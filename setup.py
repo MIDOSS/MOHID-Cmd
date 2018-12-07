@@ -38,7 +38,14 @@ try:
 except IOError:
     long_description = ""
 install_requires = [
+    # see environment-dev.yaml for conda environment dev installation
     # see requirements.txt for versions most recently used in development
+    "arrow",
+    "attrs",
+    "cliff!=2.9.0",
+    # 'NEMO-Cmd',  # install from repo clone or gomss-nowcast conda channel
+    "python-hglib",
+    "PyYAML",
 ]
 
 setup(

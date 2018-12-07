@@ -6,6 +6,7 @@
 #
 #   $ conda env create -f MOHID-Cmd/environment-dev.yaml
 #   $ conda activate mohid-cmd
+#   (mohid-cmd)$ pip install --editable NEMO-Cmd
 #   (mohid-cmd)$ pip install --editable MOHID-Cmd
 #
 # The environment will include all of the tools used to develop,
@@ -22,8 +23,13 @@ channels:
   - defaults
 
 dependencies:
+  - arrow
+  - attrs
+  - cliff!=2.9.0
+  - python-hglib
   - pip
   - python=3
+  - pyyaml
 
   # For unit tests
   - coverage
