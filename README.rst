@@ -15,7 +15,7 @@ MIDOSS-MOHID Command Processor
     :target: https://bitbucket.org/midoss/mohid-cmd/issues?status=new&status=open
     :alt: Issue Tracker
 
-The Salish Sea NEMO command processor, ``mohid``, is a command line tool for doing various operations associated with the `MIDOSS project`_ version of the `MOHID model`_.
+The MIDOSS-MOHID command processor, ``mohid``, is a command line tool for doing various operations associated with the `MIDOSS project`_ version of the `MOHID model`_.
 
 
 .. _MIDOSS project: https://midoss-docs.readthedocs.io/en/latest/
