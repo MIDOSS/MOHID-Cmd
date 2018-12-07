@@ -17,7 +17,6 @@ MIDOSS-MOHID Command Processor
 
 The MIDOSS-MOHID command processor, ``mohid``, is a command line tool for doing various operations associated with the `MIDOSS project`_ version of the `MOHID model`_.
 
-
 .. _MIDOSS project: https://midoss-docs.readthedocs.io/en/latest/
 .. _MOHID model: https://www.mohid.com/
 
@@ -25,6 +24,12 @@ Use ``mohid --help`` to get a list of the sub-commands available for doing thing
 Use ``mohid help <sub-command>`` to get a synopsis of what a sub-command does,
 what its required arguments are,
 and what options are available to control it.
+
+Documentation for the package is in the ``docs/`` directory and is rendered at http://mohid-cmd.readthedocs.org/en/latest/.
+
+.. image:: https://readthedocs.org/projects/mohid-cmd/badge/?version=latest
+    :target: https://mohid-cmd.readthedocs.io/en/latest/
+    :alt: Documentation Status
 
 This an extensible tool built on the OpenStack ``cliff``
 (`Command Line Interface Formulation Framework`_)
@@ -37,6 +42,10 @@ It uses plug-ins from the `NEMO-Cmd`_ package to provide a command processor too
 
 License
 =======
+
+.. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
+    :target: https://www.apache.org/licenses/LICENSE-2.0
+    :alt: Licensed under the Apache License, Version 2.0
 
 The MIDOSS-MOHID command processor code and documentation are copyright 2018 by the MIDOSS project contributors,
 The University of British Columbia,
