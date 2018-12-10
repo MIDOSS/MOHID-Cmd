@@ -1,0 +1,14 @@
+# mohid command processor run description file example
+#
+# Please see
+#   http://mohid-cmd.readthedocs.org/en/latest/run_description_file/yaml_file.html
+# for detailed documentation.
+
+
+# The run id value appears in the list of jobs display by the squeue command
+run_id: example
+
+paths:
+  # Directory in which to create temporary run directories
+  # Typically NOT inside a version control repository
+  runs directory: $SCRATCH/MIDOSS/runs/

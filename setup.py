@@ -62,4 +62,10 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=install_requires,
+    entry_points={
+        # The mohid command:
+        "console_scripts": ["mohid = mohid_cmd.main:main"],
+        # Sub-command plug-ins:
+        "mohid.app": ["prepare = mohid_cmd.prepare:Prepare"],
+    },
 )

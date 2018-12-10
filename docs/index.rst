@@ -20,9 +20,32 @@
 MIDOSS-MOHID Command Processor
 ******************************
 
+The MIDOSS-MOHID command processor,
+:program:`mohid`,
+is a command-line tool for doing various operations associated with the `MIDOSS project`_ version of the `MOHID model`_.
+
+.. _MIDOSS project: https://midoss-docs.readthedocs.io/en/latest/
+.. _MOHID model: https://www.mohid.com/
+
+The :kbd:`MOHID-Cmd` package is a Python 3 package.
+It is developed and tested under Python 3.6 and should work with that and later versions of Python.
+
+This an extensible tool built on the OpenStack ``cliff``
+(`Command Line Interface Formulation Framework`_)
+package.
+It uses plug-ins from the `NEMO-Cmd`_ package to provide a command processor tool that is specifically tailored to the MOHID model as it is used in the MIDOSS project.
+
+.. _Command Line Interface Formulation Framework: https://docs.openstack.org/cliff/latest/
+.. _NEMO-Cmd: https://bitbucket.org/salishsea/nemo-cmd
+
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+
+   subcommands
+   run_description_file/index
+
 
 Indices
 =======
