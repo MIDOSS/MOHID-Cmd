@@ -49,6 +49,17 @@ The following key-value pairs provide the basic configuration for the run:
 
 The :kbd:`paths` section of the run description file is a collection of directory paths that :program:`mohid` uses to find files in other repos that it needs.
 
+:kbd:`mohid repo`
+  The path to the :ref:`MIDOSS-MOHID-repo` clone where the :file:`MohidWater.exe` executable for the run is to be found.
+
+  This path may be either absolute or relative.
+  It may contain:
+
+  * :envvar:`$SCRATCH` as an alternative spelling of the user's :file:`scratch` directory on :kbd:`cedar`
+  * :envvar:`$PROJECT` as an alternative spelling of the group's :file:`project` directory on :kbd:`cedar`
+  * :envvar:`$USER` as an alternative spelling of the user's userid
+  * :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory
+
 :kbd:`runs directory`
   The path to the directory where temporary run directories will be created by the :command:`mohid run` (or :command:`mohid prepare`) sub-command.
 
@@ -70,9 +81,11 @@ Example:
 
     $ mohid prepare mohid.yaml
 
-    mohid_cmd.prepare INFO: Created temporary run directory: /tmp/mohid-runs/example_2018-12-10T145044.750477-0800
+    mohid_cmd.prepare INFO: Created temporary run directory: /scratch/dlatorne/MIDOSS/runs/example_2018-12-10T145044.750477-0800
 
 The name of the temporary run directory created is the :kbd:`run id` string from the run description YAML file with an ISO-formatted date/time stamp appended because the directory is intended to be ephemerally used for a single run.
 
-If the :command:`prepare` sub-command prints an error message,
-you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
+.. note::
+
+    If the :command:`prepare` sub-command prints an error message,
+    you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.

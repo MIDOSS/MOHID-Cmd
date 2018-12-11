@@ -19,6 +19,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import pytest
+import yaml
 
 import mohid_cmd.prepare
 
@@ -26,6 +27,20 @@ import mohid_cmd.prepare
 @pytest.fixture
 def prepare_cmd():
     return mohid_cmd.prepare.Prepare(Mock(spec=True), [])
+
+
+@pytest.fixture()
+def run_desc(tmpdir):
+    p_run_desc = tmpdir.join("mohid.yaml")
+    p_run_desc.write(
+        f"""
+    paths:
+      mohid repo: "MIDOSS-MOHID/"
+    """
+    )
+    with open(str(p_run_desc), "rt") as f:
+        run_desc = yaml.safe_load(f)
+    return run_desc
 
 
 class TestParser:
@@ -94,13 +109,35 @@ class TestTakeAction:
         assert not m_logger.info.called
 
 
-@patch("nemo_cmd.prepare.load_run_desc", autospec=True)
+@patch("nemo_cmd.prepare.load_run_desc", spec=True)
+@patch("mohid_cmd.prepare._check_mohid_exec", autospec=True)
 @patch("nemo_cmd.prepare.make_run_dir", spec=True)
 class TestPrepare:
     """Unit tests for `mohid prepare` prepare() function.
     """
 
-    def test_prepare(self, m_mk_run_dir, m_ld_run_desc):
+    def test_prepare(self, m_mk_run_dir, m_chk_mohid_exe, m_ld_run_desc):
         tmp_run_dir = mohid_cmd.prepare.prepare(Path("foo.yaml"))
         m_ld_run_desc.assert_called_once_with(Path("foo.yaml"))
+        m_chk_mohid_exe.assert_called_once_with(m_ld_run_desc())
         assert tmp_run_dir == m_mk_run_dir()
+
+
+@patch("mohid_cmd.prepare.logger", autospec=True)
+class TestCheckMohidExec:
+    """Unit tests for `mohid prepare` _check_mohid_exec() function.
+    """
+
+    def test_mohid_exe(self, m_logger, tmpdir, run_desc):
+        p_mohid_repo = tmpdir.ensure_dir("MIDOSS-MOHID/")
+        p_mohid_exe = p_mohid_repo.ensure("Solutions/linux/bin/MohidWater.exe")
+        with patch.dict(run_desc["paths"], {"mohid repo": str(p_mohid_repo)}):
+            mohid_exe = mohid_cmd.prepare._check_mohid_exec(run_desc)
+        assert mohid_exe == Path(str(p_mohid_exe))
+        assert not m_logger.error.called
+
+    def test_mohid_exe_not_found(self, m_logger, tmpdir, run_desc):
+        p_mohid_repo = tmpdir.ensure_dir("MIDOSS-MOHID/")
+        with patch.dict(run_desc["paths"], {"mohid repo": str(p_mohid_repo)}):
+            with pytest.raises(SystemExit):
+                mohid_cmd.prepare._check_mohid_exec(run_desc)

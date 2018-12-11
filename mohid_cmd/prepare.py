@@ -82,5 +82,29 @@ def prepare(desc_file):
     :rtype: :py:class:`pathlib.Path`
     """
     run_desc = nemo_cmd.prepare.load_run_desc(desc_file)
+    mohid_exe = _check_mohid_exec(run_desc)
     tmp_run_dir = nemo_cmd.prepare.make_run_dir(run_desc)
     return tmp_run_dir
+
+
+def _check_mohid_exec(run_desc):
+    """Calculate absolute path of the MOHID executable.
+
+    Confirm that the MOHID executable exists, raising a SystemExit
+    exception if it does not.
+
+    :param dict run_desc: Run description dictionary.
+
+    :returns: Absolute path of MOHID executable.
+    :rtype: :py:class:`pathlib.Path`
+
+    :raises: :py:exc:`SystemExit` with exit code 2
+    """
+    mohid_repo = nemo_cmd.prepare.get_run_desc_value(
+        run_desc, ("paths", "mohid repo"), expand_path=True, resolve_path=True
+    )
+    mohid_exe = mohid_repo / Path("Solutions/linux/bin/MohidWater.exe")
+    if not mohid_exe.exists():
+        logger.error(f"{mohid_exe} not found - did you forget to build it?")
+        raise SystemExit(2)
+    return mohid_exe

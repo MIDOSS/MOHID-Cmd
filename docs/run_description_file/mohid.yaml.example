@@ -9,6 +9,9 @@
 run_id: example
 
 paths:
+  # Absolute path to MIDOSS-MOHID repository clone.
+  # You can use $SCRATCH, $PROJECT, $USER, ~, $HOME in the path, if you wish.
+  mohid repo: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID/
   # Directory in which to create temporary run directories
   # Typically NOT inside a version control repository
   runs directory: $SCRATCH/MIDOSS/runs/
