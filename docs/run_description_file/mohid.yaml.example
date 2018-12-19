@@ -15,3 +15,18 @@ paths:
   # Directory in which to create temporary run directories
   # Typically NOT inside a version control repository
   runs directory: $SCRATCH/MIDOSS/runs/
+
+forcing:
+  # The keys below are the names of symlinks that will be created.
+  # The associated values are the targets of those symlinks;
+  # e.g. a symlink named winds.hdf5 will be created to
+  # $PROJECT/MIDOSS/MIDOSS/forcing/HRDPS/atmosphere_20150408_20150414.hdf5
+  #
+  # The keys are file names that you use as "FILENAME" values in your
+  # .dat files.
+  #
+  # You only need to include keys that are used in the .dat filess for
+  # your run.
+  winds.hdf5: $PROJECT/MIDOSS/MIDOSS/forcing/HRDPS/atmosphere_20150408_20150414.hdf5
+  currents.hdf5: $PROJECT/MIDOSS/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
+  water_levels.hdf5: $PROJECT/MIDOSS/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5

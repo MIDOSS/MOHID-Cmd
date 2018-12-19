@@ -35,7 +35,11 @@ def run_desc(tmpdir):
     p_run_desc.write(
         f"""
     paths:
-      mohid repo: "MIDOSS-MOHID/"
+      mohid repo: MIDOSS-MOHID/
+      runs directory: runs/
+
+    forcing:
+      winds.hdf5: MIDOSS/forcing/HRDPS/hrdps_20181211_20181218.hdf5
     """
     )
     with open(str(p_run_desc), "rt") as f:
@@ -110,16 +114,18 @@ class TestTakeAction:
 
 
 @patch("nemo_cmd.prepare.load_run_desc", spec=True)
-@patch("mohid_cmd.prepare._check_mohid_exec", autospec=True)
+@patch("mohid_cmd.prepare._check_mohid_exec", spec=True)
 @patch("nemo_cmd.prepare.make_run_dir", spec=True)
+@patch("mohid_cmd.prepare._make_forcing_links", spec=True)
 class TestPrepare:
     """Unit tests for `mohid prepare` prepare() function.
     """
 
-    def test_prepare(self, m_mk_run_dir, m_chk_mohid_exe, m_ld_run_desc):
+    def test_prepare(self, m_mk_frc_lnks, m_mk_run_dir, m_chk_mohid_exe, m_ld_run_desc):
         tmp_run_dir = mohid_cmd.prepare.prepare(Path("foo.yaml"))
         m_ld_run_desc.assert_called_once_with(Path("foo.yaml"))
         m_chk_mohid_exe.assert_called_once_with(m_ld_run_desc())
+        m_mk_frc_lnks.assert_called_once_with(m_ld_run_desc(), m_mk_run_dir())
         assert tmp_run_dir == m_mk_run_dir()
 
 
@@ -141,3 +147,32 @@ class TestCheckMohidExec:
         with patch.dict(run_desc["paths"], {"mohid repo": str(p_mohid_repo)}):
             with pytest.raises(SystemExit):
                 mohid_cmd.prepare._check_mohid_exec(run_desc)
+
+
+@patch("mohid_cmd.prepare.logger", autospec=True)
+@patch("nemo_cmd.prepare.remove_run_dir", autospec=True)
+class TestMakeForcingLinks:
+    """Unit tests for `mohid prepare` _make_forcing_links() function.
+    """
+
+    def test_no_link_path(self, m_rm_run_dir, m_logger, run_desc):
+        with pytest.raises(SystemExit):
+            mohid_cmd.prepare._make_forcing_links(run_desc, Path("tmp_run_dir"))
+        m_logger.error.assert_called_once_with(
+            f'{run_desc["forcing"]["winds.hdf5"]} not found; cannot create symlink - '
+            f"please check the forcing paths and file names in your run description file"
+        )
+        m_rm_run_dir.assert_called_once_with(Path("tmp_run_dir"))
+
+    def test_make_forcing_links(self, m_rm_run_dir, m_logger, run_desc, tmpdir):
+        links = {
+            link_name: tmpdir.ensure(source)
+            for link_name, source in run_desc["forcing"].items()
+        }
+        p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
+        with patch.dict(run_desc["forcing"], links):
+            mohid_cmd.prepare._make_forcing_links(run_desc, Path(str(p_tmp_run_dir)))
+        for link_name in run_desc["forcing"]:
+            assert p_tmp_run_dir.join(link_name).check(link=True)
+        assert not m_logger.error.called
+        assert not m_rm_run_dir.called

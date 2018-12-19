@@ -84,6 +84,8 @@ def prepare(desc_file):
     run_desc = nemo_cmd.prepare.load_run_desc(desc_file)
     mohid_exe = _check_mohid_exec(run_desc)
     tmp_run_dir = nemo_cmd.prepare.make_run_dir(run_desc)
+    (tmp_run_dir / mohid_exe.name).symlink_to(mohid_exe)
+    _make_forcing_links(run_desc, tmp_run_dir)
     return tmp_run_dir
 
 
@@ -108,3 +110,21 @@ def _check_mohid_exec(run_desc):
         logger.error(f"{mohid_exe} not found - did you forget to build it?")
         raise SystemExit(2)
     return mohid_exe
+
+
+def _make_forcing_links(run_desc, tmp_run_dir):
+    link_names = nemo_cmd.prepare.get_run_desc_value(
+        run_desc, ("forcing",), run_dir=tmp_run_dir
+    )
+    for link_name in link_names:
+        source = nemo_cmd.prepare.get_run_desc_value(
+            run_desc, ("forcing", link_name), expand_path=True, fatal=False
+        )
+        if not source.exists():
+            logger.error(
+                f"{source} not found; cannot create symlink - "
+                f"please check the forcing paths and file names in your run description file"
+            )
+            nemo_cmd.prepare.remove_run_dir(tmp_run_dir)
+            raise SystemExit(2)
+        (tmp_run_dir / link_name).symlink_to(source.resolve())

@@ -82,3 +82,22 @@ The :command:`prepare` sub-command sets up a temporary run directory from which 
   optional arguments:
     -h, --help   show this help message and exit
     -q, --quiet  don't show the run directory path on completion
+
+
+See the :ref:`RunDescriptionFileStructure` section for details of the run description file.
+
+The :command:`prepare` sub-command concludes by printing the path to the temporary run directory it created.
+Example:
+
+.. code-block:: bash
+
+    $ mohid prepare mohid.yaml
+
+    mohid_cmd.prepare INFO: Created temporary run directory: /scratch/dlatorne/MIDOSS/runs/example_2018-12-10T145044.750477-0800
+
+The name of the temporary run directory created is the :kbd:`run id` string from the run description YAML file with an ISO-formatted date/time stamp appended because the directory is intended to be ephemerally used for a single run.
+
+.. note::
+
+    If the :command:`prepare` sub-command prints an error message,
+    you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
