@@ -50,7 +50,9 @@ The following key-value pairs provide the basic configuration for the run:
 The :kbd:`paths` section of the run description file is a collection of directory paths that :program:`mohid` uses to find files in other repos that it needs.
 
 :kbd:`mohid repo`
-  The path to the :ref:`MIDOSS-MOHID-repo` clone where the :file:`MohidWater.exe` executable for the run is to be found.
+  The path to the `MIDOSS-MOHID`_ repository clone where the :file:`MohidWater.exe` executable for the run is to be found.
+
+  .. _MIDOSS-MOHID: https://bitbucket.org/midoss/midoss-mohid/
 
   This path may be either absolute or relative.
   It may contain:
@@ -59,6 +61,8 @@ The :kbd:`paths` section of the run description file is a collection of director
   * :envvar:`$PROJECT` as an alternative spelling of the group's :file:`project` directory on :kbd:`cedar`
   * :envvar:`$USER` as an alternative spelling of the user's userid
   * :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory
+
+  Absolute paths with environment variables are strongly recommended for portability and re-usability.
 
 :kbd:`runs directory`
   The path to the directory where temporary run directories will be created by the :command:`mohid run` (or :command:`mohid prepare`) sub-command.
@@ -71,21 +75,39 @@ The :kbd:`paths` section of the run description file is a collection of director
   * :envvar:`$USER` as an alternative spelling of the user's userid
   * :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory
 
+  Absolute paths with environment variables are strongly recommended for portability and re-usability.
 
-See the :ref:`RunDescriptionFileStructure` section for details of the run description file.
 
-The :command:`prepare` sub-command concludes by printing the path to the temporary run directory it created.
-Example:
+.. _ForcingSection:
 
-.. code-block:: bash
+:kbd:`forcing` Section
+======================
 
-    $ mohid prepare mohid.yaml
+The :kbd:`forcing` section of the run description file contains key-value pairs that provide the names of files that are to be symlinked in the temporary run directory for MOHID to read forcing data from.
 
-    mohid_cmd.prepare INFO: Created temporary run directory: /scratch/dlatorne/MIDOSS/runs/example_2018-12-10T145044.750477-0800
+An example :kbd:`forcing` section:
 
-The name of the temporary run directory created is the :kbd:`run id` string from the run description YAML file with an ISO-formatted date/time stamp appended because the directory is intended to be ephemerally used for a single run.
+.. code-block:: yaml
 
-.. note::
+    forcing:
+      winds.hdf5: $PROJECT/MIDOSS/MIDOSS/forcing/HRDPS/atmosphere_20150408_20150414.hdf5
+      currents.hdf5: $PROJECT/MIDOSS/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
+      water_levels.hdf5: $PROJECT/MIDOSS/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
 
-    If the :command:`prepare` sub-command prints an error message,
-    you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
+The keys
+(:kbd:`winds.hdf5`,
+:kbd:`currents.hdf5`,
+and :kbd:`water_levels.hdf5` above)
+are the names of the symlinks that will be created in the temporary run directory.
+Those names are expected to appear in the appropriate places in the :file:`.dat` files.
+The values associated with the keys are the targets of the symlinks that will be created in the temporary run directory.
+
+The paths may be relative or absolute.
+They may contain:
+
+* :envvar:`$SCRATCH` as an alternative spelling of the user's :file:`scratch` directory on :kbd:`cedar`
+* :envvar:`$PROJECT` as an alternative spelling of the group's :file:`project` directory on :kbd:`cedar`
+* :envvar:`$USER` as an alternative spelling of the user's userid
+* :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory
+
+Absolute paths with environment variables are strongly recommended for portability and re-usability.
