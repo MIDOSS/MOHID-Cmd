@@ -141,12 +141,22 @@ def _make_nomfich(run_desc, tmp_run_dir):
     :param :py:class:`pathlib.Path` tmp_run_dir:
     """
     bathymetry = nemo_cmd.prepare.get_run_desc_value(
-        run_desc, ("bathymetry",), expand_path=True, resolve_path=True
+        run_desc, ("bathymetry",), expand_path=True, resolve_path=True, run_dir=tmp_run_dir
     )
+    results_dir = tmp_run_dir / "res"
     nomfich = {
         "IN_BATIM": bathymetry,
-        "ROOT": tmp_run_dir/"res",
+        "ROOT": results_dir,
     }
+    run_data_files = nemo_cmd.prepare.get_run_desc_value(run_desc, ("run data files",), run_dir=tmp_run_dir)
+    run_id = nemo_cmd.prepare.get_run_desc_value(run_desc, ("run_id",), run_dir=tmp_run_dir)
+    hdf_files = {"PARTIC_DATA": "PARTIC_HDF", "SURF_DAT": "SURF_HDF", "AIRW_DAT": "AIRW_HDF", "IN_TURB": "TURB_HDF", "DISPQUAL": "EUL_HDF", "WAVES_DAT": "WAVES_HDF"}
+    for key, path in run_data_files.items():
+        dat_path = nemo_cmd.expanded_path(path)
+        nomfich.update({key: dat_path})
+        if key in hdf_files:
+            hdf_file = results_dir/f"{dat_path.stem}_{run_id}.hdf"
+            nomfich.update({hdf_files[key]: hdf_file})
     with (tmp_run_dir/"nomfich.dat").open("wt") as f:
         for key, value in nomfich.items():
             f.write(f"{key:<11} : {value}\n")
