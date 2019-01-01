@@ -144,6 +144,7 @@ def _make_nomfich(run_desc, tmp_run_dir):
         run_desc, ("bathymetry",), expand_path=True, resolve_path=True, run_dir=tmp_run_dir
     )
     results_dir = tmp_run_dir / "res"
+    results_dir.mkdir()
     nomfich = {
         "IN_BATIM": bathymetry,
         "ROOT": results_dir,
