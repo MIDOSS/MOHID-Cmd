@@ -86,6 +86,7 @@ def prepare(desc_file):
     tmp_run_dir = nemo_cmd.prepare.make_run_dir(run_desc)
     (tmp_run_dir / mohid_exe.name).symlink_to(mohid_exe)
     _make_forcing_links(run_desc, tmp_run_dir)
+    _make_nomfich(run_desc, tmp_run_dir)
     return tmp_run_dir
 
 
@@ -113,6 +114,10 @@ def _check_mohid_exec(run_desc):
 
 
 def _make_forcing_links(run_desc, tmp_run_dir):
+    """
+    :param dict run_desc:
+    :param :py:class:`pathlib.Path` tmp_run_dir:
+    """
     link_names = nemo_cmd.prepare.get_run_desc_value(
         run_desc, ("forcing",), run_dir=tmp_run_dir
     )
@@ -128,3 +133,20 @@ def _make_forcing_links(run_desc, tmp_run_dir):
             nemo_cmd.prepare.remove_run_dir(tmp_run_dir)
             raise SystemExit(2)
         (tmp_run_dir / link_name).symlink_to(source.resolve())
+
+
+def _make_nomfich(run_desc, tmp_run_dir):
+    """
+    :param dict run_desc:
+    :param :py:class:`pathlib.Path` tmp_run_dir:
+    """
+    bathymetry = nemo_cmd.prepare.get_run_desc_value(
+        run_desc, ("bathymetry",), expand_path=True, resolve_path=True
+    )
+    nomfich = {
+        "IN_BATIM": bathymetry,
+        "ROOT": tmp_run_dir/"res",
+    }
+    with (tmp_run_dir/"nomfich.dat").open("wt") as f:
+        for key, value in nomfich.items():
+            f.write(f"{key:<11} : {value}\n")

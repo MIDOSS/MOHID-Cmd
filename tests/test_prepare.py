@@ -40,6 +40,8 @@ def run_desc(tmpdir):
 
     forcing:
       winds.hdf5: MIDOSS/forcing/HRDPS/hrdps_20181211_20181218.hdf5
+
+    bathymetry: MIDOSS-MOHID-config/SalishSeaCast/SalishSeaCast_bathymetry.dat
     """
     )
     with open(str(p_run_desc), "rt") as f:
@@ -117,15 +119,17 @@ class TestTakeAction:
 @patch("mohid_cmd.prepare._check_mohid_exec", spec=True)
 @patch("nemo_cmd.prepare.make_run_dir", spec=True)
 @patch("mohid_cmd.prepare._make_forcing_links", spec=True)
+@patch("mohid_cmd.prepare._make_nomfich", spec=True)
 class TestPrepare:
     """Unit tests for `mohid prepare` prepare() function.
     """
 
-    def test_prepare(self, m_mk_frc_lnks, m_mk_run_dir, m_chk_mohid_exe, m_ld_run_desc):
+    def test_prepare(self, m_mk_nomfich, m_mk_frc_lnks, m_mk_run_dir, m_chk_mohid_exe, m_ld_run_desc):
         tmp_run_dir = mohid_cmd.prepare.prepare(Path("foo.yaml"))
         m_ld_run_desc.assert_called_once_with(Path("foo.yaml"))
         m_chk_mohid_exe.assert_called_once_with(m_ld_run_desc())
         m_mk_frc_lnks.assert_called_once_with(m_ld_run_desc(), m_mk_run_dir())
+        m_mk_nomfich.assert_called_once_with(m_ld_run_desc(), m_mk_run_dir())
         assert tmp_run_dir == m_mk_run_dir()
 
 
@@ -176,3 +180,36 @@ class TestMakeForcingLinks:
             assert p_tmp_run_dir.join(link_name).check(link=True)
         assert not m_logger.error.called
         assert not m_rm_run_dir.called
+
+
+@patch("mohid_cmd.prepare.nemo_cmd.prepare.logger", autospec=True)
+class TestMakeNomfich:
+    """Unit tests for `mohid prepare` _make_nomfich() function.
+    """
+
+    def test_no_bathymetry_key(self, m_logger, run_desc):
+        with pytest.raises(SystemExit):
+            mohid_cmd.prepare._make_nomfich({}, Path("tmp_run_dir"))
+        m_logger.error.assert_called_once_with(
+            '"bathymetry" key not found - please check your run description YAML file')
+
+    def test_bathymetry_file_not_found(self, m_logger, run_desc):
+        with pytest.raises(SystemExit):
+            mohid_cmd.prepare._make_nomfich(run_desc, Path("tmp_run_dir"))
+        m_logger.error.assert_called_once_with(
+            f'{Path(run_desc["bathymetry"]).resolve()} path from "bathymetry" key not found - '
+            f'please check your run description YAML file')
+
+    def test_nomfich_file(self, m_logger, tmpdir, run_desc):
+        p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
+        p_bathy = tmpdir.ensure(run_desc["bathymetry"])
+        with patch.dict(run_desc, {"bathymetry": str(p_bathy)}):
+            mohid_cmd.prepare._make_nomfich(run_desc, Path(str(p_tmp_run_dir)))
+        with p_tmp_run_dir.join("nomfich.dat").open('rt') as f:
+            nomfich = f.read()
+        expected = f"""\
+IN_BATIM    : {str(p_bathy)}
+ROOT        : {str(p_tmp_run_dir.join("res"))}
+"""
+        assert nomfich == expected
+

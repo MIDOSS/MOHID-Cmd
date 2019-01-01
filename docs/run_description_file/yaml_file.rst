@@ -90,9 +90,9 @@ An example :kbd:`forcing` section:
 .. code-block:: yaml
 
     forcing:
-      winds.hdf5: $PROJECT/MIDOSS/MIDOSS/forcing/HRDPS/atmosphere_20150408_20150414.hdf5
-      currents.hdf5: $PROJECT/MIDOSS/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
-      water_levels.hdf5: $PROJECT/MIDOSS/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
+      winds.hdf5: $PROJECT/MIDOSS/forcing/HRDPS/atmosphere_20150408_20150414.hdf5
+      currents.hdf5: $PROJECT/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
+      water_levels.hdf5: $PROJECT/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
 
 The keys
 (:kbd:`winds.hdf5`,
@@ -111,3 +111,28 @@ They may contain:
 * :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory
 
 Absolute paths with environment variables are strongly recommended for portability and re-usability.
+
+
+.. _BathymetryPath:
+
+:kbd:`bathymetry` Path
+======================
+
+The path and file name of the bathymetry file to use for the run is given by the value associated with the :kbd:`bathymetry` key.
+The bathymetry path is inserted into the :file:`nomfich.dat` file that is created in the temporary run directory as the value associated with the :kbd:`IN_BATIM` key.
+
+An example :kbd:`bathymetry` line:
+
+.. code-block:: yaml
+
+    bathymetry: $PROJECT/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/SalishSeaCast_bathymetry.dat
+
+The path may be relative or absolute.
+It may contain:
+
+* :envvar:`$SCRATCH` as an alternative spelling of the user's :file:`scratch` directory on :kbd:`cedar`
+* :envvar:`$PROJECT` as an alternative spelling of the group's :file:`project` directory on :kbd:`cedar`
+* :envvar:`$USER` as an alternative spelling of the user's userid
+* :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory
+
+An absolute path with environment variables is strongly recommended for portability and re-usability.
