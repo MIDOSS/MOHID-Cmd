@@ -155,7 +155,7 @@ def _make_nomfich(run_desc, tmp_run_dir):
         dat_path = nemo_cmd.expanded_path(path)
         nomfich.update({key: dat_path})
         if key in hdf_files:
-            hdf_file = results_dir/f"{dat_path.stem}_{run_id}.hdf"
+            hdf_file = results_dir/f"{dat_path.stem}_{run_id}.hdf5"
             nomfich.update({hdf_files[key]: hdf_file})
     with (tmp_run_dir/"nomfich.dat").open("wt") as f:
         for key, value in nomfich.items():
