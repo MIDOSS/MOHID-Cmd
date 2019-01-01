@@ -215,6 +215,20 @@ class TestMakeNomfich:
             f'{Path(run_desc["bathymetry"]).resolve()} path from "bathymetry" key not found - '
             f'please check your run description YAML file')
 
+    @patch("mohid_cmd.prepare.Path.mkdir", autospec=True)
+    def test_make_results_dir(self, m_mkdir, m_logger, tmpdir, run_desc):
+        p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
+        p_bathy = tmpdir.ensure(run_desc["bathymetry"])
+        p_run_files = {key: tmpdir.ensure(path) for key, path in run_desc["run data files"].items()}
+        p_run_desc = patch.dict(
+            run_desc, {
+                "bathymetry": str(p_bathy),
+                "run data files": {key: str(path) for key, path in p_run_files.items()}
+            })
+        with p_run_desc:
+            mohid_cmd.prepare._make_nomfich(run_desc, Path(str(p_tmp_run_dir)))
+        assert m_mkdir.called
+
     def test_nomfich_file(self, m_logger, tmpdir, run_desc):
         p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         p_bathy = tmpdir.ensure(run_desc["bathymetry"])
