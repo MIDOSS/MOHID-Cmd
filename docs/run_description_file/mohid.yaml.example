@@ -6,7 +6,7 @@
 
 
 # The run id value appears in the list of jobs display by the squeue command
-run_id: example
+run_id: MarathassaConstTS
 
 paths:
   # Absolute path to MIDOSS-MOHID repository clone.
@@ -27,10 +27,25 @@ forcing:
   #
   # You only need to include keys that are used in the .dat files for
   # your run.
-  winds.hdf5: $PROJECT/MIDOSS/forcing/HRDPS/atmosphere_20150408_20150414.hdf5
-  currents.hdf5: $PROJECT/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
-  water_levels.hdf5: $PROJECT/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
+  winds.hdf5: $PROJECT/$USER/MIDOSS/forcing/HRDPS/atmosphere_20150408_20150414.hdf5
+  currents.hdf5: $PROJECT/$USER/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
+  water_levels.hdf5: $PROJECT/$USER/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
 
 # Path and file name of the bathymetry
 # You can use $SCRATCH, $PROJECT, $USER, ~, $HOME in the path, if you wish.
-bathymetry: $PROJECT/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/SalishSeaCast_bathymetry.dat
+bathymetry: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/SalishSeaCast_bathymetry.dat
+
+run data files:
+  # Keywords and run data file paths to insert into the nomfich.dat file
+  IN_MODEL: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/MarathassaConstTS/Model.dat
+  PARTIC_DATA: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/MarathassaConstTS/Lagrangian.dat
+  DOMAIN: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Geometry.dat
+  SURF_DAT: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Atmosphere.dat
+  DOMAIN: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Geometry.dat
+  IN_DAD3D: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Hydrodynamic.dat
+  BOT_DAT: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/InterfaceSedimentWater.dat
+  AIRW_DAT: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/InterfaceWaterAir.dat
+  IN_TIDES: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Tide.dat
+  IN_TURB: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Turbulence.dat
+  DISPQUAL: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/WaterProperties.dat
+  WAVES_DAT: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Waves.dat

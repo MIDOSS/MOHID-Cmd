@@ -90,9 +90,9 @@ An example :kbd:`forcing` section:
 .. code-block:: yaml
 
     forcing:
-      winds.hdf5: $PROJECT/MIDOSS/forcing/HRDPS/atmosphere_20150408_20150414.hdf5
-      currents.hdf5: $PROJECT/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
-      water_levels.hdf5: $PROJECT/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
+      winds.hdf5: $PROJECT/$USER/MIDOSS/forcing/HRDPS/atmosphere_20150408_20150414.hdf5
+      currents.hdf5: $PROJECT/$USER/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
+      water_levels.hdf5: $PROJECT/$USER/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
 
 The keys
 (:kbd:`winds.hdf5`,
@@ -125,7 +125,7 @@ An example :kbd:`bathymetry` line:
 
 .. code-block:: yaml
 
-    bathymetry: $PROJECT/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/SalishSeaCast_bathymetry.dat
+    bathymetry: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/SalishSeaCast_bathymetry.dat
 
 The path may be relative or absolute.
 It may contain:
@@ -136,3 +136,58 @@ It may contain:
 * :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory
 
 An absolute path with environment variables is strongly recommended for portability and re-usability.
+
+
+.. _RunDataFilesSection:
+
+:kbd:`run data files` Section
+=============================
+
+The :kbd:`run data files` section of the run description file contains key-value pairs that provide the keywords and paths to run data files that will be used to build the :file:`nomfich.dat` file that MOHID requires.
+
+An example :kbd:`run data files` section:
+
+.. code-block:: yaml
+
+    run data files:
+      IN_MODEL: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/MarathassaConstTS/Model.dat
+      PARTIC_DATA: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/MarathassaConstTS/Lagrangian.dat
+      DOMAIN: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Geometry.dat
+      SURF_DAT: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Atmosphere.dat
+      DOMAIN: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Geometry.dat
+      IN_DAD3D: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Hydrodynamic.dat
+      BOT_DAT: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/InterfaceSedimentWater.dat
+      AIRW_DAT: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/InterfaceWaterAir.dat
+      IN_TIDES: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Tide.dat
+      IN_TURB: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Turbulence.dat
+      DISPQUAL: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/WaterProperties.dat
+      WAVES_DAT: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Waves.dat
+
+The path may be relative or absolute.
+It may contain:
+
+* :envvar:`$SCRATCH` as an alternative spelling of the user's :file:`scratch` directory on :kbd:`cedar`
+* :envvar:`$PROJECT` as an alternative spelling of the group's :file:`project` directory on :kbd:`cedar`
+* :envvar:`$USER` as an alternative spelling of the user's userid
+* :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory
+
+An absolute path with environment variables is strongly recommended for portability and re-usability.
+
+Necessary HDF5 results file keywords and paths are automatically added to :file:`nomfich.dat`.
+The HDF5 results files are stored in the :file:`res/` sub-directory of the temporary run directory
+(the path that MOHID requires).
+Their file names are the :file:`.dat` file stem with the :kbd:`run_id` appended,
+and the extension :file:`.hdf`.
+For example, if the value associated with the :kbd:`run_id` key in the run description YAML file is :kbd:`MarathassaConstTS`,
+the
+
+.. code-block:: yaml
+
+    PARTIC_DATA: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/MarathassaConstTS/Lagrangian.dat
+
+line in the :kbd:`run data files` section causes the following 2 lines to be added to the :file:`nomfich.dat` file:
+
+.. code-block:: yaml
+
+    PARTIC_DATA : /project/def-allen/dlatorne//MIDOSS/MIDOSS-MOHID-config/MarathassaConstTS/Lagrangian.dat
+    PARTIC_HDF  : /project/def-allen/dlatorne//MIDOSS/MIDOSS-MOHID-config/MarathassaConstTS/Lagrangian_MarathassaConstTS.hdf
