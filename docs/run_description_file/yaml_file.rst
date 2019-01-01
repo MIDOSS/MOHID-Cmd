@@ -90,9 +90,9 @@ An example :kbd:`forcing` section:
 .. code-block:: yaml
 
     forcing:
-      winds.hdf5: $PROJECT/$USER/MIDOSS/forcing/HRDPS/atmosphere_20150408_20150414.hdf5
-      currents.hdf5: $PROJECT/$USER/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
-      water_levels.hdf5: $PROJECT/$USER/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
+      winds.hdf5: $PROJECT/MIDOSS/forcing/HRDPS/atmosphere_20150408_20150414.hdf5
+      currents.hdf5: $PROJECT/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
+      water_levels.hdf5: $PROJECT/MIDOSS/forcing/SalishSeaCast/hydrodynamics_20150408_20150414.hdf5
 
 The keys
 (:kbd:`winds.hdf5`,
