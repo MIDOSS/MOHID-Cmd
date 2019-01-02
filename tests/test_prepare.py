@@ -16,8 +16,9 @@
 """
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import call, Mock, patch
 
+import nemo_cmd.prepare
 import pytest
 import yaml
 
@@ -57,6 +58,10 @@ def run_desc(tmpdir):
       IN_TURB: MIDOSS-MOHID-config/SalishSeaCast/Turbulence.dat
       DISPQUAL: MIDOSS-MOHID-config/SalishSeaCast/WaterProperties.dat
       WAVES_DAT: MIDOSS-MOHID-config/SalishSeaCast/Waves.dat
+
+    vcs revisions:
+      hg:
+        - MIDOSS-MOHID-config
     """
     )
     with open(str(p_run_desc), "rt") as f:
@@ -135,16 +140,26 @@ class TestTakeAction:
 @patch("nemo_cmd.prepare.make_run_dir", spec=True)
 @patch("mohid_cmd.prepare._make_forcing_links", spec=True)
 @patch("mohid_cmd.prepare._make_nomfich", spec=True)
+@patch("mohid_cmd.prepare._record_vcs_revisions", spec=True)
 class TestPrepare:
     """Unit tests for `mohid prepare` prepare() function.
     """
 
-    def test_prepare(self, m_mk_nomfich, m_mk_frc_lnks, m_mk_run_dir, m_chk_mohid_exe, m_ld_run_desc):
+    def test_prepare(
+        self,
+        m_rec_vcs_revs,
+        m_mk_nomfich,
+        m_mk_frc_lnks,
+        m_mk_run_dir,
+        m_chk_mohid_exe,
+        m_ld_run_desc,
+    ):
         tmp_run_dir = mohid_cmd.prepare.prepare(Path("foo.yaml"))
         m_ld_run_desc.assert_called_once_with(Path("foo.yaml"))
         m_chk_mohid_exe.assert_called_once_with(m_ld_run_desc())
         m_mk_frc_lnks.assert_called_once_with(m_ld_run_desc(), m_mk_run_dir())
         m_mk_nomfich.assert_called_once_with(m_ld_run_desc(), m_mk_run_dir())
+        m_rec_vcs_revs.assert_called_once_with(m_ld_run_desc(), m_mk_run_dir())
         assert tmp_run_dir == m_mk_run_dir()
 
 
@@ -206,25 +221,31 @@ class TestMakeNomfich:
         with pytest.raises(SystemExit):
             mohid_cmd.prepare._make_nomfich({}, Path("tmp_run_dir"))
         m_logger.error.assert_called_once_with(
-            '"bathymetry" key not found - please check your run description YAML file')
+            '"bathymetry" key not found - please check your run description YAML file'
+        )
 
     def test_bathymetry_file_not_found(self, m_logger, run_desc):
         with pytest.raises(SystemExit):
             mohid_cmd.prepare._make_nomfich(run_desc, Path("tmp_run_dir"))
         m_logger.error.assert_called_once_with(
             f'{Path(run_desc["bathymetry"]).resolve()} path from "bathymetry" key not found - '
-            f'please check your run description YAML file')
+            f"please check your run description YAML file"
+        )
 
     @patch("mohid_cmd.prepare.Path.mkdir", autospec=True)
     def test_make_results_dir(self, m_mkdir, m_logger, tmpdir, run_desc):
         p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         p_bathy = tmpdir.ensure(run_desc["bathymetry"])
-        p_run_files = {key: tmpdir.ensure(path) for key, path in run_desc["run data files"].items()}
+        p_run_files = {
+            key: tmpdir.ensure(path) for key, path in run_desc["run data files"].items()
+        }
         p_run_desc = patch.dict(
-            run_desc, {
+            run_desc,
+            {
                 "bathymetry": str(p_bathy),
-                "run data files": {key: str(path) for key, path in p_run_files.items()}
-            })
+                "run data files": {key: str(path) for key, path in p_run_files.items()},
+            },
+        )
         with p_run_desc:
             mohid_cmd.prepare._make_nomfich(run_desc, Path(str(p_tmp_run_dir)))
         assert m_mkdir.called
@@ -232,15 +253,19 @@ class TestMakeNomfich:
     def test_nomfich_file(self, m_logger, tmpdir, run_desc):
         p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         p_bathy = tmpdir.ensure(run_desc["bathymetry"])
-        p_run_files = {key: tmpdir.ensure(path) for key, path in run_desc["run data files"].items()}
+        p_run_files = {
+            key: tmpdir.ensure(path) for key, path in run_desc["run data files"].items()
+        }
         p_run_desc = patch.dict(
-            run_desc, {
+            run_desc,
+            {
                 "bathymetry": str(p_bathy),
-                "run data files": {key: str(path) for key, path in p_run_files.items()}
-            })
+                "run data files": {key: str(path) for key, path in p_run_files.items()},
+            },
+        )
         with p_run_desc:
             mohid_cmd.prepare._make_nomfich(run_desc, Path(str(p_tmp_run_dir)))
-        with p_tmp_run_dir.join("nomfich.dat").open('rt') as f:
+        with p_tmp_run_dir.join("nomfich.dat").open("rt") as f:
             nomfich = f.read()
         expected = f"""\
 IN_BATIM    : {str(p_bathy)}
@@ -265,3 +290,47 @@ WAVES_HDF   : {str(p_tmp_run_dir.join("res/Waves_MarathassaConstTS.hdf5"))}
 """
         assert nomfich == expected
 
+
+class TestRecordVCSRevisions:
+    """Unit tests for `mohid prepare` _record_vcs_revisions() function.
+    """
+
+    def test_no_paths_forcing_key(self, run_desc):
+        with pytest.raises(SystemExit):
+            mohid_cmd.prepare._record_vcs_revisions(run_desc, Path("run_dir"))
+
+    @patch("nemo_cmd.prepare.write_repo_rev_file")
+    def test_write_repo_rev_file_mohid_repo(self, m_write, tmpdir, run_desc):
+        p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
+        p_mohid_repo = tmpdir.ensure(run_desc["paths"]["mohid repo"])
+        p_run_desc = patch.dict(
+            run_desc,
+            {"paths": {"mohid repo": str(p_mohid_repo)}, "vcs revisions": {"hg": []}},
+        )
+        with p_run_desc:
+            mohid_cmd.prepare._record_vcs_revisions(run_desc, Path(str(p_tmp_run_dir)))
+        m_write.assert_called_once_with(
+            Path(str(p_mohid_repo)),
+            Path(str(p_tmp_run_dir)),
+            nemo_cmd.prepare.get_hg_revision,
+        )
+
+    @patch("nemo_cmd.prepare.write_repo_rev_file")
+    def test_write_repo_rev_file_hg_repo(self, m_write, tmpdir, run_desc):
+        p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
+        p_mohid_repo = tmpdir.ensure(run_desc["paths"]["mohid repo"])
+        p_hg_repo = tmpdir.ensure(run_desc["vcs revisions"]["hg"][0])
+        p_run_desc = patch.dict(
+            run_desc,
+            {
+                "paths": {"mohid repo": str(p_mohid_repo)},
+                "vcs revisions": {"hg": [str(p_hg_repo)]},
+            },
+        )
+        with p_run_desc:
+            mohid_cmd.prepare._record_vcs_revisions(run_desc, Path(str(p_tmp_run_dir)))
+        assert m_write.call_args_list[1] == call(
+            Path(str(p_hg_repo)),
+            Path(str(p_tmp_run_dir)),
+            nemo_cmd.prepare.get_hg_revision,
+        )
