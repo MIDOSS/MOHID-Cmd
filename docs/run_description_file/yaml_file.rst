@@ -191,3 +191,81 @@ line in the :kbd:`run data files` section causes the following 2 lines to be add
 
     PARTIC_DATA : /project/def-allen/dlatorne//MIDOSS/MIDOSS-MOHID-config/MarathassaConstTS/Lagrangian.dat
     PARTIC_HDF  : /project/def-allen/dlatorne//MIDOSS/MIDOSS-MOHID-config/MarathassaConstTS/Lagrangian_MarathassaConstTS.hdf
+
+
+.. _VCS-RevisionsSection:
+
+:kbd:`vcs revisions` Section
+============================
+
+The *optional* :kbd:`vcs revisions` section of the run description YAML file contains lists of version control system repositories for which the revision and status will be recorded in the temporary run directory and run results directory.
+
+.. note::
+    Revision and status record files for the :file:`MIDOSS-MOHID` code repository listed in the :ref:`PathsSection` is always generated,
+    so that repository path should not be included in the :kbd:`vcs revisions` section.
+
+An example :kbd:`vcs revisions` section:
+
+.. code-block:: yaml
+
+    vcs revisions:
+      hg:
+        - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config
+        - $PROJECT/$USER/MIDOSS/MOHID-Cmd
+        - $PROJECT/$USER/MIDOSS/moad_tools
+
+The sub-section keys
+(:kbd:`hg` above)
+are the names of the version control tools to use for the repositories listed below them.
+At present only Mercurial
+(:kbd:`hg`)
+is supported.
+
+The paths listed under the version control tool key are the repositories for which the revision and status will be recorded.
+
+The repository paths may be relative or absolute.
+They may contain:
+
+* :envvar:`$SCRATCH` as an alternative spelling of the user's :file:`scratch` directory on :kbd:`cedar`
+* :envvar:`$PROJECT` as an alternative spelling of the group's :file:`project` directory on :kbd:`cedar`
+* :envvar:`$USER` as an alternative spelling of the user's userid
+* :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory
+
+Absolute paths with environment variables are strongly recommended for portability and re-usability.
+
+For each repository,
+a file will be created in the temporary run directory.
+The file names are the repository directory names with :kbd:`_rev.txt` appended.
+So,
+from the example above,
+the files created will be::
+
+  MIDOSS-MOHID-config_rev.txt
+  MOHID-Cmd_rev.txt
+  moad_tools_rev.txt
+
+Each file will contain the output of the :command:`hg parents -v` command for the repository.
+That is a record of the last committed revision of the repository that will be in effect for the run.
+For example,
+:file:`MOHID-Cmd_rev.txt` might contain::
+
+  changset:   17:190158c9704e17d0a8da8f1c0c59576c880a4559
+  tag:        tip
+  user:       Doug Latornell <dlatornell@eoas.ubc.ca>
+  date:       Tue Jan 01 15:56:34 2019 -08:00
+  files:      mohid_cmd/prepare.py tests/test_prepare.py
+  description:
+  Create results directory in tmp run dir.
+
+If any of the listed repositories contain uncommitted changes,
+the :command:`nemo prepare` command will generate a warning message like::
+
+  nemo_cmd.prepare WARNING: There are uncommitted changes in $PROJECT/$USER/MIDOSS/MOHID-Cmd/
+
+and the list of uncommitted changes and their status codes,
+the output of the :command:`hg status -mardC` command,
+will be appended to the :file:`_rev.txt` file,
+for example::
+
+  uncommitted changes:
+  M mohid_cmd/prepare.py

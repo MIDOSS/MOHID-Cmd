@@ -49,3 +49,12 @@ run data files:
   IN_TURB: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Turbulence.dat
   DISPQUAL: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/WaterProperties.dat
   WAVES_DAT: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Waves.dat
+
+vcs revisions:
+  hg:
+    # Absolute paths to Mercurial repos that you want revision records of
+    # in your run results
+    # You can use $SCRATCH, $PROJECT, $USER, ~, $HOME in the path, if you wish.
+    - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config
+    - $PROJECT/$USER/MIDOSS/MOHID-Cmd
+    - $PROJECT/$USER/MIDOSS/moad_tools
