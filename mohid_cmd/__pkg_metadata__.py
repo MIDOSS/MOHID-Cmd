@@ -16,5 +16,5 @@
 """
 PROJECT = "MOHID-Cmd"
 DESCRIPTION = "MIDOSS-MOHID Command Processor"
-VERSION = "18.1.dev0"
+VERSION = "19.1.dev0"
 DEV_STATUS = "1 - Planning"
