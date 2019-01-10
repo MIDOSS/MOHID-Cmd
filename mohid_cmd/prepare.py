@@ -27,8 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class Prepare(cliff.command.Command):
-    """Set up the MIDOSS-MOHID run described in DESC_FILE and print the path of the
-    temporary run directory.
+    """Set up the MIDOSS-MOHID run described in DESC_FILE and print the path of the temporary run directory.
     """
 
     def get_parser(self, prog_name):
@@ -105,7 +104,7 @@ def _check_mohid_exec(run_desc):
     :raises: :py:exc:`SystemExit` with exit code 2
     """
     mohid_repo = nemo_cmd.prepare.get_run_desc_value(
-        run_desc, ("paths", "mohid repo"), expand_path=True, resolve_path=True
+        run_desc, ("paths", "mohid repo"), resolve_path=True
     )
     mohid_exe = mohid_repo / Path("Solutions/linux/bin/MohidWater.exe")
     if not mohid_exe.exists():
