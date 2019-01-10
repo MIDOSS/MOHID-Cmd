@@ -41,6 +41,23 @@ The following key-value pairs provide the basic configuration for the run:
 :kbd:`run_id`
    The job identifier that appears in the temporary run directory name and the :command:`squeue` command output.
 
+:kbd:`email`
+  The email address at which you want to receive notification of the beginning and end of execution of the run,
+  as well as notification of abnormal abort messages.
+  The email key is only required if the address is different than would be constructed by combining your user id on :kbd:`cedar` with :kbd:`@eoas.ubc.ca`.
+
+:kbd:`account`
+  The account name to include in the :kbd:`#SBATCH` directives section of the :file:`MOHID.sh` job script.
+
+:kbd:`walltime`
+  The wall-clock time requested for the run.
+  It limits the time that the job will run for,
+  and it also affects queue priority.
+  It is important to allow some buffer time when calculating your walltime limits to allow for indeterminacy of the MOHID run and the file system operations.
+  Too low a value and your job will be terminated before it finishes.
+  Too high and you will have to wait longer on the queue for your job to start.
+  You have to experiment to find the "just right" value.
+
 
 .. _PathsSection:
 
