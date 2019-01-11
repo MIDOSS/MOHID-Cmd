@@ -19,6 +19,7 @@ in a specified directory and changes the pwd to that directory.
 """
 import logging
 from pathlib import Path
+import shutil
 
 import cliff.command
 import nemo_cmd.prepare
@@ -84,6 +85,7 @@ def prepare(desc_file):
     mohid_exe = _check_mohid_exec(run_desc)
     tmp_run_dir = nemo_cmd.prepare.make_run_dir(run_desc)
     (tmp_run_dir / mohid_exe.name).symlink_to(mohid_exe)
+    shutil.copy2(desc_file, tmp_run_dir / desc_file.name)
     _make_forcing_links(run_desc, tmp_run_dir)
     _make_nomfich(run_desc, tmp_run_dir)
     _record_vcs_revisions(run_desc, tmp_run_dir)
