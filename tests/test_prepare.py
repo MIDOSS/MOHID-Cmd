@@ -138,6 +138,7 @@ class TestTakeAction:
 @patch("nemo_cmd.prepare.load_run_desc", spec=True)
 @patch("mohid_cmd.prepare._check_mohid_exec", spec=True)
 @patch("nemo_cmd.prepare.make_run_dir", spec=True)
+@patch("nemo_cmd.prepare.shutil.copy2", autospec=True)
 @patch("mohid_cmd.prepare._make_forcing_links", spec=True)
 @patch("mohid_cmd.prepare._make_nomfich", spec=True)
 @patch("mohid_cmd.prepare._record_vcs_revisions", spec=True)
@@ -150,13 +151,20 @@ class TestPrepare:
         m_rec_vcs_revs,
         m_mk_nomfich,
         m_mk_frc_lnks,
+        m_copy2,
         m_mk_run_dir,
         m_chk_mohid_exe,
         m_ld_run_desc,
     ):
-        tmp_run_dir = mohid_cmd.prepare.prepare(Path("foo.yaml"))
+        with patch("mohid_cmd.prepare.Path.symlink_to") as m_ln:
+            tmp_run_dir = mohid_cmd.prepare.prepare(Path("foo.yaml"))
         m_ld_run_desc.assert_called_once_with(Path("foo.yaml"))
         m_chk_mohid_exe.assert_called_once_with(m_ld_run_desc())
+        m_mk_run_dir.assert_called_once_with(m_ld_run_desc())
+        (m_mk_run_dir() / m_chk_mohid_exe().name).symlink_to.assert_called_once_with(
+            m_chk_mohid_exe()
+        )
+        m_copy2.assert_called_once_with(Path("foo.yaml"), m_mk_run_dir() / "foo.yaml")
         m_mk_frc_lnks.assert_called_once_with(m_ld_run_desc(), m_mk_run_dir())
         m_mk_nomfich.assert_called_once_with(m_ld_run_desc(), m_mk_run_dir())
         m_rec_vcs_revs.assert_called_once_with(m_ld_run_desc(), m_mk_run_dir())
