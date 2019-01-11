@@ -160,7 +160,7 @@ def _build_run_script(run_desc, desc_file, results_dir, tmp_run_dir):
     run_script = "\n".join(
         (
             run_script,
-            _sbatch_directives(run_desc),
+            _sbatch_directives(run_desc, results_dir),
             _definitions(run_desc, desc_file, results_dir, tmp_run_dir),
             _modules(),
             _execute(run_desc),
@@ -169,9 +169,10 @@ def _build_run_script(run_desc, desc_file, results_dir, tmp_run_dir):
     return run_script
 
 
-def _sbatch_directives(run_desc):
+def _sbatch_directives(run_desc, results_dir):
     """
     :param dict run_desc:
+    :param :py:class:`pathlib.Path` results_dir:
 
     :rtype: str
     """
@@ -209,8 +210,8 @@ def _sbatch_directives(run_desc):
         f"#SBATCH --cpus-per-task=1\n"
         f"#SBATCH --mem-per-cpu=20000m\n"
         f"#SBATCH --time={walltime}\n"
-        f"#SBATCH --output=stdout\n"
-        f"#SBATCH --error=stderr\n"
+        f"#SBATCH --output={results_dir/'stdout'}\n"
+        f"#SBATCH --error={results_dir/'stderr'}\n"
         f"\n"
         f"export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n"
     )
