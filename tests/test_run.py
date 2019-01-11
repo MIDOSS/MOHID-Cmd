@@ -242,8 +242,8 @@ class TestBuildRunScript:
             f"#SBATCH --cpus-per-task=1\n"
             f"#SBATCH --mem-per-cpu=20000m\n"
             f"#SBATCH --time={run_desc['walltime']}\n"
-            f"#SBATCH --output=stdout\n"
-            f"#SBATCH --error=stderr\n"
+            f"#SBATCH --output=results_dir/stdout\n"
+            f"#SBATCH --error=results_dir/stderr\n"
             f"\n"
             f"export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n"
             f"\n"
@@ -285,7 +285,9 @@ class TestSbatchDirectives:
         pass
 
     def test_sbatch_directives(self, run_desc):
-        sbatch_directives = mohid_cmd.run._sbatch_directives(run_desc)
+        sbatch_directives = mohid_cmd.run._sbatch_directives(
+            run_desc, Path("results_dir")
+        )
         expected = (
             f"#SBATCH --job-name={run_desc['run_id']}\n"
             f"#SBATCH --account={run_desc['account']}\n"
@@ -294,8 +296,8 @@ class TestSbatchDirectives:
             f"#SBATCH --cpus-per-task=1\n"
             f"#SBATCH --mem-per-cpu=20000m\n"
             f"#SBATCH --time={run_desc['walltime']}\n"
-            f"#SBATCH --output=stdout\n"
-            f"#SBATCH --error=stderr\n"
+            f"#SBATCH --output=results_dir/stdout\n"
+            f"#SBATCH --error=results_dir/stderr\n"
             f"\n"
             f"export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n"
         )
