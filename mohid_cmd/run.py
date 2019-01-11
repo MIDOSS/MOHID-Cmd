@@ -20,6 +20,8 @@ import datetime
 import logging
 import os
 from pathlib import Path
+import shlex
+import subprocess
 
 import cliff.command
 
@@ -130,10 +132,18 @@ def run(desc_file, results_dir, no_submit=False, quiet=False):
     run_script_file = tmp_run_dir / "MOHID.sh"
     with run_script_file.open("wt") as f:
         f.write(run_script)
+    if not quiet:
+        logger.info(f"Wrote job run script to {run_script_file}")
     if no_submit:
         return
     results_dir.mkdir(parents=True, exist_ok=True)
-    submit_job_msg = "submit_job_msg"
+    sbatch_cmd = f"sbatch {run_script_file}"
+    submit_job_msg = subprocess.run(
+        shlex.split(sbatch_cmd),
+        check=True,
+        universal_newlines=True,
+        stdout=subprocess.PIPE,
+    ).stdout
     return submit_job_msg
 
 
@@ -241,8 +251,8 @@ def _definitions(run_desc, desc_file, results_dir, tmp_run_dir):
         f"RUN_DESC={desc_file}\n"
         f"WORK_DIR={tmp_run_dir}\n"
         f"RESULTS_DIR={results_dir}\n"
-        f"HDF5-TO-NETCDF4={user_local_bin}/hdf5-to-netcdf4\n"
-        f"GATHER={user_local_bin}/mohid gather\n"
+        f"HDF5_TO_NETCDF4={user_local_bin}/hdf5-to-netcdf4\n"
+        f'GATHER="${{HOME}}/.local/bin/mohid gather"\n'
     )
     return defns
 
@@ -280,7 +290,7 @@ def _execute(run_desc):
         f'echo "Ended run at $(date)"\n'
         f"\n"
         f'echo "Results hdf5 to netCDF4 conversion started at $(date)"\n'
-        f"${{HDF5-TO-NETCDF4}} ${{WORKDIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{WORKDIR}}/Lagrangian_${{RUN_ID}}.nc\n"
+        f"${{HDF5_TO_NETCDF4}} ${{WORKDIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{WORKDIR}}/Lagrangian_${{RUN_ID}}.nc\n"
         f'echo "Results hdf5 to netCDF4 conversion ended at $(date)"\n'
     )
     return script

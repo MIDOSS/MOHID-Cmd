@@ -15,8 +15,9 @@
 """MOHID-Cmd run sub-command plug-in unit tests.
 """
 from pathlib import Path
+import subprocess
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, call
 
 import pytest
 import yaml
@@ -151,6 +152,7 @@ class TestTakeAction:
         assert not m_logger.info.called
 
 
+@patch("mohid_cmd.run.subprocess.run", autospec=True)
 @patch("mohid_cmd.run.Path.mkdir", autospec=True)
 @patch("mohid_cmd.run.nemo_cmd.resolved_path", spec=True)
 @patch("mohid_cmd.run._build_run_script", return_value="script", autospec=True)
@@ -161,12 +163,20 @@ class TestRun:
     """
 
     def test_run_submit(
-        self, m_prepare, m_ld_run_desc, m_bld_run_script, m_rslv_path, m_mkdir, tmpdir
+        self,
+        m_prepare,
+        m_ld_run_desc,
+        m_bld_run_script,
+        m_rslv_path,
+        m_mkdir,
+        m_run,
+        tmpdir,
     ):
         p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         m_prepare.return_value = Path(str(p_tmp_run_dir))
         p_results_dir = tmpdir.ensure_dir("results_dir")
         m_rslv_path.return_value = Path(str(p_results_dir))
+        m_run().stdout = "submit_job_msg"
         submit_job_msg = mohid_cmd.run.run(Path("mohid.yaml"), Path(str(p_results_dir)))
         m_prepare.assert_called_once_with(Path("mohid.yaml"))
         m_ld_run_desc.assert_called_once_with(Path("mohid.yaml"))
@@ -175,10 +185,23 @@ class TestRun:
             m_ld_run_desc(), Path("mohid.yaml"), m_rslv_path(), m_prepare()
         )
         m_mkdir.assert_called_once_with(m_rslv_path(), parents=True, exist_ok=True)
+        assert m_run.call_args_list[1] == call(
+            ["sbatch", str(p_tmp_run_dir.join("MOHID.sh"))],
+            check=True,
+            universal_newlines=True,
+            stdout=subprocess.PIPE,
+        )
         assert submit_job_msg == "submit_job_msg"
 
     def test_run_no_submit(
-        self, m_prepare, m_ld_run_desc, m_bld_run_script, m_rslv_path, m_mkdir, tmpdir
+        self,
+        m_prepare,
+        m_ld_run_desc,
+        m_bld_run_script,
+        m_rslv_path,
+        m_mkdir,
+        m_run,
+        tmpdir,
     ):
         p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         m_prepare.return_value = Path(str(p_tmp_run_dir))
@@ -195,6 +218,7 @@ class TestRun:
         )
         assert submit_job_msg is None
         assert not m_mkdir.called
+        assert not m_run.called
 
 
 class TestBuildRunScript:
@@ -227,8 +251,8 @@ class TestBuildRunScript:
             f"RUN_DESC=mohid.yaml\n"
             f"WORK_DIR=tmp_run_dir\n"
             f"RESULTS_DIR=results_dir\n"
-            f"HDF5-TO-NETCDF4=${{HOME}}/.local/bin/hdf5-to-netcdf4\n"
-            f"GATHER=${{HOME}}/.local/bin/mohid gather\n"
+            f"HDF5_TO_NETCDF4=${{HOME}}/.local/bin/hdf5-to-netcdf4\n"
+            f'GATHER="${{HOME}}/.local/bin/mohid gather"\n'
             f"\n"
             f"module load proj4-fortran/1.0\n"
             f"module load python/3.7.0\n"
@@ -244,7 +268,7 @@ class TestBuildRunScript:
             f'echo "Ended run at $(date)"\n'
             f"\n"
             f'echo "Results hdf5 to netCDF4 conversion started at $(date)"\n'
-            f"${{HDF5-TO-NETCDF4}} ${{WORKDIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{WORKDIR}}/Lagrangian_${{RUN_ID}}.nc\n"
+            f"${{HDF5_TO_NETCDF4}} ${{WORKDIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{WORKDIR}}/Lagrangian_${{RUN_ID}}.nc\n"
             f'echo "Results hdf5 to netCDF4 conversion ended at $(date)"\n'
         )
         assert run_script == expected
@@ -296,8 +320,8 @@ class TestDefinitions:
             f"RUN_DESC=mohid.yaml\n"
             f"WORK_DIR=tmp_run_dir\n"
             f"RESULTS_DIR=results_dir\n"
-            f"HDF5-TO-NETCDF4=${{HOME}}/.local/bin/hdf5-to-netcdf4\n"
-            f"GATHER=${{HOME}}/.local/bin/mohid gather\n"
+            f"HDF5_TO_NETCDF4=${{HOME}}/.local/bin/hdf5-to-netcdf4\n"
+            f'GATHER="${{HOME}}/.local/bin/mohid gather"\n'
         )
         assert defns == expected
 
@@ -336,7 +360,7 @@ class TestExecute:
             f'echo "Ended run at $(date)"\n'
             f"\n"
             f'echo "Results hdf5 to netCDF4 conversion started at $(date)"\n'
-            f"${{HDF5-TO-NETCDF4}} ${{WORKDIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{WORKDIR}}/Lagrangian_${{RUN_ID}}.nc\n"
+            f"${{HDF5_TO_NETCDF4}} ${{WORKDIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{WORKDIR}}/Lagrangian_${{RUN_ID}}.nc\n"
             f'echo "Results hdf5 to netCDF4 conversion ended at $(date)"\n'
         )
         assert script == expected
