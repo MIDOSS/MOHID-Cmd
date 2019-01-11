@@ -272,21 +272,21 @@ IN_BATIM    : {str(p_bathy)}
 ROOT        : {str(p_tmp_run_dir.join("res"))}
 IN_MODEL    : {str(p_run_files["IN_MODEL"])}
 PARTIC_DATA : {str(p_run_files["PARTIC_DATA"])}
-PARTIC_HDF  : {str(p_tmp_run_dir.join("res/Lagrangian_MarathassaConstTS.hdf5"))}
+PARTIC_HDF  : {str(p_tmp_run_dir.join("res/Lagrangian_MarathassaConstTS.hdf"))}
 DOMAIN      : {str(p_run_files["DOMAIN"])}
 SURF_DAT    : {str(p_run_files["SURF_DAT"])}
-SURF_HDF    : {str(p_tmp_run_dir.join("res/Atmosphere_MarathassaConstTS.hdf5"))}
+SURF_HDF    : {str(p_tmp_run_dir.join("res/Atmosphere_MarathassaConstTS.hdf"))}
 IN_DAD3D    : {str(p_run_files["IN_DAD3D"])}
 BOT_DAT     : {str(p_run_files["BOT_DAT"])}
 AIRW_DAT    : {str(p_run_files["AIRW_DAT"])}
-AIRW_HDF    : {str(p_tmp_run_dir.join("res/InterfaceWaterAir_MarathassaConstTS.hdf5"))}
+AIRW_HDF    : {str(p_tmp_run_dir.join("res/InterfaceWaterAir_MarathassaConstTS.hdf"))}
 IN_TIDES    : {str(p_run_files["IN_TIDES"])}
 IN_TURB     : {str(p_run_files["IN_TURB"])}
-TURB_HDF    : {str(p_tmp_run_dir.join("res/Turbulence_MarathassaConstTS.hdf5"))}
+TURB_HDF    : {str(p_tmp_run_dir.join("res/Turbulence_MarathassaConstTS.hdf"))}
 DISPQUAL    : {str(p_run_files["DISPQUAL"])}
-EUL_HDF     : {str(p_tmp_run_dir.join("res/WaterProperties_MarathassaConstTS.hdf5"))}
+EUL_HDF     : {str(p_tmp_run_dir.join("res/WaterProperties_MarathassaConstTS.hdf"))}
 WAVES_DAT   : {str(p_run_files["WAVES_DAT"])}
-WAVES_HDF   : {str(p_tmp_run_dir.join("res/Waves_MarathassaConstTS.hdf5"))}
+WAVES_HDF   : {str(p_tmp_run_dir.join("res/Waves_MarathassaConstTS.hdf"))}
 """
         assert nomfich == expected
 
