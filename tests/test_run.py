@@ -232,26 +232,30 @@ class TestBuildRunScript:
             run_script = mohid_cmd.run._build_run_script(
                 run_desc, Path("mohid.yaml"), Path("results_dir"), Path("tmp_run_dir")
             )
+        run_id = run_desc["run_id"]
+        account = run_desc["account"]
+        email = run_desc["email"]
+        walltime = run_desc["walltime"]
         expected = (
             f"#!/bin/bash\n"
             f"\n"
-            f"#SBATCH --job-name={run_desc['run_id']}\n"
-            f"#SBATCH --account={run_desc['account']}\n"
-            f"#SBATCH --mail-user={run_desc['email']}\n"
+            f"#SBATCH --job-name={run_id}\n"
+            f"#SBATCH --account={account}\n"
+            f"#SBATCH --mail-user={email}\n"
             f"#SBATCH --mail-type=ALL\n"
             f"#SBATCH --cpus-per-task=1\n"
             f"#SBATCH --mem-per-cpu=20000m\n"
-            f"#SBATCH --time={run_desc['walltime']}\n"
+            f"#SBATCH --time={walltime}\n"
             f"#SBATCH --output=results_dir/stdout\n"
             f"#SBATCH --error=results_dir/stderr\n"
             f"\n"
             f"export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n"
             f"\n"
-            f"RUN_ID={run_desc['run_id']}\n"
-            f"RUN_DESC=mohid.yaml\n"
-            f"WORK_DIR=tmp_run_dir\n"
-            f"RESULTS_DIR=results_dir\n"
-            f"HDF5_TO_NETCDF4=${{HOME}}/.local/bin/hdf5-to-netcdf4\n"
+            f'RUN_ID="{run_id}"\n'
+            f'RUN_DESC="mohid.yaml"\n'
+            f'WORK_DIR="tmp_run_dir"\n'
+            f'RESULTS_DIR="results_dir"\n'
+            f'HDF5_TO_NETCDF4="${{HOME}}/.local/bin/hdf5-to-netcdf4"\n'
             f'GATHER="${{HOME}}/.local/bin/mohid gather"\n'
             f"\n"
             f"module load proj4-fortran/1.0\n"
@@ -317,12 +321,13 @@ class TestDefinitions:
         defns = mohid_cmd.run._definitions(
             run_desc, Path("mohid.yaml"), Path("results_dir"), Path("tmp_run_dir")
         )
+        run_id = run_desc["run_id"]
         expected = (
-            f"RUN_ID={run_desc['run_id']}\n"
-            f"RUN_DESC=mohid.yaml\n"
-            f"WORK_DIR=tmp_run_dir\n"
-            f"RESULTS_DIR=results_dir\n"
-            f"HDF5_TO_NETCDF4=${{HOME}}/.local/bin/hdf5-to-netcdf4\n"
+            f'RUN_ID="{run_id}"\n'
+            f'RUN_DESC="mohid.yaml"\n'
+            f'WORK_DIR="tmp_run_dir"\n'
+            f'RESULTS_DIR="results_dir"\n'
+            f'HDF5_TO_NETCDF4="${{HOME}}/.local/bin/hdf5-to-netcdf4"\n'
             f'GATHER="${{HOME}}/.local/bin/mohid gather"\n'
         )
         assert defns == expected

@@ -247,12 +247,13 @@ def _definitions(run_desc, desc_file, results_dir, tmp_run_dir):
     :rtype: str
     """
     user_local_bin = "${HOME}/.local/bin"
+    run_id = run_desc["run_id"]
     defns = (
-        f"RUN_ID={run_desc['run_id']}\n"
-        f"RUN_DESC={desc_file}\n"
-        f"WORK_DIR={tmp_run_dir}\n"
-        f"RESULTS_DIR={results_dir}\n"
-        f"HDF5_TO_NETCDF4={user_local_bin}/hdf5-to-netcdf4\n"
+        f'RUN_ID="{run_id}"\n'
+        f'RUN_DESC="{desc_file}"\n'
+        f'WORK_DIR="{tmp_run_dir}"\n'
+        f'RESULTS_DIR="{results_dir}"\n'
+        f'HDF5_TO_NETCDF4="{user_local_bin}/hdf5-to-netcdf4"\n'
         f'GATHER="${{HOME}}/.local/bin/mohid gather"\n'
     )
     return defns
