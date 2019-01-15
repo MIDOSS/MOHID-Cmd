@@ -25,7 +25,7 @@ The MIDOSS-MOHID command processor,
 is a command-line tool for doing various operations associated with the `MIDOSS project`_ version of the `MOHID model`_.
 
 .. _MIDOSS project: https://midoss-docs.readthedocs.io/en/latest/
-.. _MOHID model: https://www.mohid.com/
+.. _MOHID model: http://www.mohid.com/
 
 The :kbd:`MOHID-Cmd` package is a Python 3 package.
 It is developed and tested under Python 3.6 and should work with that and later versions of Python.
