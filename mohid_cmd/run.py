@@ -292,7 +292,7 @@ def _execute(run_desc):
         f'echo "Ended run at $(date)"\n'
         f"\n"
         f'echo "Results hdf5 to netCDF4 conversion started at $(date)"\n'
-        f"${{HDF5_TO_NETCDF4}} ${{WORKDIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{WORKDIR}}/Lagrangian_${{RUN_ID}}.nc\n"
+        f"${{HDF5_TO_NETCDF4}} ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{WORK_DIR}}/Lagrangian_${{RUN_ID}}.nc\n"
         f'echo "Results hdf5 to netCDF4 conversion ended at $(date)"\n'
     )
     return script
