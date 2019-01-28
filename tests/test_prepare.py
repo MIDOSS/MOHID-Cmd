@@ -143,7 +143,7 @@ class TestTakeAction:
 @patch("mohid_cmd.prepare._make_nomfich", spec=True)
 @patch("mohid_cmd.prepare._record_vcs_revisions", spec=True)
 class TestPrepare:
-    """Unit tests for `mohid prepare` prepare() function.
+    """Unit test for `mohid prepare` prepare() function.
     """
 
     def test_prepare(
