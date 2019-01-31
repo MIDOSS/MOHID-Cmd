@@ -118,42 +118,44 @@ class TestTakeAction:
     """Unit tests for `mohid run` sub-command take_action() method.
     """
 
-    @patch("mohid_cmd.run.run", return_value="submit job msg")
+    @patch("mohid_cmd.run.run", return_value="submit job msg", autospec=True)
     def test_take_action(self, m_run, m_logger, run_cmd):
         parsed_args = SimpleNamespace(
-            desc_file="desc file",
-            results_dir="results dir",
+            desc_file=Path("desc file"),
+            results_dir=Path("results dir"),
             no_submit=False,
             quiet=False,
         )
-        run_cmd.run(parsed_args)
+        run_cmd.take_action(parsed_args)
         m_run.assert_called_once_with(
-            "desc file", "results dir", no_submit=False, quiet=False
+            Path("desc file"), Path("results dir"), no_submit=False, quiet=False
         )
         m_logger.info.assert_called_once_with("submit job msg")
 
-    @patch("mohid_cmd.run.run", return_value="submit job msg")
+    @patch("mohid_cmd.run.run", return_value="submit job msg", autospec=True)
     def test_take_action_quiet(self, m_run, m_logger, run_cmd):
         parsed_args = SimpleNamespace(
-            desc_file="desc file",
-            results_dir="results dir",
+            desc_file=Path("desc file"),
+            results_dir=Path("results dir"),
             no_submit=False,
             quiet=True,
         )
-        run_cmd.run(parsed_args)
+        run_cmd.take_action(parsed_args)
         assert not m_logger.info.called
 
-    @patch("mohid_cmd.run.run", return_value=None)
+    @patch("mohid_cmd.run.run", return_value=None, autospec=True)
     def test_take_action_no_submit(self, m_run, m_logger, run_cmd):
         parsed_args = SimpleNamespace(
-            desc_file="desc file", results_dir="results dir", no_submit=True, quiet=True
+            desc_file=Path("desc file"),
+            results_dir=Path("results dir"),
+            no_submit=True,
+            quiet=True,
         )
-        run_cmd.run(parsed_args)
+        run_cmd.take_action(parsed_args)
         assert not m_logger.info.called
 
 
 @patch("mohid_cmd.run.subprocess.run", autospec=True)
-@patch("mohid_cmd.run.Path.mkdir", autospec=True)
 @patch("mohid_cmd.run.nemo_cmd.resolved_path", spec=True)
 @patch("mohid_cmd.run._build_run_script", return_value="script", autospec=True)
 @patch("mohid_cmd.run.nemo_cmd.prepare.load_run_desc", spec=True)
@@ -163,19 +165,11 @@ class TestRun:
     """
 
     def test_run_submit(
-        self,
-        m_prepare,
-        m_ld_run_desc,
-        m_bld_run_script,
-        m_rslv_path,
-        m_mkdir,
-        m_run,
-        tmpdir,
+        self, m_prepare, m_ld_run_desc, m_bld_run_script, m_rslv_path, m_run, tmpdir
     ):
         p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         m_prepare.return_value = Path(str(p_tmp_run_dir))
         p_results_dir = tmpdir.ensure_dir("results_dir")
-        m_rslv_path.return_value = Path(str(p_results_dir))
         m_run().stdout = "submit_job_msg"
         submit_job_msg = mohid_cmd.run.run(Path("mohid.yaml"), Path(str(p_results_dir)))
         m_prepare.assert_called_once_with(Path("mohid.yaml"))
@@ -184,7 +178,7 @@ class TestRun:
         m_bld_run_script.assert_called_once_with(
             m_ld_run_desc(), Path("mohid.yaml"), m_rslv_path(), m_prepare()
         )
-        m_mkdir.assert_called_once_with(m_rslv_path(), parents=True, exist_ok=True)
+        m_rslv_path().mkdir.assert_called_once_with(parents=True, exist_ok=True)
         assert m_run.call_args_list[1] == call(
             ["sbatch", str(p_tmp_run_dir.join("MOHID.sh"))],
             check=True,
@@ -194,19 +188,11 @@ class TestRun:
         assert submit_job_msg == "submit_job_msg"
 
     def test_run_no_submit(
-        self,
-        m_prepare,
-        m_ld_run_desc,
-        m_bld_run_script,
-        m_rslv_path,
-        m_mkdir,
-        m_run,
-        tmpdir,
+        self, m_prepare, m_ld_run_desc, m_bld_run_script, m_rslv_path, m_run, tmpdir
     ):
         p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         m_prepare.return_value = Path(str(p_tmp_run_dir))
         p_results_dir = tmpdir.ensure_dir("results_dir")
-        m_rslv_path.return_value = Path(str(p_results_dir))
         submit_job_msg = mohid_cmd.run.run(
             Path("mohid.yaml"), Path(str(p_results_dir)), no_submit=True
         )
@@ -217,7 +203,7 @@ class TestRun:
             m_ld_run_desc(), Path("mohid.yaml"), m_rslv_path(), m_prepare()
         )
         assert submit_job_msg is None
-        assert not m_mkdir.called
+        assert not m_rslv_path().mkdir.called
         assert not m_run.called
 
 
