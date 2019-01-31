@@ -36,6 +36,7 @@ The command :kbd:`mohid help` produces a list of the available :program:`mohid` 
 
   Commands:
     complete       print bash completion command (cliff)
+    gather         Gather results files from a MIDOSS-MOHID run.
     help           print detailed help for another command (cliff)
     prepare        Set up the MIDOSS-MOHID run described in DESC_FILE and print the path of the temporary run directory.
     run            Prepare, execute, and gather results from a MIDOSS-MOHID model run.
@@ -116,6 +117,10 @@ The :command:`run` sub-command does the following:
 
 #. Execute the :ref:`mohid-prepare` via the :ref:`MOHID-CmdAPI` to set up a temporary run directory from which to execute the MIDOSS-MOHID run.
 
+.. note::
+    If the :command:`run` sub-command prints an error message,
+    you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
+
 
 .. _mohid-prepare:
 
@@ -151,6 +156,30 @@ Example:
 The name of the temporary run directory created is the :kbd:`run id` string from the run description YAML file with an ISO-formatted date/time stamp appended because the directory is intended to be ephemerally used for a single run.
 
 .. note::
-
     If the :command:`prepare` sub-command prints an error message,
+    you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
+
+
+.. _mohid-gather:
+
+:kbd:`gather` Sub-command
+=========================
+
+The :command:`gather` sub-command moves results from a MIDOSS-MOHID run into a results directory::
+
+  usage: mohid gather [-h] RESULTS_DIR
+
+  Gather the results files from the MIDOSS-MOHID run in the present working
+  directory into files in RESULTS_DIR. The run description YAML file,
+  `nomfich.dat` file, and other files that define the run are also gathered into
+  RESULTS_DIR. If RESULTS_DIR does not exist it will be created.
+
+  positional arguments:
+    RESULTS_DIR  directory to store results into
+
+  optional arguments:
+    -h, --help   show this help message and exit
+
+.. note::
+    If the :command:`gather` sub-command prints an error message,
     you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.

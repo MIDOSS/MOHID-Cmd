@@ -66,6 +66,10 @@ setup(
         # The mohid command:
         "console_scripts": ["mohid = mohid_cmd.main:main"],
         # Sub-command plug-ins:
-        "mohid.app": ["prepare = mohid_cmd.prepare:Prepare", "run = mohid_cmd.run:Run"],
+        "mohid.app": [
+            "gather = mohid_cmd.gather:Gather",
+            "prepare = mohid_cmd.prepare:Prepare",
+            "run = mohid_cmd.run:Run",
+        ],
     },
 )
