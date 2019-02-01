@@ -25,7 +25,9 @@ They contain key-value pairs that define the names and locations of files and di
 
 .. _YAML: https://pyyaml.org/wiki/PyYAMLDocumentation
 
-Run description files are typically stored in a sub-directory of your clone of the :ref:`MIDOSS-MOHID-config-repo`.
+Run description files are typically stored in a sub-directory of your clone of the `MIDOSS-MOHID-config-repo`_.
+
+.. _MIDOSS-MOHID-config-repo: https://bitbucket.org/midoss/midoss-mohid-config/
 
 .. toctree::
    :maxdepth: 3

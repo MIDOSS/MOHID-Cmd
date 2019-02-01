@@ -164,6 +164,8 @@ def _build_run_script(run_desc, desc_file, results_dir, tmp_run_dir):
             _definitions(run_desc, desc_file, results_dir, tmp_run_dir),
             _modules(),
             _execute(run_desc),
+            _fix_permissions(),
+            _cleanup(),
         )
     )
     return run_script
@@ -294,5 +296,28 @@ def _execute(run_desc):
         f'echo "Results hdf5 to netCDF4 conversion started at $(date)"\n'
         f"${{HDF5_TO_NETCDF4}} ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{WORK_DIR}}/Lagrangian_${{RUN_ID}}.nc\n"
         f'echo "Results hdf5 to netCDF4 conversion ended at $(date)"\n'
+        f"\n"
+        f'echo "Results gathering started at $(date)"\n'
+        f"${{GATHER}} ${{RESULTS_DIR}} --debug\n"
+        f'echo "Results gathering ended at $(date)"\n'
+    )
+    return script
+
+
+def _fix_permissions():
+    script = (
+        f"chmod go+rx ${{RESULTS_DIR}}\n"
+        f"chmod g+rw ${{RESULTS_DIR}}/*\n"
+        f"chmod o+r ${{RESULTS_DIR}}/*\n"
+    )
+    return script
+
+
+def _cleanup():
+    script = (
+        f'echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout\n'
+        f"rmdir $(pwd)\n"
+        f'echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout\n'
+        f"exit ${{MPIRUN_EXIT_CODE}}\n"
     )
     return script
