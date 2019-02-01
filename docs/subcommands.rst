@@ -117,6 +117,15 @@ The :command:`run` sub-command does the following:
 
 #. Execute the :ref:`mohid-prepare` via the :ref:`MOHID-CmdAPI` to set up a temporary run directory from which to execute the MIDOSS-MOHID run.
 
+#. Create a :file:`MOHID.sh` job script in the temporary run directory.
+   The job script:
+
+   * runs MOHID
+
+   * executes the :command:`hdf5-to-netcdf4` command to transform the MOHID Lagrangian.hdf5 output file into a netCDF4 file
+
+   * executes the :ref:`mohid-gather` to collect the run description and results files into the results directory
+
 .. note::
     If the :command:`run` sub-command prints an error message,
     you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.

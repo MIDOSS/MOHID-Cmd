@@ -260,6 +260,19 @@ class TestBuildRunScript:
             f'echo "Results hdf5 to netCDF4 conversion started at $(date)"\n'
             f"${{HDF5_TO_NETCDF4}} ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{WORK_DIR}}/Lagrangian_${{RUN_ID}}.nc\n"
             f'echo "Results hdf5 to netCDF4 conversion ended at $(date)"\n'
+            f"\n"
+            f'echo "Results gathering started at $(date)"\n'
+            f"${{GATHER}} ${{RESULTS_DIR}} --debug\n"
+            f'echo "Results gathering ended at $(date)"\n'
+            f"\n"
+            f"chmod go+rx ${{RESULTS_DIR}}\n"
+            f"chmod g+rw ${{RESULTS_DIR}}/*\n"
+            f"chmod o+r ${{RESULTS_DIR}}/*\n"
+            f"\n"
+            f'echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout\n'
+            f"rmdir $(pwd)\n"
+            f'echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout\n'
+            f"exit ${{MPIRUN_EXIT_CODE}}\n"
         )
         assert run_script == expected
 
@@ -326,9 +339,9 @@ class TestModules:
     def test_modules(self):
         modules = mohid_cmd.run._modules()
         expected = (
-            "module load proj4-fortran/1.0\n"
-            "module load python/3.7.0\n"
-            "module load nco/4.6.6\n"
+            f"module load proj4-fortran/1.0\n"
+            f"module load python/3.7.0\n"
+            f"module load nco/4.6.6\n"
         )
         assert modules == expected
 
@@ -355,5 +368,38 @@ class TestExecute:
             f'echo "Results hdf5 to netCDF4 conversion started at $(date)"\n'
             f"${{HDF5_TO_NETCDF4}} ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{WORK_DIR}}/Lagrangian_${{RUN_ID}}.nc\n"
             f'echo "Results hdf5 to netCDF4 conversion ended at $(date)"\n'
+            f"\n"
+            f'echo "Results gathering started at $(date)"\n'
+            f"${{GATHER}} ${{RESULTS_DIR}} --debug\n"
+            f'echo "Results gathering ended at $(date)"\n'
+        )
+        assert script == expected
+
+
+class TestFixPermissions:
+    """Unit tests for _fix_permissions() function.
+    """
+
+    def test_fix_permissions(self):
+        script = mohid_cmd.run._fix_permissions()
+        expected = (
+            f"chmod go+rx ${{RESULTS_DIR}}\n"
+            f"chmod g+rw ${{RESULTS_DIR}}/*\n"
+            f"chmod o+r ${{RESULTS_DIR}}/*\n"
+        )
+        assert script == expected
+
+
+class TestCleanup:
+    """Unit tests for _cleanup() function.
+    """
+
+    def test_fix_permissions(self):
+        script = mohid_cmd.run._cleanup()
+        expected = (
+            f'echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout\n'
+            f"rmdir $(pwd)\n"
+            f'echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout\n'
+            f"exit ${{MPIRUN_EXIT_CODE}}\n"
         )
         assert script == expected
