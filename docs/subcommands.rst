@@ -122,7 +122,7 @@ The :command:`run` sub-command does the following:
 
    * runs MOHID
 
-   * executes the :command:`hdf5-to-netcdf4` command to transform the MOHID Lagrangian.hdf5 output file into a netCDF4 file
+   * executes the :command:`hdf5-to-netcdf4` command to transform the MOHID :file:`Lagrangian.hdf5` output file into a netCDF4 file
 
    * executes the :ref:`mohid-gather` to collect the run description and results files into the results directory
 
