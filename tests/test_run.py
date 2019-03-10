@@ -258,7 +258,10 @@ class TestBuildRunScript:
             f'echo "Ended run at $(date)"\n'
             f"\n"
             f'echo "Results hdf5 to netCDF4 conversion started at $(date)"\n'
-            f"${{HDF5_TO_NETCDF4}} ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{WORK_DIR}}/Lagrangian_${{RUN_ID}}.nc\n"
+            f'TMPDIR="${{SLURM_TMPDIR}}"\n'
+            f"cp ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/\n"
+            f"${{HDF5_TO_NETCDF4}} -v info ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc\n"
+            f"cp ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc ${{WORK_DIR}}/\n"
             f'echo "Results hdf5 to netCDF4 conversion ended at $(date)"\n'
             f"\n"
             f'echo "Results gathering started at $(date)"\n'
@@ -366,7 +369,10 @@ class TestExecute:
             f'echo "Ended run at $(date)"\n'
             f"\n"
             f'echo "Results hdf5 to netCDF4 conversion started at $(date)"\n'
-            f"${{HDF5_TO_NETCDF4}} ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{WORK_DIR}}/Lagrangian_${{RUN_ID}}.nc\n"
+            f'TMPDIR="${{SLURM_TMPDIR}}"\n'
+            f"cp ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/\n"
+            f"${{HDF5_TO_NETCDF4}} -v info ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc\n"
+            f"cp ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc ${{WORK_DIR}}/\n"
             f'echo "Results hdf5 to netCDF4 conversion ended at $(date)"\n'
             f"\n"
             f'echo "Results gathering started at $(date)"\n'
