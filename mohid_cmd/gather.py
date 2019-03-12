@@ -78,9 +78,7 @@ def gather(results_dir):
     results_dir = nemo_cmd.resolved_path(results_dir)
     results_dir.mkdir(parents=True, exist_ok=True)
     symlinks = {p for p in Path.cwd().glob("*") if p.is_symlink()}
-    res_files = {
-        p for p in (Path.cwd() / "res").glob("*") if not p.name.startswith("Lagrangian")
-    }
+    res_files = {p for p in (Path.cwd() / "res").glob("*")}
     try:
         _move_results(results_dir, symlinks, res_files)
     except Exception:
