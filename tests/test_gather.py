@@ -64,13 +64,15 @@ class TestTakeAction:
 @pytest.mark.parametrize(
     "res_files, expected",
     (
-        ({Path("Lagrangian_MarathassaCostTS.hdf5")}, set()),
         (
             {
                 Path("Lagrangian_MarathassaCostTS.hdf5"),
                 Path("Hydrodynamics_MarathassaCostTS.hdf5"),
             },
-            {Path("Hydrodynamics_MarathassaCostTS.hdf5")},
+            {
+                Path("Lagrangian_MarathassaCostTS.hdf5"),
+                Path("Hydrodynamics_MarathassaCostTS.hdf5"),
+            },
         ),
     ),
 )
