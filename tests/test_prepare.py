@@ -14,6 +14,7 @@
 # limitations under the License.
 """MOHID-Cmd prepare sub-command plug-in unit tests.
 """
+import textwrap
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import call, Mock, patch
@@ -34,35 +35,37 @@ def prepare_cmd():
 def run_desc(tmpdir):
     p_run_desc = tmpdir.join("mohid.yaml")
     p_run_desc.write(
-        f"""
-    run_id: MarathassaConstTS
-
-    paths:
-      mohid repo: MIDOSS-MOHID/
-      runs directory: runs/
-
-    forcing:
-      winds.hdf5: MIDOSS/forcing/HRDPS/hrdps_20181211_20181218.hdf5
-
-    bathymetry: MIDOSS-MOHID-config/SalishSeaCast/SalishSeaCast_bathymetry.dat
-
-    run data files:
-      IN_MODEL: MIDOSS-MOHID-config/MarathassaConstTS/Model.dat
-      PARTIC_DATA: MIDOSS-MOHID-config/MarathassaConstTS/Lagrangian.dat
-      DOMAIN: MIDOSS-MOHID-config/SalishSeaCast/Geometry.dat
-      SURF_DAT: MIDOSS-MOHID-config/SalishSeaCast/Atmosphere.dat
-      IN_DAD3D: MIDOSS-MOHID-config/SalishSeaCast/Hydrodynamic.dat
-      BOT_DAT: MIDOSS-MOHID-config/SalishSeaCast/InterfaceSedimentWater.dat
-      AIRW_DAT: MIDOSS-MOHID-config/SalishSeaCast/InterfaceWaterAir.dat
-      IN_TIDES: MIDOSS-MOHID-config/SalishSeaCast/Tide.dat
-      IN_TURB: MIDOSS-MOHID-config/SalishSeaCast/Turbulence.dat
-      DISPQUAL: MIDOSS-MOHID-config/SalishSeaCast/WaterProperties.dat
-      WAVES_DAT: MIDOSS-MOHID-config/SalishSeaCast/Waves.dat
-
-    vcs revisions:
-      hg:
-        - MIDOSS-MOHID-config
-    """
+        textwrap.dedent(
+            """\
+            run_id: MarathassaConstTS
+        
+            paths:
+              mohid repo: MIDOSS-MOHID/
+              runs directory: runs/
+        
+            forcing:
+              winds.hdf5: MIDOSS/forcing/HRDPS/hrdps_20181211_20181218.hdf5
+        
+            bathymetry: MIDOSS-MOHID-config/SalishSeaCast/SalishSeaCast_bathymetry.dat
+        
+            run data files:
+              IN_MODEL: MIDOSS-MOHID-config/MarathassaConstTS/Model.dat
+              PARTIC_DATA: MIDOSS-MOHID-config/MarathassaConstTS/Lagrangian.dat
+              DOMAIN: MIDOSS-MOHID-config/SalishSeaCast/Geometry.dat
+              SURF_DAT: MIDOSS-MOHID-config/SalishSeaCast/Atmosphere.dat
+              IN_DAD3D: MIDOSS-MOHID-config/SalishSeaCast/Hydrodynamic.dat
+              BOT_DAT: MIDOSS-MOHID-config/SalishSeaCast/InterfaceSedimentWater.dat
+              AIRW_DAT: MIDOSS-MOHID-config/SalishSeaCast/InterfaceWaterAir.dat
+              IN_TIDES: MIDOSS-MOHID-config/SalishSeaCast/Tide.dat
+              IN_TURB: MIDOSS-MOHID-config/SalishSeaCast/Turbulence.dat
+              DISPQUAL: MIDOSS-MOHID-config/SalishSeaCast/WaterProperties.dat
+              WAVES_DAT: MIDOSS-MOHID-config/SalishSeaCast/Waves.dat
+        
+            vcs revisions:
+              hg:
+                - MIDOSS-MOHID-config
+            """
+        )
     )
     with open(str(p_run_desc), "rt") as f:
         run_desc = yaml.safe_load(f)
@@ -275,27 +278,29 @@ class TestMakeNomfich:
             mohid_cmd.prepare._make_nomfich(run_desc, Path(str(p_tmp_run_dir)))
         with p_tmp_run_dir.join("nomfich.dat").open("rt") as f:
             nomfich = f.read()
-        expected = f"""\
-IN_BATIM    : {str(p_bathy)}
-ROOT        : {str(p_tmp_run_dir.join("res"))}
-IN_MODEL    : {str(p_run_files["IN_MODEL"])}
-PARTIC_DATA : {str(p_run_files["PARTIC_DATA"])}
-PARTIC_HDF  : {str(p_tmp_run_dir.join("res/Lagrangian_MarathassaConstTS.hdf"))}
-DOMAIN      : {str(p_run_files["DOMAIN"])}
-SURF_DAT    : {str(p_run_files["SURF_DAT"])}
-SURF_HDF    : {str(p_tmp_run_dir.join("res/Atmosphere_MarathassaConstTS.hdf"))}
-IN_DAD3D    : {str(p_run_files["IN_DAD3D"])}
-BOT_DAT     : {str(p_run_files["BOT_DAT"])}
-AIRW_DAT    : {str(p_run_files["AIRW_DAT"])}
-AIRW_HDF    : {str(p_tmp_run_dir.join("res/InterfaceWaterAir_MarathassaConstTS.hdf"))}
-IN_TIDES    : {str(p_run_files["IN_TIDES"])}
-IN_TURB     : {str(p_run_files["IN_TURB"])}
-TURB_HDF    : {str(p_tmp_run_dir.join("res/Turbulence_MarathassaConstTS.hdf"))}
-DISPQUAL    : {str(p_run_files["DISPQUAL"])}
-EUL_HDF     : {str(p_tmp_run_dir.join("res/WaterProperties_MarathassaConstTS.hdf"))}
-WAVES_DAT   : {str(p_run_files["WAVES_DAT"])}
-WAVES_HDF   : {str(p_tmp_run_dir.join("res/Waves_MarathassaConstTS.hdf"))}
-"""
+        expected = textwrap.dedent(
+            f"""\
+            IN_BATIM    : {str(p_bathy)}
+            ROOT        : {str(p_tmp_run_dir.join("res"))}
+            IN_MODEL    : {str(p_run_files["IN_MODEL"])}
+            PARTIC_DATA : {str(p_run_files["PARTIC_DATA"])}
+            PARTIC_HDF  : {str(p_tmp_run_dir.join("res/Lagrangian_MarathassaConstTS.hdf"))}
+            DOMAIN      : {str(p_run_files["DOMAIN"])}
+            SURF_DAT    : {str(p_run_files["SURF_DAT"])}
+            SURF_HDF    : {str(p_tmp_run_dir.join("res/Atmosphere_MarathassaConstTS.hdf"))}
+            IN_DAD3D    : {str(p_run_files["IN_DAD3D"])}
+            BOT_DAT     : {str(p_run_files["BOT_DAT"])}
+            AIRW_DAT    : {str(p_run_files["AIRW_DAT"])}
+            AIRW_HDF    : {str(p_tmp_run_dir.join("res/InterfaceWaterAir_MarathassaConstTS.hdf"))}
+            IN_TIDES    : {str(p_run_files["IN_TIDES"])}
+            IN_TURB     : {str(p_run_files["IN_TURB"])}
+            TURB_HDF    : {str(p_tmp_run_dir.join("res/Turbulence_MarathassaConstTS.hdf"))}
+            DISPQUAL    : {str(p_run_files["DISPQUAL"])}
+            EUL_HDF     : {str(p_tmp_run_dir.join("res/WaterProperties_MarathassaConstTS.hdf"))}
+            WAVES_DAT   : {str(p_run_files["WAVES_DAT"])}
+            WAVES_HDF   : {str(p_tmp_run_dir.join("res/Waves_MarathassaConstTS.hdf"))}
+            """
+        )
         assert nomfich == expected
 
 

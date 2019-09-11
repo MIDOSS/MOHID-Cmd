@@ -19,6 +19,7 @@ Prepare for, execute, and gather the results of a run of the MIDOSS-MOHID model.
 import datetime
 import logging
 import os
+import textwrap
 from pathlib import Path
 import shlex
 import subprocess
@@ -204,18 +205,20 @@ def _sbatch_directives(run_desc, results_dir):
         ).time()
         td = datetime.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
     walltime = _td_to_hms(td)
-    sbatch_directives = (
-        f"#SBATCH --job-name={run_id}\n"
-        f"#SBATCH --account={account}\n"
-        f"#SBATCH --mail-user={email}\n"
-        f"#SBATCH --mail-type=ALL\n"
-        f"#SBATCH --cpus-per-task=1\n"
-        f"#SBATCH --mem-per-cpu=20000m\n"
-        f"#SBATCH --time={walltime}\n"
-        f"#SBATCH --output={results_dir/'stdout'}\n"
-        f"#SBATCH --error={results_dir/'stderr'}\n"
-        f"\n"
-        f"export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n"
+    sbatch_directives = textwrap.dedent(
+        f"""\
+        #SBATCH --job-name={run_id}
+        #SBATCH --account={account}
+        #SBATCH --mail-user={email}
+        #SBATCH --mail-type=ALL
+        #SBATCH --cpus-per-task=1
+        #SBATCH --mem-per-cpu=20000m
+        #SBATCH --time={walltime}
+        #SBATCH --output={results_dir/'stdout'}
+        #SBATCH --error={results_dir/'stderr'}
+    
+        export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+        """
     )
     return sbatch_directives
 
@@ -250,13 +253,15 @@ def _definitions(run_desc, desc_file, results_dir, tmp_run_dir):
     """
     user_local_bin = "${HOME}/.local/bin"
     run_id = run_desc["run_id"]
-    defns = (
-        f'RUN_ID="{run_id}"\n'
-        f'RUN_DESC="{desc_file}"\n'
-        f'WORK_DIR="{tmp_run_dir}"\n'
-        f'RESULTS_DIR="{results_dir}"\n'
-        f'HDF5_TO_NETCDF4="{user_local_bin}/hdf5-to-netcdf4"\n'
-        f'GATHER="${{HOME}}/.local/bin/mohid gather"\n'
+    defns = textwrap.dedent(
+        f"""\
+        RUN_ID="{run_id}"
+        RUN_DESC="mohid.yaml"
+        WORK_DIR="tmp_run_dir"
+        RESULTS_DIR="results_dir"
+        HDF5_TO_NETCDF4="{user_local_bin}/hdf5-to-netcdf4"
+        GATHER="{user_local_bin}/mohid gather"
+        """
     )
     return defns
 
@@ -265,10 +270,12 @@ def _modules():
     """
     :rtype: str
     """
-    modules = (
-        "module load proj4-fortran/1.0\n"
-        "module load python/3.7.0\n"
-        "module load nco/4.6.6\n"
+    modules = textwrap.dedent(
+        """\
+        module load proj4-fortran/1.0
+        module load python/3.7.0
+        module load nco/4.6.6
+        """
     )
     return modules
 
@@ -283,44 +290,50 @@ def _execute(run_desc):
         run_desc, ("paths", "mohid repo"), resolve_path=True
     )
     mohid_exe = mohid_repo / Path("Solutions/linux/bin/MohidWater.exe")
-    script = (
-        f"mkdir -p ${{RESULTS_DIR}}\n"
-        f"cd ${{WORK_DIR}}\n"
-        f'echo "working dir: $(pwd)"\n'
-        f"\n"
-        f'echo "Starting run at $(date)"\n'
-        f"{str(mohid_exe)}\n"
-        f"MOHID_EXIT_CODE=$?\n"
-        f'echo "Ended run at $(date)"\n'
-        f"\n"
-        f'echo "Results hdf5 to netCDF4 conversion started at $(date)"\n'
-        f'TMPDIR="${{SLURM_TMPDIR}}"\n'
-        f"cp ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/\n"
-        f"${{HDF5_TO_NETCDF4}} -v info ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc\n"
-        f"cp ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc ${{WORK_DIR}}/\n"
-        f'echo "Results hdf5 to netCDF4 conversion ended at $(date)"\n'
-        f"\n"
-        f'echo "Results gathering started at $(date)"\n'
-        f"${{GATHER}} ${{RESULTS_DIR}} --debug\n"
-        f'echo "Results gathering ended at $(date)"\n'
+    script = textwrap.dedent(
+        f"""\
+        mkdir -p ${{RESULTS_DIR}}
+        cd ${{WORK_DIR}}
+        echo "working dir: $(pwd)"
+        
+        echo "Starting run at $(date)"
+        {str(mohid_exe)}
+        MOHID_EXIT_CODE=$?
+        echo "Ended run at $(date)"
+        
+        echo "Results hdf5 to netCDF4 conversion started at $(date)"
+        TMPDIR="${{SLURM_TMPDIR}}"
+        cp ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/
+        ${{HDF5_TO_NETCDF4}} -v info ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc
+        cp ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc ${{WORK_DIR}}/
+        echo "Results hdf5 to netCDF4 conversion ended at $(date)"
+        
+        echo "Results gathering started at $(date)"
+        ${{GATHER}} ${{RESULTS_DIR}} --debug
+        echo "Results gathering ended at $(date)"
+        """
     )
     return script
 
 
 def _fix_permissions():
-    script = (
-        f"chmod go+rx ${{RESULTS_DIR}}\n"
-        f"chmod g+rw ${{RESULTS_DIR}}/*\n"
-        f"chmod o+r ${{RESULTS_DIR}}/*\n"
+    script = textwrap.dedent(
+        """\
+        chmod go+rx ${RESULTS_DIR}
+        chmod g+rw ${RESULTS_DIR}/*
+        chmod o+r ${RESULTS_DIR}/*
+        """
     )
     return script
 
 
 def _cleanup():
-    script = (
-        f'echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout\n'
-        f"rmdir $(pwd)\n"
-        f'echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout\n'
-        f"exit ${{MPIRUN_EXIT_CODE}}\n"
+    script = textwrap.dedent(
+        """\
+        echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+        rmdir $(pwd)
+        echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+        exit ${MPIRUN_EXIT_CODE}
+        """
     )
     return script
