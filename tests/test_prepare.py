@@ -50,7 +50,7 @@ def run_desc(tmpdir):
         
             run data files:
               IN_MODEL: MIDOSS-MOHID-config/MarathassaConstTS/Model.dat
-              PARTIC_DATA: MIDOSS-MOHID-config/MarathassaConstTS/Lagrangian.dat
+              PARTIC_DATA: MIDOSS-MOHID-config/MarathassaConstTS/Lagrangian_DieselFuel_refined.dat
               DOMAIN: MIDOSS-MOHID-config/SalishSeaCast/Geometry.dat
               SURF_DAT: MIDOSS-MOHID-config/SalishSeaCast/Atmosphere.dat
               IN_DAD3D: MIDOSS-MOHID-config/SalishSeaCast/Hydrodynamic.dat
@@ -284,7 +284,7 @@ class TestMakeNomfich:
             ROOT        : {str(p_tmp_run_dir.join("res"))}
             IN_MODEL    : {str(p_run_files["IN_MODEL"])}
             PARTIC_DATA : {str(p_run_files["PARTIC_DATA"])}
-            PARTIC_HDF  : {str(p_tmp_run_dir.join("res/Lagrangian_MarathassaConstTS.hdf"))}
+            PARTIC_HDF  : {str(p_tmp_run_dir.join("res/Lagrangian_DieselFuel_refined_MarathassaConstTS.hdf"))}
             DOMAIN      : {str(p_run_files["DOMAIN"])}
             SURF_DAT    : {str(p_run_files["SURF_DAT"])}
             SURF_HDF    : {str(p_tmp_run_dir.join("res/Atmosphere_MarathassaConstTS.hdf"))}

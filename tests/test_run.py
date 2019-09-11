@@ -44,6 +44,9 @@ def run_desc(tmpdir):
 
             paths:
               mohid repo: MIDOSS-MOHID/
+
+            run data files:
+              PARTIC_DATA: MIDOSS-MOHID-config/MarathassaConstTS/Lagrangian_DieselFuel_refined.dat
             """
         )
     )
@@ -217,7 +220,12 @@ class TestBuildRunScript:
     def test_build_run_script(self, run_desc, tmpdir):
         p_mohid_repo = tmpdir.ensure_dir(run_desc["paths"]["mohid repo"])
         p_mohid_exe = p_mohid_repo.ensure("Solutions/linux/bin/MohidWater.exe")
-        with patch.dict(run_desc["paths"], {"mohid repo": str(p_mohid_repo)}):
+        p_partic_data = tmpdir.ensure_dir(run_desc["run data files"]["PARTIC_DATA"])
+        run_desc_patch = {
+            "paths": {"mohid repo": str(p_mohid_repo)},
+            "run data files": {"PARTIC_DATA": str(p_partic_data)},
+        }
+        with patch.dict(run_desc, run_desc_patch):
             run_script = mohid_cmd.run._build_run_script(
                 run_desc, Path("mohid.yaml"), Path("results_dir"), Path("tmp_run_dir")
             )
@@ -263,9 +271,11 @@ class TestBuildRunScript:
             
             echo "Results hdf5 to netCDF4 conversion started at $(date)"
             TMPDIR="${{SLURM_TMPDIR}}"
-            cp ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/
-            ${{HDF5_TO_NETCDF4}} -v info ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc
-            cp ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc ${{WORK_DIR}}/
+            cp ${{WORK_DIR}}/res/Lagrangian_DieselFuel_refined_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/
+            ${{HDF5_TO_NETCDF4}} -v info \\
+              ${{SLURM_TMPDIR}}/Lagrangian_DieselFuel_refined_${{RUN_ID}}.hdf5 \\
+              ${{SLURM_TMPDIR}}/Lagrangian_DieselFuel_refined_${{RUN_ID}}.nc
+            cp ${{SLURM_TMPDIR}}/Lagrangian_DieselFuel_refined_${{RUN_ID}}.nc ${{WORK_DIR}}/
             echo "Results hdf5 to netCDF4 conversion ended at $(date)"
             
             echo "Results gathering started at $(date)"
@@ -367,7 +377,12 @@ class TestExecute:
     def test_execute(self, run_desc, tmpdir):
         p_mohid_repo = tmpdir.ensure_dir(run_desc["paths"]["mohid repo"])
         p_mohid_exe = p_mohid_repo.ensure("Solutions/linux/bin/MohidWater.exe")
-        with patch.dict(run_desc["paths"], {"mohid repo": str(p_mohid_repo)}):
+        p_partic_data = tmpdir.ensure_dir(run_desc["run data files"]["PARTIC_DATA"])
+        run_desc_patch = {
+            "paths": {"mohid repo": str(p_mohid_repo)},
+            "run data files": {"PARTIC_DATA": str(p_partic_data)},
+        }
+        with patch.dict(run_desc, run_desc_patch):
             script = mohid_cmd.run._execute(run_desc)
         expected = textwrap.dedent(
             f"""\
@@ -382,9 +397,11 @@ class TestExecute:
             
             echo "Results hdf5 to netCDF4 conversion started at $(date)"
             TMPDIR="${{SLURM_TMPDIR}}"
-            cp ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/
-            ${{HDF5_TO_NETCDF4}} -v info ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc
-            cp ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc ${{WORK_DIR}}/
+            cp ${{WORK_DIR}}/res/Lagrangian_DieselFuel_refined_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/
+            ${{HDF5_TO_NETCDF4}} -v info \\
+              ${{SLURM_TMPDIR}}/Lagrangian_DieselFuel_refined_${{RUN_ID}}.hdf5 \\
+              ${{SLURM_TMPDIR}}/Lagrangian_DieselFuel_refined_${{RUN_ID}}.nc
+            cp ${{SLURM_TMPDIR}}/Lagrangian_DieselFuel_refined_${{RUN_ID}}.nc ${{WORK_DIR}}/
             echo "Results hdf5 to netCDF4 conversion ended at $(date)"
             
             echo "Results gathering started at $(date)"

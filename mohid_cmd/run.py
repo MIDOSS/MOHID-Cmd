@@ -290,6 +290,9 @@ def _execute(run_desc):
         run_desc, ("paths", "mohid repo"), resolve_path=True
     )
     mohid_exe = mohid_repo / Path("Solutions/linux/bin/MohidWater.exe")
+    partic_data = nemo_cmd.prepare.get_run_desc_value(
+        run_desc, ("run data files", "PARTIC_DATA"), resolve_path=True
+    )
     script = textwrap.dedent(
         f"""\
         mkdir -p ${{RESULTS_DIR}}
@@ -303,9 +306,11 @@ def _execute(run_desc):
         
         echo "Results hdf5 to netCDF4 conversion started at $(date)"
         TMPDIR="${{SLURM_TMPDIR}}"
-        cp ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/
-        ${{HDF5_TO_NETCDF4}} -v info ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc
-        cp ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc ${{WORK_DIR}}/
+        cp ${{WORK_DIR}}/res/{partic_data.stem}_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/
+        ${{HDF5_TO_NETCDF4}} -v info \\
+          ${{SLURM_TMPDIR}}/{partic_data.stem}_${{RUN_ID}}.hdf5 \\
+          ${{SLURM_TMPDIR}}/{partic_data.stem}_${{RUN_ID}}.nc
+        cp ${{SLURM_TMPDIR}}/{partic_data.stem}_${{RUN_ID}}.nc ${{WORK_DIR}}/
         echo "Results hdf5 to netCDF4 conversion ended at $(date)"
         
         echo "Results gathering started at $(date)"
