@@ -14,6 +14,7 @@
 #  limitations under the License.
 """MOHID-Cmd run sub-command plug-in unit tests.
 """
+import textwrap
 from pathlib import Path
 import subprocess
 from types import SimpleNamespace
@@ -34,15 +35,17 @@ def run_cmd():
 def run_desc(tmpdir):
     p_run_desc = tmpdir.join("mohid.yaml")
     p_run_desc.write(
-        """
-    run_id: MarathassaConstTS
-    email: you@example.com
-    account: def-allen
-    walltime: "1:30:00"
+        textwrap.dedent(
+            """\
+            run_id: MarathassaConstTS
+            email: you@example.com
+            account: def-allen
+            walltime: "1:30:00"
 
-    paths:
-      mohid repo: MIDOSS-MOHID/
-    """
+            paths:
+              mohid repo: MIDOSS-MOHID/
+            """
+        )
     )
     with open(str(p_run_desc), "rt") as f:
         run_desc = yaml.safe_load(f)
@@ -222,60 +225,62 @@ class TestBuildRunScript:
         account = run_desc["account"]
         email = run_desc["email"]
         walltime = run_desc["walltime"]
-        expected = (
-            f"#!/bin/bash\n"
-            f"\n"
-            f"#SBATCH --job-name={run_id}\n"
-            f"#SBATCH --account={account}\n"
-            f"#SBATCH --mail-user={email}\n"
-            f"#SBATCH --mail-type=ALL\n"
-            f"#SBATCH --cpus-per-task=1\n"
-            f"#SBATCH --mem-per-cpu=20000m\n"
-            f"#SBATCH --time={walltime}\n"
-            f"#SBATCH --output=results_dir/stdout\n"
-            f"#SBATCH --error=results_dir/stderr\n"
-            f"\n"
-            f"export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n"
-            f"\n"
-            f'RUN_ID="{run_id}"\n'
-            f'RUN_DESC="mohid.yaml"\n'
-            f'WORK_DIR="tmp_run_dir"\n'
-            f'RESULTS_DIR="results_dir"\n'
-            f'HDF5_TO_NETCDF4="${{HOME}}/.local/bin/hdf5-to-netcdf4"\n'
-            f'GATHER="${{HOME}}/.local/bin/mohid gather"\n'
-            f"\n"
-            f"module load proj4-fortran/1.0\n"
-            f"module load python/3.7.0\n"
-            f"module load nco/4.6.6\n"
-            f"\n"
-            f"mkdir -p ${{RESULTS_DIR}}\n"
-            f"cd ${{WORK_DIR}}\n"
-            f'echo "working dir: $(pwd)"\n'
-            f"\n"
-            f'echo "Starting run at $(date)"\n'
-            f"{str(p_mohid_exe)}\n"
-            f"MOHID_EXIT_CODE=$?\n"
-            f'echo "Ended run at $(date)"\n'
-            f"\n"
-            f'echo "Results hdf5 to netCDF4 conversion started at $(date)"\n'
-            f'TMPDIR="${{SLURM_TMPDIR}}"\n'
-            f"cp ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/\n"
-            f"${{HDF5_TO_NETCDF4}} -v info ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc\n"
-            f"cp ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc ${{WORK_DIR}}/\n"
-            f'echo "Results hdf5 to netCDF4 conversion ended at $(date)"\n'
-            f"\n"
-            f'echo "Results gathering started at $(date)"\n'
-            f"${{GATHER}} ${{RESULTS_DIR}} --debug\n"
-            f'echo "Results gathering ended at $(date)"\n'
-            f"\n"
-            f"chmod go+rx ${{RESULTS_DIR}}\n"
-            f"chmod g+rw ${{RESULTS_DIR}}/*\n"
-            f"chmod o+r ${{RESULTS_DIR}}/*\n"
-            f"\n"
-            f'echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout\n'
-            f"rmdir $(pwd)\n"
-            f'echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout\n'
-            f"exit ${{MPIRUN_EXIT_CODE}}\n"
+        expected = textwrap.dedent(
+            f"""\
+            #!/bin/bash
+            
+            #SBATCH --job-name={run_id}
+            #SBATCH --account={account}
+            #SBATCH --mail-user={email}
+            #SBATCH --mail-type=ALL
+            #SBATCH --cpus-per-task=1
+            #SBATCH --mem-per-cpu=20000m
+            #SBATCH --time={walltime}
+            #SBATCH --output=results_dir/stdout
+            #SBATCH --error=results_dir/stderr
+            
+            export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+            
+            RUN_ID="{run_id}"
+            RUN_DESC="mohid.yaml"
+            WORK_DIR="tmp_run_dir"
+            RESULTS_DIR="results_dir"
+            HDF5_TO_NETCDF4="${{HOME}}/.local/bin/hdf5-to-netcdf4"
+            GATHER="${{HOME}}/.local/bin/mohid gather"
+            
+            module load proj4-fortran/1.0
+            module load python/3.7.0
+            module load nco/4.6.6
+            
+            mkdir -p ${{RESULTS_DIR}}
+            cd ${{WORK_DIR}}
+            echo "working dir: $(pwd)"
+            
+            echo "Starting run at $(date)"
+            {str(p_mohid_exe)}
+            MOHID_EXIT_CODE=$?
+            echo "Ended run at $(date)"
+            
+            echo "Results hdf5 to netCDF4 conversion started at $(date)"
+            TMPDIR="${{SLURM_TMPDIR}}"
+            cp ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/
+            ${{HDF5_TO_NETCDF4}} -v info ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc
+            cp ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc ${{WORK_DIR}}/
+            echo "Results hdf5 to netCDF4 conversion ended at $(date)"
+            
+            echo "Results gathering started at $(date)"
+            ${{GATHER}} ${{RESULTS_DIR}} --debug
+            echo "Results gathering ended at $(date)"
+            
+            chmod go+rx ${{RESULTS_DIR}}
+            chmod g+rw ${{RESULTS_DIR}}/*
+            chmod o+r ${{RESULTS_DIR}}/*
+            
+            echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout
+            rmdir $(pwd)
+            echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout
+            exit ${{MPIRUN_EXIT_CODE}}
+            """
         )
         assert run_script == expected
 
@@ -294,18 +299,20 @@ class TestSbatchDirectives:
         sbatch_directives = mohid_cmd.run._sbatch_directives(
             run_desc, Path("results_dir")
         )
-        expected = (
-            f"#SBATCH --job-name={run_desc['run_id']}\n"
-            f"#SBATCH --account={run_desc['account']}\n"
-            f"#SBATCH --mail-user={run_desc['email']}\n"
-            f"#SBATCH --mail-type=ALL\n"
-            f"#SBATCH --cpus-per-task=1\n"
-            f"#SBATCH --mem-per-cpu=20000m\n"
-            f"#SBATCH --time={run_desc['walltime']}\n"
-            f"#SBATCH --output=results_dir/stdout\n"
-            f"#SBATCH --error=results_dir/stderr\n"
-            f"\n"
-            f"export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n"
+        expected = textwrap.dedent(
+            f"""\
+            #SBATCH --job-name={run_desc['run_id']}
+            #SBATCH --account={run_desc['account']}
+            #SBATCH --mail-user={run_desc['email']}
+            #SBATCH --mail-type=ALL
+            #SBATCH --cpus-per-task=1
+            #SBATCH --mem-per-cpu=20000m
+            #SBATCH --time={run_desc['walltime']}
+            #SBATCH --output=results_dir/stdout
+            #SBATCH --error=results_dir/stderr
+            
+            export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+            """
         )
         assert sbatch_directives == expected
 
@@ -324,13 +331,15 @@ class TestDefinitions:
             run_desc, Path("mohid.yaml"), Path("results_dir"), Path("tmp_run_dir")
         )
         run_id = run_desc["run_id"]
-        expected = (
-            f'RUN_ID="{run_id}"\n'
-            f'RUN_DESC="mohid.yaml"\n'
-            f'WORK_DIR="tmp_run_dir"\n'
-            f'RESULTS_DIR="results_dir"\n'
-            f'HDF5_TO_NETCDF4="${{HOME}}/.local/bin/hdf5-to-netcdf4"\n'
-            f'GATHER="${{HOME}}/.local/bin/mohid gather"\n'
+        expected = textwrap.dedent(
+            f"""\
+            RUN_ID="{run_id}"
+            RUN_DESC="mohid.yaml"
+            WORK_DIR="tmp_run_dir"
+            RESULTS_DIR="results_dir"
+            HDF5_TO_NETCDF4="${{HOME}}/.local/bin/hdf5-to-netcdf4"
+            GATHER="${{HOME}}/.local/bin/mohid gather"
+            """
         )
         assert defns == expected
 
@@ -341,10 +350,12 @@ class TestModules:
 
     def test_modules(self):
         modules = mohid_cmd.run._modules()
-        expected = (
-            f"module load proj4-fortran/1.0\n"
-            f"module load python/3.7.0\n"
-            f"module load nco/4.6.6\n"
+        expected = textwrap.dedent(
+            """\
+            module load proj4-fortran/1.0
+            module load python/3.7.0
+            module load nco/4.6.6
+            """
         )
         assert modules == expected
 
@@ -358,26 +369,28 @@ class TestExecute:
         p_mohid_exe = p_mohid_repo.ensure("Solutions/linux/bin/MohidWater.exe")
         with patch.dict(run_desc["paths"], {"mohid repo": str(p_mohid_repo)}):
             script = mohid_cmd.run._execute(run_desc)
-        expected = (
-            f"mkdir -p ${{RESULTS_DIR}}\n"
-            f"cd ${{WORK_DIR}}\n"
-            f'echo "working dir: $(pwd)"\n'
-            f"\n"
-            f'echo "Starting run at $(date)"\n'
-            f"{str(p_mohid_exe)}\n"
-            f"MOHID_EXIT_CODE=$?\n"
-            f'echo "Ended run at $(date)"\n'
-            f"\n"
-            f'echo "Results hdf5 to netCDF4 conversion started at $(date)"\n'
-            f'TMPDIR="${{SLURM_TMPDIR}}"\n'
-            f"cp ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/\n"
-            f"${{HDF5_TO_NETCDF4}} -v info ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc\n"
-            f"cp ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc ${{WORK_DIR}}/\n"
-            f'echo "Results hdf5 to netCDF4 conversion ended at $(date)"\n'
-            f"\n"
-            f'echo "Results gathering started at $(date)"\n'
-            f"${{GATHER}} ${{RESULTS_DIR}} --debug\n"
-            f'echo "Results gathering ended at $(date)"\n'
+        expected = textwrap.dedent(
+            f"""\
+            mkdir -p ${{RESULTS_DIR}}
+            cd ${{WORK_DIR}}
+            echo "working dir: $(pwd)"
+            
+            echo "Starting run at $(date)"
+            {str(p_mohid_exe)}
+            MOHID_EXIT_CODE=$?
+            echo "Ended run at $(date)"
+            
+            echo "Results hdf5 to netCDF4 conversion started at $(date)"
+            TMPDIR="${{SLURM_TMPDIR}}"
+            cp ${{WORK_DIR}}/res/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/
+            ${{HDF5_TO_NETCDF4}} -v info ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc
+            cp ${{SLURM_TMPDIR}}/Lagrangian_${{RUN_ID}}.nc ${{WORK_DIR}}/
+            echo "Results hdf5 to netCDF4 conversion ended at $(date)"
+            
+            echo "Results gathering started at $(date)"
+            ${{GATHER}} ${{RESULTS_DIR}} --debug
+            echo "Results gathering ended at $(date)"
+            """
         )
         assert script == expected
 
@@ -388,10 +401,12 @@ class TestFixPermissions:
 
     def test_fix_permissions(self):
         script = mohid_cmd.run._fix_permissions()
-        expected = (
-            f"chmod go+rx ${{RESULTS_DIR}}\n"
-            f"chmod g+rw ${{RESULTS_DIR}}/*\n"
-            f"chmod o+r ${{RESULTS_DIR}}/*\n"
+        expected = textwrap.dedent(
+            """\
+            chmod go+rx ${RESULTS_DIR}
+            chmod g+rw ${RESULTS_DIR}/*
+            chmod o+r ${RESULTS_DIR}/*
+            """
         )
         assert script == expected
 
@@ -402,10 +417,12 @@ class TestCleanup:
 
     def test_fix_permissions(self):
         script = mohid_cmd.run._cleanup()
-        expected = (
-            f'echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout\n'
-            f"rmdir $(pwd)\n"
-            f'echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout\n'
-            f"exit ${{MPIRUN_EXIT_CODE}}\n"
+        expected = textwrap.dedent(
+            """\
+            echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+            rmdir $(pwd)
+            echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+            exit ${MPIRUN_EXIT_CODE}
+            """
         )
         assert script == expected
