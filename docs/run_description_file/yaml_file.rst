@@ -67,9 +67,9 @@ The following key-value pairs provide the basic configuration for the run:
 The :kbd:`paths` section of the run description file is a collection of directory paths that :program:`mohid` uses to find files in other repos that it needs.
 
 :kbd:`mohid repo`
-  The path to the `MIDOSS-MOHID`_ repository clone where the :file:`MohidWater.exe` executable for the run is to be found.
+  The path to the `MIDOSS-MOHID-CODE`_ repository clone where the :file:`MohidWater.exe` executable for the run is to be found.
 
-  .. _MIDOSS-MOHID: https://bitbucket.org/midoss/midoss-mohid/
+  .. _MIDOSS-MOHID-CODE: https://bitbucket.org/midoss/midoss-mohid-code/
 
   This path may be either absolute or relative.
   It may contain:
@@ -218,7 +218,7 @@ line in the :kbd:`run data files` section causes the following 2 lines to be add
 The *optional* :kbd:`vcs revisions` section of the run description YAML file contains lists of version control system repositories for which the revision and status will be recorded in the temporary run directory and run results directory.
 
 .. note::
-    Revision and status record files for the :file:`MIDOSS-MOHID` code repository listed in the :ref:`PathsSection` is always generated,
+    Revision and status record files for the :file:`MIDOSS-MOHID-CODE` code repository listed in the :ref:`PathsSection` is always generated,
     so that repository path should not be included in the :kbd:`vcs revisions` section.
 
 An example :kbd:`vcs revisions` section:
@@ -228,6 +228,7 @@ An example :kbd:`vcs revisions` section:
     vcs revisions:
       hg:
         - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config
+        - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-grid
         - $PROJECT/$USER/MIDOSS/MOHID-Cmd
         - $PROJECT/$USER/MIDOSS/moad_tools
 
@@ -257,7 +258,9 @@ So,
 from the example above,
 the files created will be::
 
+  MIDOSS-MOHID-CODE_rev.txt
   MIDOSS-MOHID-config_rev.txt
+  MIDOSS-MOHID-grid_rev.txt
   MOHID-Cmd_rev.txt
   moad_tools_rev.txt
 
