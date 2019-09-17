@@ -256,9 +256,9 @@ def _definitions(run_desc, desc_file, results_dir, tmp_run_dir):
     defns = textwrap.dedent(
         f"""\
         RUN_ID="{run_id}"
-        RUN_DESC="mohid.yaml"
-        WORK_DIR="tmp_run_dir"
-        RESULTS_DIR="results_dir"
+        RUN_DESC="{desc_file}"
+        WORK_DIR="{tmp_run_dir}"
+        RESULTS_DIR="{results_dir}"
         HDF5_TO_NETCDF4="{user_local_bin}/hdf5-to-netcdf4"
         GATHER="{user_local_bin}/mohid gather"
         """
