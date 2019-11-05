@@ -286,9 +286,9 @@ class TestBuildRunScript:
             chmod g+rw ${{RESULTS_DIR}}/*
             chmod o+r ${{RESULTS_DIR}}/*
             
-            echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout
+            echo "Deleting run directory"
             rmdir $(pwd)
-            echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout
+            echo "Finished at $(date)"
             exit ${{MPIRUN_EXIT_CODE}}
             """
         )
@@ -432,13 +432,13 @@ class TestCleanup:
     """Unit tests for _cleanup() function.
     """
 
-    def test_fix_permissions(self):
+    def test_cleanup(self):
         script = mohid_cmd.run._cleanup()
         expected = textwrap.dedent(
             """\
-            echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+            echo "Deleting run directory"
             rmdir $(pwd)
-            echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+            echo "Finished at $(date)"
             exit ${MPIRUN_EXIT_CODE}
             """
         )
