@@ -273,7 +273,7 @@ def _modules():
     modules = textwrap.dedent(
         """\
         module load proj4-fortran/1.0
-        module load python/3.7.0
+        module load python/3.7
         module load nco/4.6.6
         """
     )
