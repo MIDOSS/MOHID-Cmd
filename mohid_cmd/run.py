@@ -110,7 +110,7 @@ def run(desc_file, results_dir, no_submit=False, quiet=False):
 
     :param results_dir: Path of the directory in which to store the run results;
                         it will be created if it does not exist.
-    :type desc_file: :py:class:`pathlib.Path`
+    :type results_dir: :py:class:`pathlib.Path`
 
     :param boolean no_submit: Prepare the temporary run directory,
                               and the run script to execute the MOHID run,
@@ -135,9 +135,9 @@ def run(desc_file, results_dir, no_submit=False, quiet=False):
         f.write(run_script)
     if not quiet:
         logger.info(f"Wrote job run script to {run_script_file}")
+    results_dir.mkdir(parents=True, exist_ok=True)
     if no_submit:
         return
-    results_dir.mkdir(parents=True, exist_ok=True)
     sbatch_cmd = f"sbatch {run_script_file}"
     submit_job_msg = subprocess.run(
         shlex.split(sbatch_cmd),
