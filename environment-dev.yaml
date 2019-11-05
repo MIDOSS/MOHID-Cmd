@@ -26,6 +26,8 @@ dependencies:
   - arrow
   - attrs
   - cliff!=2.9.0
+  - f90nml
+  - gitpython
   - python-hglib
   - pip
   - python=3

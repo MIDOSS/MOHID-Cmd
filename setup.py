@@ -43,6 +43,8 @@ install_requires = [
     "arrow",
     "attrs",
     "cliff!=2.9.0",
+    "f90nml",
+    "gitpython",
     # 'NEMO-Cmd',  # install from repo clone or gomss-nowcast conda channel
     "python-hglib",
     "PyYAML",
