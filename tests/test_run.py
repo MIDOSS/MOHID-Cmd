@@ -208,8 +208,8 @@ class TestRun:
         m_bld_run_script.assert_called_once_with(
             m_ld_run_desc(), Path("mohid.yaml"), m_rslv_path(), m_prepare()
         )
+        m_rslv_path().mkdir.assert_called_once_with(parents=True, exist_ok=True)
         assert submit_job_msg is None
-        assert not m_rslv_path().mkdir.called
         assert not m_run.called
 
 
