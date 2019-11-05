@@ -335,9 +335,9 @@ def _fix_permissions():
 def _cleanup():
     script = textwrap.dedent(
         """\
-        echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+        echo "Deleting run directory"
         rmdir $(pwd)
-        echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+        echo "Finished at $(date)"
         exit ${MPIRUN_EXIT_CODE}
         """
     )
