@@ -237,7 +237,9 @@ The sub-section keys
 are the names of the version control tools to use for the repositories listed below them.
 At present only Mercurial
 (:kbd:`hg`)
-is supported.
+and Git
+(:kbd:`git`)
+are supported.
 
 The paths listed under the version control tool key are the repositories for which the revision and status will be recorded.
 
@@ -264,7 +266,8 @@ the files created will be::
   MOHID-Cmd_rev.txt
   moad_tools_rev.txt
 
-Each file will contain the output of the :command:`hg parents -v` command for the repository.
+For Mercurial repositories,
+each :file:`_rev.txt` file will contain the output of the :command:`hg parents -v` command for the repository.
 That is a record of the last committed revision of the repository that will be in effect for the run.
 For example,
 :file:`MOHID-Cmd_rev.txt` might contain::
@@ -289,3 +292,41 @@ for example::
 
   uncommitted changes:
   M mohid_cmd/prepare.py
+
+For Git repositories,
+each :file:`_rev.txt` file will contain the output of the commands:
+
+.. code-block:: bash
+
+    git branch --show-current
+    git log -1
+    git show --pretty="" --name-only
+
+for the repository.
+That is a record of the last committed revision of the repository that will be in effect for the run.
+For example,
+if :file:`MIDOSS-MOHID-config` were is Git repository,
+:file:`MIDOSS-MOHID-config_rev.txt` might contain::
+
+  branch: master
+  commit: 35fc362f3d77866df8c0a8b743aca81359295d59
+  author: Rachael D. Mueller <rmueller@eoas.ubc.ca>
+  date:   Fri Nov 01 21:26:36 2019 -04:00
+  files:  MediumFloater/submit_run_AKNScrude.yaml settings/Model.dat
+  message:
+  SOG AKNS 01jun2017 - 08jun2017 with BEACHING_LIMIT: 250
+
+If any of the listed repositories contain uncommitted changes,
+the :command:`nemo prepare` command that :command:`mohid run` uses will generate a warning message like::
+
+  nemo_cmd.prepare WARNING: There are uncommitted changes in $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/
+
+and the list of uncommitted changes and their status codes,
+the output of the :command:`git diff --name-status` command,
+will be appended to the :file:`_rev.txt` file,
+for example::
+
+  uncommitted changes:
+  M MediumFloater/submit_run_AKNScrude.yaml
+  M settings/Model.dat
+  M settings/Waves.dat
