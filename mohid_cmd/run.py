@@ -304,14 +304,19 @@ def _execute(run_desc):
         MOHID_EXIT_CODE=$?
         echo "Ended run at $(date)"
         
-        echo "Results hdf5 to netCDF4 conversion started at $(date)"
         TMPDIR="${{SLURM_TMPDIR}}"
-        cp ${{WORK_DIR}}/res/{partic_data.stem}_${{RUN_ID}}.hdf5 ${{SLURM_TMPDIR}}/
-        ${{HDF5_TO_NETCDF4}} -v info \\
-          ${{SLURM_TMPDIR}}/{partic_data.stem}_${{RUN_ID}}.hdf5 \\
-          ${{SLURM_TMPDIR}}/{partic_data.stem}_${{RUN_ID}}.nc
-        cp ${{SLURM_TMPDIR}}/{partic_data.stem}_${{RUN_ID}}.nc ${{WORK_DIR}}/
-        echo "Results hdf5 to netCDF4 conversion ended at $(date)"
+        LAGRANGIAN="{partic_data.stem}_${{RUN_ID}}"
+        if test -f ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5
+        then
+          echo "Results hdf5 to netCDF4 conversion started at $(date)"
+          cp ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5 ${{SLURM_TMPDIR}}/ && \\
+          ${{HDF5_TO_NETCDF4}} -v info \\
+            ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.hdf5 \\
+            ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.nc && \\
+          mv ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.nc ${{WORK_DIR}}/ && \\
+          rm ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5
+          echo "Results hdf5 to netCDF4 conversion ended at $(date)"
+        fi
         
         echo "Results gathering started at $(date)"
         ${{GATHER}} ${{RESULTS_DIR}} --debug
