@@ -212,7 +212,7 @@ def _sbatch_directives(run_desc, results_dir):
         #SBATCH --mail-user={email}
         #SBATCH --mail-type=ALL
         #SBATCH --cpus-per-task=1
-        #SBATCH --mem-per-cpu=20000m
+        #SBATCH --mem-per-cpu=14000m
         #SBATCH --time={walltime}
         #SBATCH --output={results_dir/'stdout'}
         #SBATCH --error={results_dir/'stderr'}
