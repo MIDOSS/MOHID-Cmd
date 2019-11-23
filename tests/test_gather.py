@@ -16,16 +16,17 @@
 """
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
 import mohid_cmd.gather
+import mohid_cmd.main
 
 
 @pytest.fixture
 def gather_cmd():
-    return mohid_cmd.gather.Gather(Mock(spec=True), [])
+    return mohid_cmd.gather.Gather(mohid_cmd.main.MohidApp, [])
 
 
 class TestParser:

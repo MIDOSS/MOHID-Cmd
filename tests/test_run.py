@@ -18,17 +18,18 @@ import textwrap
 from pathlib import Path
 import subprocess
 from types import SimpleNamespace
-from unittest.mock import Mock, patch, call
+from unittest.mock import patch, call
 
 import pytest
 import yaml
 
+import mohid_cmd.main
 import mohid_cmd.run
 
 
 @pytest.fixture
 def run_cmd():
-    return mohid_cmd.run.Run(Mock(spec=True), [])
+    return mohid_cmd.run.Run(mohid_cmd.main.MohidApp, [])
 
 
 @pytest.fixture()
