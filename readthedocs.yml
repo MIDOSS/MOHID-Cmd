@@ -3,7 +3,7 @@ formats:
   - none
 
 conda:
-  file: environment-rtd.yaml
+  file: env/environment-rtd.yaml
 
 build:
   image: latest
