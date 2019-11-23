@@ -14,16 +14,19 @@
 #  limitations under the License.
 """MOHID-Cmd run sub-command plug-in unit tests.
 """
+import logging
 import textwrap
 from pathlib import Path
 import subprocess
 from types import SimpleNamespace
 from unittest.mock import patch, call
 
+import attr
 import pytest
 import yaml
 
 import mohid_cmd.main
+import mohid_cmd.prepare
 import mohid_cmd.run
 
 
@@ -33,25 +36,50 @@ def run_cmd():
 
 
 @pytest.fixture()
-def run_desc(tmpdir):
-    p_run_desc = tmpdir.join("mohid.yaml")
-    p_run_desc.write(
+def run_desc(tmp_path):
+    mohid_repo = tmp_path / "MIDOSS-MOHID"
+    mohid_repo.mkdir()
+    mohid_bin = mohid_repo / "Solutions" / "linux" / "bin"
+    mohid_bin.mkdir(parents=True)
+    mohid_exe = mohid_bin / "MohidWater.exe"
+    mohid_exe.write_bytes(b"")
+
+    grid = tmp_path / "MIDOSS-MOHID-grid"
+    grid.mkdir()
+    bathy = grid / "SalishSeaCast_bathymetry.dat"
+    bathy.write_bytes(b"")
+
+    runs_dir = tmp_path / "runs_dir"
+    runs_dir.mkdir()
+
+    settings = tmp_path / "MIDOSS-MOHID-config/sttings"
+    settings.mkdir(parents=True)
+    lagrangian_dat = settings / "Lagrangian_DieselFuel_refined.dat"
+    lagrangian_dat.write_text("")
+
+    p_run_desc = tmp_path / "mohid.yaml"
+    p_run_desc.write_text(
         textwrap.dedent(
-            """\
+            f"""\
             run_id: MarathassaConstTS
             email: you@example.com
             account: def-allen
             walltime: "1:30:00"
 
             paths:
-              mohid repo: MIDOSS-MOHID/
+              mohid repo: {mohid_repo}
+              runs directory: {runs_dir}
+              
+            forcing: {{}}
+            
+            bathymetry: {bathy}
 
             run data files:
-              PARTIC_DATA: MIDOSS-MOHID-config/MarathassaConstTS/Lagrangian_DieselFuel_refined.dat
+              PARTIC_DATA: {lagrangian_dat}
             """
         )
     )
-    with open(str(p_run_desc), "rt") as f:
+    with p_run_desc.open("rt") as f:
         run_desc = yaml.safe_load(f)
     return run_desc
 
@@ -120,46 +148,82 @@ class TestParser:
         assert parsed_args.no_submit is True
 
 
-@patch("mohid_cmd.run.logger", autospec=True)
 class TestTakeAction:
     """Unit tests for `mohid run` sub-command take_action() method.
     """
 
-    @patch("mohid_cmd.run.run", return_value="submit job msg", autospec=True)
-    def test_take_action(self, m_run, m_logger, run_cmd):
-        parsed_args = SimpleNamespace(
-            desc_file=Path("desc file"),
-            results_dir=Path("results dir"),
-            no_submit=False,
-            quiet=False,
-        )
-        run_cmd.take_action(parsed_args)
-        m_run.assert_called_once_with(
-            Path("desc file"), Path("results dir"), no_submit=False, quiet=False
-        )
-        m_logger.info.assert_called_once_with("submit job msg")
+    @staticmethod
+    @pytest.fixture
+    def mock_record_vcs_revisions(monkeypatch):
+        def mock_record_vcs_revisions(*args):
+            pass
 
-    @patch("mohid_cmd.run.run", return_value="submit job msg", autospec=True)
-    def test_take_action_quiet(self, m_run, m_logger, run_cmd):
-        parsed_args = SimpleNamespace(
-            desc_file=Path("desc file"),
-            results_dir=Path("results dir"),
-            no_submit=False,
-            quiet=True,
+        monkeypatch.setattr(
+            mohid_cmd.prepare, "_record_vcs_revisions", mock_record_vcs_revisions
         )
-        run_cmd.take_action(parsed_args)
-        assert not m_logger.info.called
 
-    @patch("mohid_cmd.run.run", return_value=None, autospec=True)
-    def test_take_action_no_submit(self, m_run, m_logger, run_cmd):
+    @staticmethod
+    @pytest.fixture
+    def mock_subprocess_run(monkeypatch):
+        def mock_subprocess_run(*args, **kwargs):
+            @attr.s
+            class CompletedProcess:
+                stdout = attr.ib(default="Submitted batch job 12345678")
+
+            return CompletedProcess()
+
+        monkeypatch.setattr(mohid_cmd.run.subprocess, "run", mock_subprocess_run)
+
+    def test_take_action(
+        self,
+        run_cmd,
+        run_desc,
+        mock_record_vcs_revisions,
+        mock_subprocess_run,
+        caplog,
+        tmp_path,
+        monkeypatch,
+    ):
+        desc_file = tmp_path / "mohid.yaml"
+        results_dir = tmp_path / "results_dir"
         parsed_args = SimpleNamespace(
-            desc_file=Path("desc file"),
-            results_dir=Path("results dir"),
-            no_submit=True,
-            quiet=True,
+            desc_file=desc_file, results_dir=results_dir, no_submit=False, quiet=False,
         )
+        caplog.set_level(logging.INFO)
         run_cmd.take_action(parsed_args)
-        assert not m_logger.info.called
+        assert caplog.records[0].levelname == "INFO"
+        assert caplog.messages[2] == "Submitted batch job 12345678"
+
+    def test_take_action_quiet(
+        self,
+        run_cmd,
+        run_desc,
+        mock_record_vcs_revisions,
+        mock_subprocess_run,
+        caplog,
+        tmp_path,
+        monkeypatch,
+    ):
+        desc_file = tmp_path / "mohid.yaml"
+        results_dir = tmp_path / "results_dir"
+        parsed_args = SimpleNamespace(
+            desc_file=desc_file, results_dir=results_dir, no_submit=False, quiet=True,
+        )
+        caplog.set_level(logging.INFO)
+        run_cmd.take_action(parsed_args)
+        assert not caplog.records
+
+    def test_take_action_no_submit(
+        self, run_cmd, run_desc, mock_record_vcs_revisions, caplog, tmp_path
+    ):
+        desc_file = tmp_path / "mohid.yaml"
+        results_dir = tmp_path / "results_dir"
+        parsed_args = SimpleNamespace(
+            desc_file=desc_file, results_dir=results_dir, no_submit=True, quiet=False,
+        )
+        caplog.set_level(logging.INFO)
+        run_cmd.take_action(parsed_args)
+        assert len(caplog.records) == 2
 
 
 @patch("mohid_cmd.run.subprocess.run", autospec=True)
