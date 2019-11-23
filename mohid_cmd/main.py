@@ -24,7 +24,7 @@ import sys
 import cliff.app
 import cliff.commandmanager
 
-from mohid_cmd import __pkg_metadata__
+import mohid_cmd
 
 
 class MohidApp(cliff.app.App):
@@ -32,8 +32,8 @@ class MohidApp(cliff.app.App):
 
     def __init__(self):
         super().__init__(
-            description=__pkg_metadata__.DESCRIPTION,
-            version=__pkg_metadata__.VERSION,
+            description="MIDOSS-MOHID Command Processor",
+            version=mohid_cmd.__version__,
             command_manager=cliff.commandmanager.CommandManager(
                 "mohid.app", convert_underscores=False
             ),

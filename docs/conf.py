@@ -19,19 +19,32 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
-project = "MIDOSS-MOHID Command Processor"
-copyright = (
-    "2018, "
-    "The MIDOSS Project Contributors, "
-    "the University of British Columbia, "
-    "and Dalhousie University."
+import configparser
+
+setup_cfg = configparser.ConfigParser()
+setup_cfg.read(os.path.abspath("../setup.cfg"))
+project = setup_cfg["metadata"]["name"]
+
+author = "The MIDOSS project contributors, the University of British Columbia, and Dalhousie University"
+
+import datetime
+
+pkg_creation_year = 2018
+copyright_years = (
+    "{pkg_creation_year}".format(pkg_creation_year=pkg_creation_year)
+    if datetime.date.today().year == pkg_creation_year
+    else "{pkg_creation_year}-{today:%Y}".format(
+        pkg_creation_year=pkg_creation_year, today=datetime.date.today()
+    )
 )
-author = "The MIDOSS Project Contributors"
+copyright = "{copyright_years}, {author}".format(
+    copyright_years=copyright_years, author=author
+)
 
 # The short X.Y version
-from mohid_cmd import __pkg_metadata__
+import mohid_cmd
 
-version = __pkg_metadata__.VERSION
+version = mohid_cmd.__version__
 # The full version, including alpha/beta/rc tags
 release = version
 
