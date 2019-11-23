@@ -17,18 +17,19 @@
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import call, Mock, patch
+from unittest.mock import call, patch
 
 import nemo_cmd.prepare
 import pytest
 import yaml
 
+import mohid_cmd.main
 import mohid_cmd.prepare
 
 
 @pytest.fixture
 def prepare_cmd():
-    return mohid_cmd.prepare.Prepare(Mock(spec=True), [])
+    return mohid_cmd.prepare.Prepare(mohid_cmd.main.MohidApp, [])
 
 
 @pytest.fixture()
