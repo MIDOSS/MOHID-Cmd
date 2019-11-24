@@ -23,7 +23,6 @@ from unittest.mock import patch, call
 
 import attr
 import pytest
-import yaml
 
 import mohid_cmd.main
 import mohid_cmd.prepare
@@ -33,55 +32,6 @@ import mohid_cmd.run
 @pytest.fixture
 def run_cmd():
     return mohid_cmd.run.Run(mohid_cmd.main.MohidApp, [])
-
-
-@pytest.fixture()
-def run_desc(tmp_path):
-    mohid_repo = tmp_path / "MIDOSS-MOHID"
-    mohid_repo.mkdir()
-    mohid_bin = mohid_repo / "Solutions" / "linux" / "bin"
-    mohid_bin.mkdir(parents=True)
-    mohid_exe = mohid_bin / "MohidWater.exe"
-    mohid_exe.write_bytes(b"")
-
-    grid = tmp_path / "MIDOSS-MOHID-grid"
-    grid.mkdir()
-    bathy = grid / "SalishSeaCast_bathymetry.dat"
-    bathy.write_bytes(b"")
-
-    runs_dir = tmp_path / "runs_dir"
-    runs_dir.mkdir()
-
-    settings = tmp_path / "MIDOSS-MOHID-config/sttings"
-    settings.mkdir(parents=True)
-    lagrangian_dat = settings / "Lagrangian_DieselFuel_refined.dat"
-    lagrangian_dat.write_text("")
-
-    p_run_desc = tmp_path / "mohid.yaml"
-    p_run_desc.write_text(
-        textwrap.dedent(
-            f"""\
-            run_id: MarathassaConstTS
-            email: you@example.com
-            account: def-allen
-            walltime: "1:30:00"
-
-            paths:
-              mohid repo: {mohid_repo}
-              runs directory: {runs_dir}
-              
-            forcing: {{}}
-            
-            bathymetry: {bathy}
-
-            run data files:
-              PARTIC_DATA: {lagrangian_dat}
-            """
-        )
-    )
-    with p_run_desc.open("rt") as f:
-        run_desc = yaml.safe_load(f)
-    return run_desc
 
 
 class TestParser:
