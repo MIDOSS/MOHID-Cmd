@@ -112,40 +112,59 @@ class TestParser:
         assert parser._actions[2].type == Path
         assert parser._actions[2].help
 
-    def test_no_submit_argument(self, run_cmd):
+    def test_no_submit_option(self, run_cmd):
         parser = run_cmd.get_parser("mohid run")
         assert parser._actions[3].dest == "no_submit"
         assert parser._actions[3].option_strings == ["--no-submit"]
-        assert parser._actions[3].const is True
-        assert parser._actions[3].default is False
+        assert parser._actions[3].const == True
+        assert parser._actions[3].default == False
         assert parser._actions[3].help
 
-    def test_quiet_argument(self, run_cmd):
+    def test_quiet_option(self, run_cmd):
         parser = run_cmd.get_parser("mohid run")
         assert parser._actions[4].dest == "quiet"
         assert parser._actions[4].option_strings == ["-q", "--quiet"]
-        assert parser._actions[4].const is True
-        assert parser._actions[4].default is False
+        assert parser._actions[4].const == True
+        assert parser._actions[4].default == False
         assert parser._actions[4].help
 
-    def test_parsed_args_defaults(self, run_cmd):
+    def test_tmp_run_dir_option(self, run_cmd):
+        parser = run_cmd.get_parser("mohid run")
+        assert parser._actions[5].dest == "tmp_run_dir"
+        assert parser._actions[5].option_strings == ["--tmp-run-dir"]
+        assert parser._actions[5].default == ""
+        assert parser._actions[5].help
+
+    def test_parsed_args(self, run_cmd):
         parser = run_cmd.get_parser("mohid run")
         parsed_args = parser.parse_args(["foo.yaml", "results/foo/"])
         assert parsed_args.desc_file == Path("foo.yaml")
         assert parsed_args.results_dir == Path("results/foo/")
-        assert not parsed_args.no_submit
-        assert not parsed_args.quiet
+
+    def test_parsed_args_option_defaults(self, run_cmd):
+        parser = run_cmd.get_parser("mohid run")
+        parsed_args = parser.parse_args(["foo.yaml", "results/foo/"])
+        assert parsed_args.no_submit == False
+        assert parsed_args.quiet == False
+        assert parsed_args.tmp_run_dir == ""
 
     @pytest.mark.parametrize("flag", ["-q", "--quiet"])
     def test_parsed_args_quiet_options(self, flag, run_cmd):
         parser = run_cmd.get_parser("mohid run")
         parsed_args = parser.parse_args(["foo.yaml", "results/foo/", flag])
-        assert parsed_args.quiet is True
+        assert parsed_args.quiet == True
 
     def test_parsed_args_no_submit_option(self, run_cmd):
         parser = run_cmd.get_parser("mohid run")
         parsed_args = parser.parse_args(["foo.yaml", "results/foo/", "--no-submit"])
-        assert parsed_args.no_submit is True
+        assert parsed_args.no_submit == True
+
+    def test_parsed_args_tmp_run_dir_option(self, run_cmd):
+        parser = run_cmd.get_parser("mohid run")
+        parsed_args = parser.parse_args(
+            ["foo.yaml", "results/foo/", "--tmp-run-dir", "tmp_run_dir"]
+        )
+        assert parsed_args.tmp_run_dir == "tmp_run_dir"
 
 
 class TestTakeAction:
@@ -187,7 +206,11 @@ class TestTakeAction:
         desc_file = tmp_path / "mohid.yaml"
         results_dir = tmp_path / "results_dir"
         parsed_args = SimpleNamespace(
-            desc_file=desc_file, results_dir=results_dir, no_submit=False, quiet=False,
+            desc_file=desc_file,
+            results_dir=results_dir,
+            no_submit=False,
+            quiet=False,
+            tmp_run_dir="",
         )
         caplog.set_level(logging.INFO)
         run_cmd.take_action(parsed_args)
@@ -207,7 +230,11 @@ class TestTakeAction:
         desc_file = tmp_path / "mohid.yaml"
         results_dir = tmp_path / "results_dir"
         parsed_args = SimpleNamespace(
-            desc_file=desc_file, results_dir=results_dir, no_submit=False, quiet=True,
+            desc_file=desc_file,
+            results_dir=results_dir,
+            no_submit=False,
+            quiet=True,
+            tmp_run_dir="",
         )
         caplog.set_level(logging.INFO)
         run_cmd.take_action(parsed_args)
@@ -219,7 +246,11 @@ class TestTakeAction:
         desc_file = tmp_path / "mohid.yaml"
         results_dir = tmp_path / "results_dir"
         parsed_args = SimpleNamespace(
-            desc_file=desc_file, results_dir=results_dir, no_submit=True, quiet=False,
+            desc_file=desc_file,
+            results_dir=results_dir,
+            no_submit=True,
+            quiet=False,
+            tmp_run_dir="",
         )
         caplog.set_level(logging.INFO)
         run_cmd.take_action(parsed_args)
@@ -243,7 +274,7 @@ class TestRun:
         p_results_dir = tmpdir.ensure_dir("results_dir")
         m_run().stdout = "submit_job_msg"
         submit_job_msg = mohid_cmd.run.run(Path("mohid.yaml"), Path(str(p_results_dir)))
-        m_prepare.assert_called_once_with(Path("mohid.yaml"))
+        m_prepare.assert_called_once_with(Path("mohid.yaml"), "")
         m_ld_run_desc.assert_called_once_with(Path("mohid.yaml"))
         m_rslv_path.assert_called_once_with(Path(str(p_results_dir)))
         m_bld_run_script.assert_called_once_with(
@@ -267,7 +298,7 @@ class TestRun:
         submit_job_msg = mohid_cmd.run.run(
             Path("mohid.yaml"), Path(str(p_results_dir)), no_submit=True
         )
-        m_prepare.assert_called_once_with(Path("mohid.yaml"))
+        m_prepare.assert_called_once_with(Path("mohid.yaml"), "")
         m_ld_run_desc.assert_called_once_with(Path("mohid.yaml"))
         m_rslv_path.assert_called_once_with(Path(str(p_results_dir)))
         m_bld_run_script.assert_called_once_with(

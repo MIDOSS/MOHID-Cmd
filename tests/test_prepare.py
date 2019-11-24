@@ -14,11 +14,13 @@
 # limitations under the License.
 """MOHID-Cmd prepare sub-command plug-in unit tests.
 """
+import logging
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import call, patch
 
+import arrow
 import nemo_cmd.prepare
 import pytest
 import yaml
@@ -33,42 +35,85 @@ def prepare_cmd():
 
 
 @pytest.fixture()
-def run_desc(tmpdir):
-    p_run_desc = tmpdir.join("mohid.yaml")
-    p_run_desc.write(
+def run_desc(tmp_path):
+    mohid_repo = tmp_path / "MIDOSS-MOHID"
+    mohid_repo.mkdir()
+    mohid_bin = mohid_repo / "Solutions" / "linux" / "bin"
+    mohid_bin.mkdir(parents=True)
+    mohid_exe = mohid_bin / "MohidWater.exe"
+    mohid_exe.write_bytes(b"")
+
+    forcing = tmp_path.joinpath("MIDOSS", "forcing", "HRDPS")
+    forcing.mkdir(parents=True)
+    wind_hdf5 = forcing / "hrdps_20181211_20181218.hdf5"
+    wind_hdf5.write_bytes(b"")
+
+    grid = tmp_path / "MIDOSS-MOHID-grid"
+    grid.mkdir()
+    bathy = grid / "SalishSeaCast_bathymetry.dat"
+    bathy.write_bytes(b"")
+
+    runs_dir = tmp_path / "runs_dir"
+    runs_dir.mkdir()
+
+    settings = tmp_path / "MIDOSS-MOHID-config" / "settings"
+    settings.mkdir(parents=True)
+    dat_files = (
+        "Model.dat",
+        "Lagrangian_DieselFuel_refined.dat",
+        "Geometry.dat",
+        "Atmosphere.dat",
+        "Hydrodynamic.dat",
+        "InterfaceSedimentWater.dat",
+        "InterfaceWaterAir.dat",
+        "Tide.dat",
+        "Turbulence.dat",
+        "WaterProperties.dat",
+        "Waves.dat",
+    )
+    dat_paths = {}
+    for dat_file in dat_files:
+        dat_paths[dat_file] = settings / dat_file
+        dat_paths[dat_file].write_text("")
+
+    p_run_desc = tmp_path / "mohid.yaml"
+    p_run_desc.write_text(
         textwrap.dedent(
-            """\
+            f"""\
             run_id: MarathassaConstTS
-        
+            email: you@example.com
+            account: def-allen
+            walltime: "1:30:00"
+
             paths:
-              mohid repo: MIDOSS-MOHID/
-              runs directory: runs/
-        
+              mohid repo: {mohid_repo}
+              runs directory: {runs_dir}
+
             forcing:
-              winds.hdf5: MIDOSS/forcing/HRDPS/hrdps_20181211_20181218.hdf5
-        
-            bathymetry: MIDOSS-MOHID-config/SalishSeaCast/SalishSeaCast_bathymetry.dat
-        
+              winds.hdf5: {wind_hdf5}
+
+            bathymetry: {bathy}
+
             run data files:
-              IN_MODEL: MIDOSS-MOHID-config/MarathassaConstTS/Model.dat
-              PARTIC_DATA: MIDOSS-MOHID-config/MarathassaConstTS/Lagrangian_DieselFuel_refined.dat
-              DOMAIN: MIDOSS-MOHID-config/SalishSeaCast/Geometry.dat
-              SURF_DAT: MIDOSS-MOHID-config/SalishSeaCast/Atmosphere.dat
-              IN_DAD3D: MIDOSS-MOHID-config/SalishSeaCast/Hydrodynamic.dat
-              BOT_DAT: MIDOSS-MOHID-config/SalishSeaCast/InterfaceSedimentWater.dat
-              AIRW_DAT: MIDOSS-MOHID-config/SalishSeaCast/InterfaceWaterAir.dat
-              IN_TIDES: MIDOSS-MOHID-config/SalishSeaCast/Tide.dat
-              IN_TURB: MIDOSS-MOHID-config/SalishSeaCast/Turbulence.dat
-              DISPQUAL: MIDOSS-MOHID-config/SalishSeaCast/WaterProperties.dat
-              WAVES_DAT: MIDOSS-MOHID-config/SalishSeaCast/Waves.dat
-        
+              IN_MODEL: {dat_paths["Model.dat"]}
+              PARTIC_DATA: {dat_paths["Lagrangian_DieselFuel_refined.dat"]}
+              DOMAIN: {dat_paths["Geometry.dat"]}
+              SURF_DAT: {dat_paths["Atmosphere.dat"]}
+              IN_DAD3D: {dat_paths["Hydrodynamic.dat"]}
+              BOT_DAT: {dat_paths["InterfaceSedimentWater.dat"]}
+              AIRW_DAT: {dat_paths["InterfaceWaterAir.dat"]}
+              IN_TIDES: {dat_paths["Tide.dat"]}
+              IN_TURB: {dat_paths["Turbulence.dat"]}
+              DISPQUAL: {dat_paths["WaterProperties.dat"]}
+              WAVES_DAT: {dat_paths["Waves.dat"]}
+
             vcs revisions:
               hg:
                 - MIDOSS-MOHID-config
             """
         )
     )
-    with open(str(p_run_desc), "rt") as f:
+    with p_run_desc.open("rt") as f:
         run_desc = yaml.safe_load(f)
     return run_desc
 
@@ -98,21 +143,37 @@ class TestParser:
         parser = prepare_cmd.get_parser("mohid prepare")
         assert parser._actions[2].dest == "quiet"
         assert parser._actions[2].option_strings == ["-q", "--quiet"]
-        assert parser._actions[2].const is True
-        assert parser._actions[2].default is False
+        assert parser._actions[2].const == True
+        assert parser._actions[2].default == False
         assert parser._actions[2].help
 
-    def test_parsed_args_defaults(self, prepare_cmd):
+    def test_tmp_run_dir_option(self, prepare_cmd):
+        parser = prepare_cmd.get_parser("mohid prepare")
+        assert parser._actions[3].dest == "tmp_run_dir"
+        assert parser._actions[3].option_strings == ["--tmp-run-dir"]
+        assert parser._actions[3].default == ""
+        assert parser._actions[3].help
+
+    def test_parsed_args(self, prepare_cmd):
         parser = prepare_cmd.get_parser("mohid prepare")
         parsed_args = parser.parse_args(["foo.yaml"])
         assert parsed_args.desc_file == Path("foo.yaml")
-        assert not parsed_args.quiet
+
+    def test_parsed_args_option_defaults(self, prepare_cmd):
+        parser = prepare_cmd.get_parser("mohid prepare")
+        parsed_args = parser.parse_args(["foo.yaml"])
+        assert parsed_args.quiet == False
 
     @pytest.mark.parametrize("flag", ["-q", "--quiet"])
-    def test_parsed_args_options(self, flag, prepare_cmd):
+    def test_parsed_args_quiet_options(self, flag, prepare_cmd):
         parser = prepare_cmd.get_parser("mohid prepare")
         parsed_args = parser.parse_args(["foo.yaml", flag])
-        assert parsed_args.quiet is True
+        assert parsed_args.quiet == True
+
+    def test_parsed_args_tmp_run_dir_option(self, prepare_cmd):
+        parser = prepare_cmd.get_parser("mohid prepare")
+        parsed_args = parser.parse_args(["foo.yaml", "--tmp-run-dir", "tmp_run_dir"])
+        assert parsed_args.tmp_run_dir == "tmp_run_dir"
 
 
 @patch("mohid_cmd.prepare.logger", autospec=True)
@@ -126,7 +187,7 @@ class TestTakeAction:
     """
 
     def test_return_tmp_run_dir(self, m_prepare, m_logger, prepare_cmd):
-        parsed_args = SimpleNamespace(desc_file="foo.yaml", quiet=False)
+        parsed_args = SimpleNamespace(desc_file="foo.yaml", quiet=False, tmp_run_dir="")
         tmp_run_dir = prepare_cmd.take_action(parsed_args)
         m_logger.info.assert_called_once_with(
             "Created temporary run directory: foo_2018-12-10T124643.123456-0800"
@@ -134,20 +195,17 @@ class TestTakeAction:
         assert tmp_run_dir == Path("foo_2018-12-10T124643.123456-0800")
 
     def test_quiet(self, m_prepare, m_logger, prepare_cmd):
-        parsed_args = SimpleNamespace(desc_file="foo.yaml", quiet=True)
+        parsed_args = SimpleNamespace(desc_file="foo.yaml", quiet=True, tmp_run_dir="")
         prepare_cmd.take_action(parsed_args)
         assert not m_logger.info.called
 
 
-@patch("nemo_cmd.prepare.load_run_desc", spec=True)
-@patch("mohid_cmd.prepare._check_mohid_exec", spec=True)
-@patch("nemo_cmd.prepare.make_run_dir", spec=True)
 @patch("nemo_cmd.prepare.shutil.copy2", autospec=True)
 @patch("mohid_cmd.prepare._make_forcing_links", spec=True)
 @patch("mohid_cmd.prepare._make_nomfich", spec=True)
 @patch("mohid_cmd.prepare._record_vcs_revisions", spec=True)
 class TestPrepare:
-    """Unit test for `mohid prepare` prepare() function.
+    """Unit tests for `mohid prepare` prepare() function.
     """
 
     def test_prepare(
@@ -156,23 +214,46 @@ class TestPrepare:
         m_mk_nomfich,
         m_mk_frc_lnks,
         m_copy2,
-        m_mk_run_dir,
-        m_chk_mohid_exe,
-        m_ld_run_desc,
+        run_desc,
+        tmp_path,
+        monkeypatch,
     ):
-        with patch("mohid_cmd.prepare.Path.symlink_to") as m_ln:
-            tmp_run_dir = mohid_cmd.prepare.prepare(Path("foo.yaml"))
-        m_ld_run_desc.assert_called_once_with(Path("foo.yaml"))
-        m_chk_mohid_exe.assert_called_once_with(m_ld_run_desc())
-        m_mk_run_dir.assert_called_once_with(m_ld_run_desc())
-        (m_mk_run_dir() / m_chk_mohid_exe().name).symlink_to.assert_called_once_with(
-            m_chk_mohid_exe()
+        def mock_make_run_dir(*args):
+            tmp_run_dir = (
+                tmp_path
+                / "runs_dir"
+                / "MarathassaConstTS_2019-11-23T203918.370737-0800"
+            )
+            tmp_run_dir.mkdir()
+            return tmp_run_dir
+
+        monkeypatch.setattr(mohid_cmd.prepare, "_make_run_dir", mock_make_run_dir)
+
+        tmp_run_dir = mohid_cmd.prepare.prepare(tmp_path / "mohid.yaml")
+        assert (tmp_run_dir / "MohidWater.exe").is_symlink()
+        m_copy2.assert_called_once_with(
+            tmp_path / "mohid.yaml", tmp_run_dir / "mohid.yaml"
         )
-        m_copy2.assert_called_once_with(Path("foo.yaml"), m_mk_run_dir() / "foo.yaml")
-        m_mk_frc_lnks.assert_called_once_with(m_ld_run_desc(), m_mk_run_dir())
-        m_mk_nomfich.assert_called_once_with(m_ld_run_desc(), m_mk_run_dir())
-        m_rec_vcs_revs.assert_called_once_with(m_ld_run_desc(), m_mk_run_dir())
-        assert tmp_run_dir == m_mk_run_dir()
+        m_mk_frc_lnks.assert_called_once_with(run_desc, tmp_run_dir)
+        m_mk_nomfich.assert_called_once_with(run_desc, tmp_run_dir)
+        m_rec_vcs_revs.assert_called_once_with(run_desc, tmp_run_dir)
+        assert (
+            tmp_run_dir
+            == tmp_path / "runs_dir" / "MarathassaConstTS_2019-11-23T203918.370737-0800"
+        )
+
+    def test_prepare_w_tmp_run_dir(
+        self, m_rec_vcs_revs, m_mk_nomfich, m_mk_frc_lnks, m_copy2, run_desc, tmp_path,
+    ):
+        tmp_run_dir = mohid_cmd.prepare.prepare(tmp_path / "mohid.yaml", "tmp_run_dir")
+        assert (tmp_run_dir / "MohidWater.exe").is_symlink()
+        m_copy2.assert_called_once_with(
+            tmp_path / "mohid.yaml", tmp_run_dir / "mohid.yaml"
+        )
+        m_mk_frc_lnks.assert_called_once_with(run_desc, tmp_run_dir)
+        m_mk_nomfich.assert_called_once_with(run_desc, tmp_run_dir)
+        m_rec_vcs_revs.assert_called_once_with(run_desc, tmp_run_dir)
+        assert tmp_run_dir == (tmp_path / "runs_dir") / "tmp_run_dir"
 
 
 @patch("mohid_cmd.prepare.logger", autospec=True)
@@ -188,64 +269,96 @@ class TestCheckMohidExec:
         assert mohid_exe == Path(str(p_mohid_exe))
         assert not m_logger.error.called
 
-    def test_mohid_exe_not_found(self, m_logger, tmpdir, run_desc):
-        p_mohid_repo = tmpdir.ensure_dir("MIDOSS-MOHID/")
-        with patch.dict(run_desc["paths"], {"mohid repo": str(p_mohid_repo)}):
-            with pytest.raises(SystemExit):
-                mohid_cmd.prepare._check_mohid_exec(run_desc)
+    def test_mohid_exe_not_found(self, m_logger, run_desc, monkeypatch):
+        monkeypatch.setitem(run_desc["paths"], "mohid repo", "not mohid repo")
+        with pytest.raises(SystemExit):
+            mohid_cmd.prepare._check_mohid_exec(run_desc)
 
 
-@patch("mohid_cmd.prepare.logger", autospec=True)
-@patch("nemo_cmd.prepare.remove_run_dir", autospec=True)
+class TestMakeRunDir:
+    """Unit tests for `mohid prepare` _make_run_dir() function.
+    """
+
+    def test_timestamp_run_dir(self, run_desc, monkeypatch):
+        def mock_arrow_now():
+            return arrow.get("2019-11-24T094803.201666-0800")
+
+        monkeypatch.setattr(nemo_cmd.prepare.arrow, "now", mock_arrow_now)
+
+        tmp_run_dir = mohid_cmd.prepare._make_run_dir(run_desc, tmp_run_dir="")
+        expected = (
+            Path(run_desc["paths"]["runs directory"])
+            / "MarathassaConstTS_2019-11-24T094803.201666-0800"
+        )
+        assert tmp_run_dir == expected
+
+    def test_named_run_dir(self, run_desc):
+        tmp_run_dir = mohid_cmd.prepare._make_run_dir(run_desc, tmp_run_dir="foobar")
+        assert tmp_run_dir == Path(run_desc["paths"]["runs directory"]) / "foobar"
+
+
 class TestMakeForcingLinks:
     """Unit tests for `mohid prepare` _make_forcing_links() function.
     """
 
-    def test_no_link_path(self, m_rm_run_dir, m_logger, run_desc):
+    def test_no_link_path(self, run_desc, caplog, tmp_path, monkeypatch):
+        monkeypatch.setitem(run_desc["forcing"], "winds.hdf5", "not a file")
+
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        caplog.set_level(logging.ERROR)
         with pytest.raises(SystemExit):
-            mohid_cmd.prepare._make_forcing_links(run_desc, Path("tmp_run_dir"))
-        m_logger.error.assert_called_once_with(
+            mohid_cmd.prepare._make_forcing_links(run_desc, tmp_run_dir)
+        assert caplog.records[0].levelname == "ERROR"
+        expected = (
             f'{run_desc["forcing"]["winds.hdf5"]} not found; cannot create symlink - '
             f"please check the forcing paths and file names in your run description file"
         )
-        m_rm_run_dir.assert_called_once_with(Path("tmp_run_dir"))
+        assert caplog.messages[0] == expected
+        assert not tmp_run_dir.exists()
 
-    def test_make_forcing_links(self, m_rm_run_dir, m_logger, run_desc, tmpdir):
-        links = {
-            link_name: tmpdir.ensure(source)
-            for link_name, source in run_desc["forcing"].items()
-        }
-        p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
-        with patch.dict(run_desc["forcing"], links):
-            mohid_cmd.prepare._make_forcing_links(run_desc, Path(str(p_tmp_run_dir)))
+    def test_make_forcing_links(self, run_desc, caplog, tmp_path):
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        caplog.set_level(logging.ERROR)
+        mohid_cmd.prepare._make_forcing_links(run_desc, tmp_run_dir)
         for link_name in run_desc["forcing"]:
-            assert p_tmp_run_dir.join(link_name).check(link=True)
-        assert not m_logger.error.called
-        assert not m_rm_run_dir.called
+            (tmp_run_dir / link_name).is_symlink()
+        assert not caplog.records
+        assert tmp_run_dir.exists()
 
 
-@patch("mohid_cmd.prepare.nemo_cmd.prepare.logger", autospec=True)
 class TestMakeNomfich:
     """Unit tests for `mohid prepare` _make_nomfich() function.
     """
 
-    def test_no_bathymetry_key(self, m_logger, run_desc):
-        with pytest.raises(SystemExit):
-            mohid_cmd.prepare._make_nomfich({}, Path("tmp_run_dir"))
-        m_logger.error.assert_called_once_with(
-            '"bathymetry" key not found - please check your run description YAML file'
-        )
-
-    def test_bathymetry_file_not_found(self, m_logger, run_desc):
+    def test_no_bathymetry_key(self, run_desc, caplog, monkeypatch):
+        monkeypatch.delitem(run_desc, "bathymetry")
+        caplog.set_level(logging.ERROR)
         with pytest.raises(SystemExit):
             mohid_cmd.prepare._make_nomfich(run_desc, Path("tmp_run_dir"))
-        m_logger.error.assert_called_once_with(
-            f'{Path(run_desc["bathymetry"]).resolve()} path from "bathymetry" key not found - '
+        assert caplog.records[0].levelname == "ERROR"
+        expected = (
+            '"bathymetry" key not found - please check your run description YAML file'
+        )
+        assert caplog.messages[0] == expected
+
+    def test_bathymetry_file_not_found(self, run_desc, caplog, tmp_path, monkeypatch):
+        monkeypatch.setitem(
+            run_desc, "bathymetry", tmp_path / "MIDOSS-MOHID-grid" / "not_bathy.dat"
+        )
+        caplog.set_level(logging.ERROR)
+        with pytest.raises(SystemExit):
+            mohid_cmd.prepare._make_nomfich(run_desc, Path("tmp_run_dir"))
+        assert caplog.records[0].levelname == "ERROR"
+        expected = (
+            f'{tmp_path / "MIDOSS-MOHID-grid"/"not_bathy.dat"} path from "bathymetry" key not found - '
             f"please check your run description YAML file"
         )
+        assert caplog.messages[0] == expected
 
     @patch("mohid_cmd.prepare.Path.mkdir", autospec=True)
-    def test_make_results_dir(self, m_mkdir, m_logger, tmpdir, run_desc):
+    def test_make_results_dir(self, m_mkdir, tmpdir, run_desc):
         p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         p_bathy = tmpdir.ensure(run_desc["bathymetry"])
         p_run_files = {
@@ -262,7 +375,7 @@ class TestMakeNomfich:
             mohid_cmd.prepare._make_nomfich(run_desc, Path(str(p_tmp_run_dir)))
         assert m_mkdir.called
 
-    def test_nomfich_file(self, m_logger, tmpdir, run_desc):
+    def test_nomfich_file(self, tmpdir, run_desc):
         p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         p_bathy = tmpdir.ensure(run_desc["bathymetry"])
         p_run_files = {
@@ -333,7 +446,7 @@ class TestRecordVCSRevisions:
     def test_write_repo_rev_file_hg_repo(self, m_write, tmpdir, run_desc):
         p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         p_mohid_repo = tmpdir.ensure(run_desc["paths"]["mohid repo"])
-        p_hg_repo = tmpdir.ensure(run_desc["vcs revisions"]["hg"][0])
+        p_hg_repo = tmpdir.ensure_dir(run_desc["vcs revisions"]["hg"][0])
         p_run_desc = patch.dict(
             run_desc,
             {

@@ -45,12 +45,24 @@ class Prepare(cliff.command.Command):
             action="store_true",
             help="don't show the run directory path on completion",
         )
+        parser.add_argument(
+            "--tmp-run-dir",
+            dest="tmp_run_dir",
+            default="",
+            help="""
+            Name to use for temporary run directory.
+            This is intended for use in Monte Carlo runs for which it is necessary to
+            have an a priori known temporary run directory name.
+            Normally, the temporary run directory name is automatically generated based on
+            the run id and the date/time at which :kbd:`mohid run` is executed.
+            """,
+        )
         return parser
 
     def take_action(self, parsed_args):
         """Execute the `salishsea prepare` sub-command.
 
-        A uniquely named temporary run directory is created.
+        A temporary run directory is created.
         Symbolic links and file copies are created in that directory based on the files and
         directories specified in the run description YAML file for a MIDOSS-MOHID run.
         The output of :command:`hg parents` is recorded in the directory
@@ -58,13 +70,13 @@ class Prepare(cliff.command.Command):
         The path to the temporary run directory is logged to the console on completion
         of the set-up.
         """
-        tmp_run_dir = prepare(parsed_args.desc_file)
+        tmp_run_dir = prepare(parsed_args.desc_file, parsed_args.tmp_run_dir)
         if not parsed_args.quiet:
             logger.info(f"Created temporary run directory: {tmp_run_dir}")
         return tmp_run_dir
 
 
-def prepare(desc_file):
+def prepare(desc_file, tmp_run_dir=""):
     """Create and prepare the temporary run directory.
 
     The temporary run directory is created with a unique name composed of the run id
@@ -78,12 +90,14 @@ def prepare(desc_file):
     :param desc_file: File path/name of the YAML run description file.
     :type desc_file: :py:class:`pathlib.Path`
 
+    :param string tmp_run_dir: Name to use for temporary run directory.
+
     :returns: Path of the temporary run directory
     :rtype: :py:class:`pathlib.Path`
     """
     run_desc = nemo_cmd.prepare.load_run_desc(desc_file)
     mohid_exe = _check_mohid_exec(run_desc)
-    tmp_run_dir = nemo_cmd.prepare.make_run_dir(run_desc)
+    tmp_run_dir = _make_run_dir(run_desc, tmp_run_dir)
     (tmp_run_dir / mohid_exe.name).symlink_to(mohid_exe)
     shutil.copy2(desc_file, tmp_run_dir / desc_file.name)
     _make_forcing_links(run_desc, tmp_run_dir)
@@ -113,6 +127,26 @@ def _check_mohid_exec(run_desc):
         logger.error(f"{mohid_exe} not found - did you forget to build it?")
         raise SystemExit(2)
     return mohid_exe
+
+
+def _make_run_dir(run_desc, tmp_run_dir):
+    """
+    :param desc_file: File path/name of the YAML run description file.
+    :type desc_file: :py:class:`pathlib.Path`
+
+    :param string tmp_run_dir: Name to use for temporary run directory.
+
+    :returns: Path of the temporary run directory
+    :rtype: :py:class:`pathlib.Path`
+    """
+    if not tmp_run_dir:
+        return nemo_cmd.prepare.make_run_dir(run_desc)
+    runs_dir = nemo_cmd.prepare.get_run_desc_value(
+        run_desc, ("paths", "runs directory"), resolve_path=True
+    )
+    run_dir = runs_dir / tmp_run_dir
+    run_dir.mkdir()
+    return run_dir
 
 
 def _make_forcing_links(run_desc, tmp_run_dir):
