@@ -26,7 +26,7 @@ import subprocess
 
 import cliff.command
 
-from mohid_cmd import api
+import mohid_cmd.prepare
 import nemo_cmd.prepare
 
 logger = logging.getLogger(__name__)
@@ -139,7 +139,7 @@ def run(desc_file, results_dir, no_submit=False, quiet=False, tmp_run_dir=""):
               run script.
     :rtype: str
     """
-    tmp_run_dir = api.prepare(desc_file, tmp_run_dir)
+    tmp_run_dir = mohid_cmd.prepare.prepare(desc_file, tmp_run_dir)
     if not quiet:
         logger.info(f"Created temporary run directory {tmp_run_dir}")
     run_desc = nemo_cmd.prepare.load_run_desc(desc_file)
