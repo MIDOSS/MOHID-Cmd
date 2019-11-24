@@ -32,7 +32,7 @@ handler.setFormatter(formatter)
 log.addHandler(handler)
 
 
-def prepare(run_desc_file):
+def prepare(run_desc_file, tmp_run_dir):
     """Prepare a MIDOSS-MOHID run.
 
     A temporary run directory is created with a unique name composed of the run id
@@ -47,7 +47,9 @@ def prepare(run_desc_file):
     :param run_desc_file: File path/name of the YAML run description file.
     :type run_desc_file: :py:class:`pathlib.Path`
 
+    :param string tmp_run_dir: Name to use for temporary run directory.
+
     :returns: Path of the temporary run directory
     :rtype: :py:class:`pathlib.Path`
     """
-    return prepare_plugin.prepare(run_desc_file)
+    return prepare_plugin.prepare(run_desc_file, tmp_run_dir)
