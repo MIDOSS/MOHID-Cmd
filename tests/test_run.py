@@ -261,7 +261,7 @@ class TestTakeAction:
 @patch("mohid_cmd.run.nemo_cmd.resolved_path", spec=True)
 @patch("mohid_cmd.run._build_run_script", return_value="script", autospec=True)
 @patch("mohid_cmd.run.nemo_cmd.prepare.load_run_desc", spec=True)
-@patch("mohid_cmd.run.api.prepare", spec=True)
+@patch("mohid_cmd.run.mohid_cmd.prepare.prepare", spec=True)
 class TestRun:
     """Unit tests for `mohid run` run() function.
     """
