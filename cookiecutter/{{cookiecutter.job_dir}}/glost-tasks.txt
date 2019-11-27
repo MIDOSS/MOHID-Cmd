@@ -1,3 +1,3 @@
-{% for n in range(cookiecutter.runs_per_job|int) %}
+{% for n in range(cookiecutter.runs_per_job|int) -%}
 {{ cookiecutter.mohid_cmd }} run --no-submit --tmp-run-dir $MONTE_CARLO/{{ cookiecutter.run_id }}-{{ n }} $MONTE_CARLO/mohid-yaml/{{ cookiecutter.run_id }}-{{ n }}.yaml $MONTE_CARLO/results/{{ cookiecutter.run_id }}-{{ n }}/ && bash $MONTE_CARLO/{{ cookiecutter.run_id }}-{{ n }}/MOHID.sh
-{%- endfor %}
+{% endfor %}
