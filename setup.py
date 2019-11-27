@@ -24,6 +24,7 @@ setuptools.setup(
         # Sub-command plug-ins:
         "mohid.app": [
             "gather = mohid_cmd.gather:Gather",
+            "monte-carlo = mohid_cmd.monte_carlo:MonteCarlo",
             "prepare = mohid_cmd.prepare:Prepare",
             "run = mohid_cmd.run:Run",
         ],
