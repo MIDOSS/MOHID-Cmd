@@ -150,20 +150,6 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
     return submit_job_msg
 
 
-def _make_glost_tasks_file(run_id, run_desc, job_dir):
-    mohid_cmd = nemo_cmd.prepare.get_run_desc_value(
-        run_desc, ("mohid command",), run_dir=job_dir
-    )
-    glost_tasks_file = job_dir / "glost-tasks.txt"
-    glost_tasks_file.write_text(
-        f"{mohid_cmd} run --no-submit --tmp-run-dir $MONTE_CARLO/{run_id}-0 "
-        f"$MONTE_CARLO/mohid-yaml/{run_id}-0.yaml "
-        f"$MONTE_CARLO/results/{run_id}-0/ "
-        f"&& bash $MONTE_CARLO/{run_id}-0/MOHID.sh\n"
-    )
-    logger.info(f"wrote glost tasks file: {glost_tasks_file}")
-
-
 def _make_glost_job_script(run_id, run_desc, job_dir):
     account = nemo_cmd.prepare.get_run_desc_value(
         run_desc, ("account",), run_dir=job_dir

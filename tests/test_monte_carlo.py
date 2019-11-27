@@ -201,51 +201,64 @@ class TestGlostJobDir:
 
         monkeypatch.setattr(mohid_cmd.monte_carlo.arrow, "now", mock_arrow_now)
 
-    def test_job_dir(
-        self, mock_arrow_now, mock_subprocess_run, monte_carlo_run_desc, tmp_path
-    ):
+    def test_job_dir_created(self, mock_arrow_now, monte_carlo_run_desc, tmp_path):
         mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv"
+            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
         )
         runs_dir = monte_carlo_run_desc["paths"]["runs directory"]
         run_id = monte_carlo_run_desc["run_id"]
         assert (Path(runs_dir) / f"{run_id}_2019-11-24T170743").is_dir()
 
-    def test_glost_tasks_file(
-        self, mock_arrow_now, mock_subprocess_run, monte_carlo_run_desc, tmp_path
+    def test_forcing_yaml_dir_created(
+        self, mock_arrow_now, monte_carlo_run_desc, tmp_path
     ):
         mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv"
+            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+        )
+        runs_dir = monte_carlo_run_desc["paths"]["runs directory"]
+        run_id = monte_carlo_run_desc["run_id"]
+        assert (
+            Path(runs_dir) / f"{run_id}_2019-11-24T170743" / "forcing-yaml"
+        ).is_dir()
+
+    def test_mohid_yaml_dir_created(
+        self, mock_arrow_now, monte_carlo_run_desc, tmp_path
+    ):
+        mohid_cmd.monte_carlo.monte_carlo(
+            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+        )
+        runs_dir = monte_carlo_run_desc["paths"]["runs directory"]
+        run_id = monte_carlo_run_desc["run_id"]
+        assert (Path(runs_dir) / f"{run_id}_2019-11-24T170743" / "mohid-yaml").is_dir()
+
+    def test_results_dir_created(self, mock_arrow_now, monte_carlo_run_desc, tmp_path):
+        mohid_cmd.monte_carlo.monte_carlo(
+            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+        )
+        runs_dir = monte_carlo_run_desc["paths"]["runs directory"]
+        run_id = monte_carlo_run_desc["run_id"]
+        assert (Path(runs_dir) / f"{run_id}_2019-11-24T170743" / "results").is_dir()
+
+    def test_glost_tasks_file_created(
+        self, mock_arrow_now, monte_carlo_run_desc, tmp_path
+    ):
+        mohid_cmd.monte_carlo.monte_carlo(
+            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
         )
         runs_dir = monte_carlo_run_desc["paths"]["runs directory"]
         run_id = monte_carlo_run_desc["run_id"]
         job_dir = Path(runs_dir) / f"{run_id}_2019-11-24T170743"
         assert (job_dir / "glost-tasks.txt").is_file()
 
-    def test_glost_job_script(
-        self, mock_arrow_now, mock_subprocess_run, monte_carlo_run_desc, tmp_path
+    def test_glost_tasks_file_contents(
+        self, mock_arrow_now, monte_carlo_run_desc, tmp_path
     ):
         mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv"
+            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
         )
         runs_dir = monte_carlo_run_desc["paths"]["runs directory"]
         run_id = monte_carlo_run_desc["run_id"]
         job_dir = Path(runs_dir) / f"{run_id}_2019-11-24T170743"
-        assert (job_dir / "glost-job.sh").is_file()
-
-
-class TestMakeGlostTasksFile:
-    """Unit test for mohid.monte-carlo._make_glost_tasks_file() function.
-    """
-
-    def test_make_glost_tasks_file(self, monte_carlo_run_desc, caplog, tmp_path):
-        run_id = "AKNS-spatial"
-        job_dir = tmp_path / "job_dir"
-        job_dir.mkdir()
-        caplog.set_level(logging.INFO)
-        mohid_cmd.monte_carlo._make_glost_tasks_file(
-            run_id, monte_carlo_run_desc, job_dir
-        )
         glost_tasks = (job_dir / "glost-tasks.txt").read_text().splitlines()
         expected = [
             f"$HOME/.local/bin/mohid run "
@@ -254,10 +267,24 @@ class TestMakeGlostTasksFile:
             f"$MONTE_CARLO/mohid-yaml/{run_id}-0.yaml "
             f"$MONTE_CARLO/results/{run_id}-0/ "
             f"&& "
-            f"bash $MONTE_CARLO/{run_id}-0/MOHID.sh"
+            f"bash $MONTE_CARLO/{run_id}-0/MOHID.sh",
+            f"$HOME/.local/bin/mohid run "
+            f"--no-submit "
+            f"--tmp-run-dir $MONTE_CARLO/{run_id}-1 "
+            f"$MONTE_CARLO/mohid-yaml/{run_id}-1.yaml "
+            f"$MONTE_CARLO/results/{run_id}-1/ "
+            f"&& "
+            f"bash $MONTE_CARLO/{run_id}-1/MOHID.sh",
         ]
-        assert glost_tasks == expected
-        assert caplog.records[0].levelname == "INFO"
-        assert (
-            caplog.messages[0] == f"wrote glost tasks file: {job_dir/'glost-tasks.txt'}"
+        assert glost_tasks[:-1] == expected
+
+    def test_glost_job_script_created(
+        self, mock_arrow_now, monte_carlo_run_desc, tmp_path
+    ):
+        mohid_cmd.monte_carlo.monte_carlo(
+            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
         )
+        runs_dir = monte_carlo_run_desc["paths"]["runs directory"]
+        run_id = monte_carlo_run_desc["run_id"]
+        job_dir = Path(runs_dir) / f"{run_id}_2019-11-24T170743"
+        assert (job_dir / "glost-job.sh").is_file()
