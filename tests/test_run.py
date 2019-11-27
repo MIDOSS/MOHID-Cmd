@@ -66,16 +66,16 @@ class TestParser:
         parser = run_cmd.get_parser("mohid run")
         assert parser._actions[3].dest == "no_submit"
         assert parser._actions[3].option_strings == ["--no-submit"]
-        assert parser._actions[3].const == True
-        assert parser._actions[3].default == False
+        assert parser._actions[3].const is True
+        assert parser._actions[3].default is False
         assert parser._actions[3].help
 
     def test_quiet_option(self, run_cmd):
         parser = run_cmd.get_parser("mohid run")
         assert parser._actions[4].dest == "quiet"
         assert parser._actions[4].option_strings == ["-q", "--quiet"]
-        assert parser._actions[4].const == True
-        assert parser._actions[4].default == False
+        assert parser._actions[4].const is True
+        assert parser._actions[4].default is False
         assert parser._actions[4].help
 
     def test_tmp_run_dir_option(self, run_cmd):
@@ -94,20 +94,20 @@ class TestParser:
     def test_parsed_args_option_defaults(self, run_cmd):
         parser = run_cmd.get_parser("mohid run")
         parsed_args = parser.parse_args(["foo.yaml", "results/foo/"])
-        assert parsed_args.no_submit == False
-        assert parsed_args.quiet == False
+        assert parsed_args.no_submit is False
+        assert parsed_args.quiet is False
         assert parsed_args.tmp_run_dir == ""
 
     @pytest.mark.parametrize("flag", ["-q", "--quiet"])
     def test_parsed_args_quiet_options(self, flag, run_cmd):
         parser = run_cmd.get_parser("mohid run")
         parsed_args = parser.parse_args(["foo.yaml", "results/foo/", flag])
-        assert parsed_args.quiet == True
+        assert parsed_args.quiet is True
 
     def test_parsed_args_no_submit_option(self, run_cmd):
         parser = run_cmd.get_parser("mohid run")
         parsed_args = parser.parse_args(["foo.yaml", "results/foo/", "--no-submit"])
-        assert parsed_args.no_submit == True
+        assert parsed_args.no_submit is True
 
     def test_parsed_args_tmp_run_dir_option(self, run_cmd):
         parser = run_cmd.get_parser("mohid run")

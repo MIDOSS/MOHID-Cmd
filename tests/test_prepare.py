@@ -58,8 +58,8 @@ class TestParser:
         parser = prepare_cmd.get_parser("mohid prepare")
         assert parser._actions[2].dest == "quiet"
         assert parser._actions[2].option_strings == ["-q", "--quiet"]
-        assert parser._actions[2].const == True
-        assert parser._actions[2].default == False
+        assert parser._actions[2].const is True
+        assert parser._actions[2].default is False
         assert parser._actions[2].help
 
     def test_tmp_run_dir_option(self, prepare_cmd):
@@ -77,13 +77,13 @@ class TestParser:
     def test_parsed_args_option_defaults(self, prepare_cmd):
         parser = prepare_cmd.get_parser("mohid prepare")
         parsed_args = parser.parse_args(["foo.yaml"])
-        assert parsed_args.quiet == False
+        assert parsed_args.quiet is False
 
     @pytest.mark.parametrize("flag", ["-q", "--quiet"])
     def test_parsed_args_quiet_options(self, flag, prepare_cmd):
         parser = prepare_cmd.get_parser("mohid prepare")
         parsed_args = parser.parse_args(["foo.yaml", flag])
-        assert parsed_args.quiet == True
+        assert parsed_args.quiet is True
 
     def test_parsed_args_tmp_run_dir_option(self, prepare_cmd):
         parser = prepare_cmd.get_parser("mohid prepare")
