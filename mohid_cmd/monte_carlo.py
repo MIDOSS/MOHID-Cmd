@@ -16,17 +16,19 @@
 
 Prepare for and execute a collection of Monte Carlo runs of the MIDOSS-MOHID model.
 """
+import datetime
 import logging
 import os
 from pathlib import Path
 import shlex
 import subprocess
-import textwrap
 
 import arrow
 import cliff.command
 import cookiecutter.main
 import nemo_cmd.prepare
+
+import mohid_cmd.run
 
 logger = logging.getLogger(__name__)
 
@@ -101,13 +103,19 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
     :return:
     """
     run_desc = nemo_cmd.prepare.load_run_desc(desc_file)
-    run_id = nemo_cmd.prepare.get_run_desc_value(run_desc, ("run_id",))
+    job_id = nemo_cmd.prepare.get_run_desc_value(run_desc, ("job id",))
     runs_dir = nemo_cmd.prepare.get_run_desc_value(
         run_desc, ("paths", "runs directory"), expand_path=True, resolve_path=True,
     )
-    job_dir = runs_dir / f"{run_id}_{arrow.now().format('YYYY-MM-DDTHHmmss')}"
+    job_dir = runs_dir / f"{job_id}_{arrow.now().format('YYYY-MM-DDTHHmmss')}"
+    ## TODO: Calculate walltime from number of runs and number of cores
+    run_walltime = nemo_cmd.prepare.get_run_desc_value(
+        run_desc, ("run walltime",), run_dir=job_dir
+    )
+    run_walltime = datetime.timedelta(seconds=run_walltime)
+    walltime = mohid_cmd.run.td_to_hms(run_walltime)
     cookiecutter_context = {
-        "run_id": run_id,
+        "job_id": job_id,
         "job_dir": job_dir,
         "account": nemo_cmd.prepare.get_run_desc_value(
             run_desc, ("account",), run_dir=job_dir
@@ -127,6 +135,7 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
         "runs_per_job": nemo_cmd.prepare.get_run_desc_value(
             run_desc, ("runs per glost job",), run_dir=job_dir
         ),
+        "walltime": walltime,
         "mohid_cmd": nemo_cmd.prepare.get_run_desc_value(
             run_desc, ("mohid command",), run_dir=job_dir
         ),
@@ -148,27 +157,3 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
         stdout=subprocess.PIPE,
     ).stdout
     return submit_job_msg
-
-
-def _make_glost_job_script(run_id, run_desc, job_dir):
-    account = nemo_cmd.prepare.get_run_desc_value(
-        run_desc, ("account",), run_dir=job_dir
-    )
-    email = nemo_cmd.prepare.get_run_desc_value(run_desc, ("email",), run_dir=job_dir)
-    nodes = nemo_cmd.prepare.get_run_desc_value(run_desc, ("nodes",), run_dir=job_dir)
-    ntasks_per_node = nemo_cmd.prepare.get_run_desc_value(
-        run_desc, ("tasks per node",), run_dir=job_dir
-    )
-    job_script = textwrap.dedent(
-        f"""\
-            #!/bin/bash
-            
-            #SBATCH --job-name={run_id}
-            #SBATCH --account={account}
-            #SBATCH --mail-user={email}
-            #SBATCH --mail-type=ALL
-            #SBATCH --nodes={nodes}
-            #SBATCH --ntasks-per-node={ntasks_per_node}
-        """
-    )
-    return job_script

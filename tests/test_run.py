@@ -379,7 +379,7 @@ class TestSbatchDirectives:
 
 
 class TestTdToHms:
-    """Unit tests for _td_to_hms() function.
+    """Unit tests for td_to_hms() function.
     """
 
 

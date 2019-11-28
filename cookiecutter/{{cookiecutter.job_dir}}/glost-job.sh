@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name={{ cookiecutter.run_id }}
+#SBATCH --job-name={{ cookiecutter.job_id }}
 #SBATCH --account={{ cookiecutter.account }}
 #SBATCH --mail-user={{ cookiecutter.email }}
 #SBATCH --mail-type=ALL
@@ -8,8 +8,8 @@
 #SBATCH --ntasks-per-node={{ cookiecutter.ntasks_per_node }}
 #SBATCH --mem-per-cpu={{ cookiecutter.mem_per_cpu }}
 #SBATCH --time={{ cookiecutter.walltime }}
-#SBATCH --output={{ cookiecutter.job_dir }}glost-job.stdout
-#SBATCH --error={{ cookiecutter.job_dir }}glost-job.stderr
+#SBATCH --output={{ cookiecutter.job_dir }}/glost-job.stdout
+#SBATCH --error={{ cookiecutter.job_dir }}/glost-job.stderr
 
 module load glost/0.3.1
 module load python/3.7
