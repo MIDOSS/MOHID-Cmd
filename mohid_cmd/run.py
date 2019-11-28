@@ -219,7 +219,7 @@ def _sbatch_directives(run_desc, results_dir):
             nemo_cmd.prepare.get_run_desc_value(run_desc, ("walltime",)), "%H:%M:%S"
         ).time()
         td = datetime.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
-    walltime = _td_to_hms(td)
+    walltime = td_to_hms(td)
     sbatch_directives = textwrap.dedent(
         f"""\
         #SBATCH --job-name={run_id}
@@ -238,7 +238,7 @@ def _sbatch_directives(run_desc, results_dir):
     return sbatch_directives
 
 
-def _td_to_hms(timedelta):
+def td_to_hms(timedelta):
     """Return a string that is the timedelta value formatted as H:M:S
     with leading zeros on the minutes and seconds values.
 
