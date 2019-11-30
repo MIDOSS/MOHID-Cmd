@@ -34,7 +34,20 @@ def monte_carlo_cmd():
 @pytest.fixture
 def glost_run_desc(tmp_path):
     runs_dir = tmp_path / "monte-carlo"
-    runs_dir.mkdir(parents=True)
+    runs_dir.mkdir()
+
+    code_repo = tmp_path / "MIDOSS-MOHID-CODE"
+    code_repo.mkdir()
+    config_repo = tmp_path / "MIDOSS-MOHID-config"
+    config_repo.mkdir()
+    grid_repo = tmp_path / "MIDOSS-MOHID-grid"
+    grid_repo.mkdir()
+    mohid_cmd_repo = tmp_path / "MOHID-Cmd"
+    mohid_cmd_repo.mkdir()
+    nemo_cmd_repo = tmp_path / "NEMO-Cmd"
+    nemo_cmd_repo.mkdir()
+    moad_tools_repo = tmp_path / "moad_tools"
+    moad_tools_repo.mkdir()
 
     run_desc_file = tmp_path / "monte-carlo.yaml"
     run_desc_file.write_text(
@@ -53,6 +66,15 @@ def glost_run_desc(tmp_path):
               runs directory: {runs_dir}
               
             mohid command: $HOME/.local/bin/mohid
+            
+            vcs revisions:
+              hg:
+                - {code_repo}
+                - {config_repo}
+                - {grid_repo}
+                - {mohid_cmd_repo}
+                - {nemo_cmd_repo}
+                - {moad_tools_repo}
             """
         )
     )
@@ -71,6 +93,18 @@ def mock_subprocess_run(monkeypatch):
         return CompletedProcess()
 
     monkeypatch.setattr(mohid_cmd.monte_carlo.subprocess, "run", mock_subprocess_run)
+
+
+@pytest.fixture
+def mock_record_vcs_revisions(monkeypatch):
+    def mock_record_vcs_revisions(*args):
+        pass
+
+    monkeypatch.setattr(
+        mohid_cmd.monte_carlo.nemo_cmd.prepare,
+        "record_vcs_revisions",
+        mock_record_vcs_revisions,
+    )
 
 
 class TestParser:
@@ -136,7 +170,13 @@ class TestTakeAction:
     """
 
     def test_take_action(
-        self, monte_carlo_cmd, glost_run_desc, mock_subprocess_run, caplog, tmp_path
+        self,
+        mock_record_vcs_revisions,
+        monte_carlo_cmd,
+        glost_run_desc,
+        mock_subprocess_run,
+        caplog,
+        tmp_path,
     ):
         desc_file = tmp_path / "monte-carlo.yaml"
         csv_file = tmp_path / "AKNS_spatial.csv"
@@ -149,7 +189,13 @@ class TestTakeAction:
         assert caplog.messages[0] == "Submitted batch job 12345678"
 
     def test_take_action_no_submit(
-        self, monte_carlo_cmd, glost_run_desc, mock_subprocess_run, caplog, tmp_path
+        self,
+        mock_record_vcs_revisions,
+        monte_carlo_cmd,
+        glost_run_desc,
+        mock_subprocess_run,
+        caplog,
+        tmp_path,
     ):
         desc_file = tmp_path / "monte-carlo.yaml"
         csv_file = tmp_path / "AKNS_spatial.csv"
@@ -165,13 +211,17 @@ class TestMonteCarlo:
     """Unit tests for mohid.monte-carlo.monte_carlo() function.
     """
 
-    def test_no_submit(self, mock_subprocess_run, glost_run_desc, tmp_path):
+    def test_no_submit(
+        self, mock_record_vcs_revisions, mock_subprocess_run, glost_run_desc, tmp_path
+    ):
         submit_job_msg = mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
         )
         assert submit_job_msg is None
 
-    def test_submit(self, mock_subprocess_run, glost_run_desc, tmp_path):
+    def test_submit(
+        self, mock_record_vcs_revisions, mock_subprocess_run, glost_run_desc, tmp_path
+    ):
         submit_job_msg = mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml",
             tmp_path / "AKNS_spatial.csv",
@@ -192,7 +242,53 @@ class TestGlostJobDir:
 
         monkeypatch.setattr(mohid_cmd.monte_carlo.arrow, "now", mock_arrow_now)
 
-    def test_job_dir_created(self, mock_arrow_now, glost_run_desc, tmp_path):
+    @staticmethod
+    @pytest.fixture
+    def mock_hg_repo(monkeypatch):
+        @attr.s
+        class MockHgRevision:
+            rev = attr.ib(default=b"43")
+            node = attr.ib(default=b"f7d21a1dfad4")
+            tags = attr.ib(default=b"tip")
+            author = attr.ib(default=b"Doug Latornell <dlatornell@example.com>")
+            date = attr.ib(default=arrow.get("2019-10-25 19:30:43").naive)
+            files = attr.ib(default=[b"foo/bar.py", b"foo/baz.py"])
+            desc = attr.ib(
+                default=b"Refactor the Frobnitzicator class\n\nImprove disambiguation\n"
+            )
+
+        @attr.s
+        class MockHgRepo:
+            repo_path = attr.ib()
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                pass
+
+            def parents(self):
+                return [MockHgRevision()]
+
+            def status(
+                self,
+                rev=None,
+                change=None,
+                modified=None,
+                added=None,
+                removed=None,
+                deleted=None,
+                copies=None,
+            ):
+                return []
+
+        monkeypatch.setattr(
+            mohid_cmd.monte_carlo.nemo_cmd.prepare.hglib, "open", MockHgRepo
+        )
+
+    def test_job_dir_created(
+        self, mock_arrow_now, mock_hg_repo, glost_run_desc, tmp_path
+    ):
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
         )
@@ -200,7 +296,9 @@ class TestGlostJobDir:
         job_id = glost_run_desc["job id"]
         assert (Path(runs_dir) / f"{job_id}_2019-11-24T170743").is_dir()
 
-    def test_forcing_yaml_dir_created(self, mock_arrow_now, glost_run_desc, tmp_path):
+    def test_forcing_yaml_dir_created(
+        self, mock_arrow_now, mock_hg_repo, glost_run_desc, tmp_path
+    ):
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
         )
@@ -210,7 +308,9 @@ class TestGlostJobDir:
             Path(runs_dir) / f"{job_id}_2019-11-24T170743" / "forcing-yaml"
         ).is_dir()
 
-    def test_mohid_yaml_dir_created(self, mock_arrow_now, glost_run_desc, tmp_path):
+    def test_mohid_yaml_dir_created(
+        self, mock_arrow_now, mock_hg_repo, glost_run_desc, tmp_path
+    ):
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
         )
@@ -218,7 +318,9 @@ class TestGlostJobDir:
         job_id = glost_run_desc["job id"]
         assert (Path(runs_dir) / f"{job_id}_2019-11-24T170743" / "mohid-yaml").is_dir()
 
-    def test_results_dir_created(self, mock_arrow_now, glost_run_desc, tmp_path):
+    def test_results_dir_created(
+        self, mock_arrow_now, mock_hg_repo, glost_run_desc, tmp_path
+    ):
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
         )
@@ -226,7 +328,9 @@ class TestGlostJobDir:
         job_id = glost_run_desc["job id"]
         assert (Path(runs_dir) / f"{job_id}_2019-11-24T170743" / "results").is_dir()
 
-    def test_glost_tasks_file_created(self, mock_arrow_now, glost_run_desc, tmp_path):
+    def test_glost_tasks_file_created(
+        self, mock_arrow_now, mock_hg_repo, glost_run_desc, tmp_path
+    ):
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
         )
@@ -235,7 +339,9 @@ class TestGlostJobDir:
         job_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743"
         assert (job_dir / "glost-tasks.txt").is_file()
 
-    def test_glost_tasks_file_contents(self, mock_arrow_now, glost_run_desc, tmp_path):
+    def test_glost_tasks_file_contents(
+        self, mock_arrow_now, mock_hg_repo, glost_run_desc, tmp_path
+    ):
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
         )
@@ -264,7 +370,9 @@ class TestGlostJobDir:
         ]
         assert glost_tasks == expected
 
-    def test_glost_job_script_created(self, mock_arrow_now, glost_run_desc, tmp_path):
+    def test_glost_job_script_created(
+        self, mock_arrow_now, mock_hg_repo, glost_run_desc, tmp_path
+    ):
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
         )
@@ -273,7 +381,9 @@ class TestGlostJobDir:
         job_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743"
         assert (job_dir / "glost-job.sh").is_file()
 
-    def test_glost_job_script_contents(self, mock_arrow_now, glost_run_desc, tmp_path):
+    def test_glost_job_script_contents(
+        self, mock_arrow_now, mock_hg_repo, glost_run_desc, tmp_path
+    ):
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
         )
@@ -309,3 +419,19 @@ class TestGlostJobDir:
             """
         ).splitlines()
         assert glost_script == expected
+
+    def test_vcs_rev_record_files_created(
+        self, mock_arrow_now, mock_hg_repo, glost_run_desc, tmp_path
+    ):
+        mohid_cmd.monte_carlo.monte_carlo(
+            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+        )
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_id = glost_run_desc["job id"]
+        job_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743"
+        assert (job_dir / "MIDOSS-MOHID-CODE_rev.txt").is_file()
+        assert (job_dir / "MIDOSS-MOHID-config_rev.txt").is_file()
+        assert (job_dir / "MIDOSS-MOHID-grid_rev.txt").is_file()
+        assert (job_dir / "MOHID-Cmd_rev.txt").is_file()
+        assert (job_dir / "NEMO-Cmd_rev.txt").is_file()
+        assert (job_dir / "moad_tools_rev.txt").is_file()

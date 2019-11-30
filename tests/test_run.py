@@ -123,12 +123,26 @@ class TestTakeAction:
 
     @staticmethod
     @pytest.fixture
+    def mock_write_repo_rev_file(monkeypatch):
+        def mock_write_repo_rev_file(*args):
+            pass
+
+        monkeypatch.setattr(
+            mohid_cmd.prepare.nemo_cmd.prepare,
+            "write_repo_rev_file",
+            mock_write_repo_rev_file,
+        )
+
+    @staticmethod
+    @pytest.fixture
     def mock_record_vcs_revisions(monkeypatch):
         def mock_record_vcs_revisions(*args):
             pass
 
         monkeypatch.setattr(
-            mohid_cmd.prepare, "_record_vcs_revisions", mock_record_vcs_revisions
+            mohid_cmd.prepare.nemo_cmd.prepare,
+            "record_vcs_revisions",
+            mock_record_vcs_revisions,
         )
 
     @staticmethod
@@ -147,6 +161,7 @@ class TestTakeAction:
         self,
         run_cmd,
         run_desc,
+        mock_write_repo_rev_file,
         mock_record_vcs_revisions,
         mock_subprocess_run,
         caplog,
@@ -171,6 +186,7 @@ class TestTakeAction:
         self,
         run_cmd,
         run_desc,
+        mock_write_repo_rev_file,
         mock_record_vcs_revisions,
         mock_subprocess_run,
         caplog,
@@ -191,7 +207,13 @@ class TestTakeAction:
         assert not caplog.records
 
     def test_take_action_no_submit(
-        self, run_cmd, run_desc, mock_record_vcs_revisions, caplog, tmp_path
+        self,
+        run_cmd,
+        run_desc,
+        mock_write_repo_rev_file,
+        mock_record_vcs_revisions,
+        caplog,
+        tmp_path,
     ):
         desc_file = tmp_path / "mohid.yaml"
         results_dir = tmp_path / "results_dir"

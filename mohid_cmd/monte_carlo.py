@@ -102,15 +102,15 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
     :param no_submit:
     :return:
     """
-    run_desc = nemo_cmd.prepare.load_run_desc(desc_file)
-    job_id = nemo_cmd.prepare.get_run_desc_value(run_desc, ("job id",))
+    job_desc = nemo_cmd.prepare.load_run_desc(desc_file)
+    job_id = nemo_cmd.prepare.get_run_desc_value(job_desc, ("job id",))
     runs_dir = nemo_cmd.prepare.get_run_desc_value(
-        run_desc, ("paths", "runs directory"), expand_path=True, resolve_path=True,
+        job_desc, ("paths", "runs directory"), expand_path=True, resolve_path=True,
     )
     job_dir = runs_dir / f"{job_id}_{arrow.now().format('YYYY-MM-DDTHHmmss')}"
     ## TODO: Calculate walltime from number of runs and number of cores
     run_walltime = nemo_cmd.prepare.get_run_desc_value(
-        run_desc, ("run walltime",), run_dir=job_dir
+        job_desc, ("run walltime",), run_dir=job_dir
     )
     run_walltime = datetime.timedelta(seconds=run_walltime)
     walltime = mohid_cmd.run.td_to_hms(run_walltime)
@@ -118,26 +118,26 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
         "job_id": job_id,
         "job_dir": job_dir,
         "account": nemo_cmd.prepare.get_run_desc_value(
-            run_desc, ("account",), run_dir=job_dir
+            job_desc, ("account",), run_dir=job_dir
         ),
         "email": nemo_cmd.prepare.get_run_desc_value(
-            run_desc, ("email",), run_dir=job_dir
+            job_desc, ("email",), run_dir=job_dir
         ),
         "nodes": nemo_cmd.prepare.get_run_desc_value(
-            run_desc, ("nodes",), run_dir=job_dir
+            job_desc, ("nodes",), run_dir=job_dir
         ),
         "ntasks_per_node": nemo_cmd.prepare.get_run_desc_value(
-            run_desc, ("tasks per node",), run_dir=job_dir
+            job_desc, ("tasks per node",), run_dir=job_dir
         ),
         "mem_per_cpu": nemo_cmd.prepare.get_run_desc_value(
-            run_desc, ("mem per cpu",), run_dir=job_dir
+            job_desc, ("mem per cpu",), run_dir=job_dir
         ),
         "runs_per_job": nemo_cmd.prepare.get_run_desc_value(
-            run_desc, ("runs per glost job",), run_dir=job_dir
+            job_desc, ("runs per glost job",), run_dir=job_dir
         ),
         "walltime": walltime,
         "mohid_cmd": nemo_cmd.prepare.get_run_desc_value(
-            run_desc, ("mohid command",), run_dir=job_dir
+            job_desc, ("mohid command",), run_dir=job_dir
         ),
     }
     cookiecutter.main.cookiecutter(
@@ -146,6 +146,7 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
         output_dir=job_dir,
         extra_context=cookiecutter_context,
     )
+    nemo_cmd.prepare.record_vcs_revisions(job_desc, job_dir)
 
     if no_submit:
         return
