@@ -22,7 +22,7 @@ import yaml
 
 @pytest.fixture()
 def run_desc(tmp_path):
-    mohid_repo = tmp_path / "MIDOSS-MOHID"
+    mohid_repo = tmp_path / "MIDOSS-MOHID-CODE"
     mohid_repo.mkdir()
     mohid_bin = mohid_repo / "Solutions" / "linux" / "bin"
     mohid_bin.mkdir(parents=True)

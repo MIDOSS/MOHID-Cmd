@@ -102,7 +102,13 @@ def prepare(desc_file, tmp_run_dir=""):
     shutil.copy2(desc_file, tmp_run_dir / desc_file.name)
     _make_forcing_links(run_desc, tmp_run_dir)
     _make_nomfich(run_desc, tmp_run_dir)
-    _record_vcs_revisions(run_desc, tmp_run_dir)
+    mohid_repo = nemo_cmd.prepare.get_run_desc_value(
+        run_desc, ("paths", "mohid repo"), resolve_path=True
+    )
+    nemo_cmd.prepare.write_repo_rev_file(
+        mohid_repo, tmp_run_dir, nemo_cmd.prepare.get_hg_revision
+    )
+    nemo_cmd.prepare.record_vcs_revisions(run_desc, tmp_run_dir)
     return tmp_run_dir
 
 
@@ -209,34 +215,3 @@ def _make_nomfich(run_desc, tmp_run_dir):
     with (tmp_run_dir / "nomfich.dat").open("wt") as f:
         for key, value in nomfich.items():
             f.write(f"{key:<11} : {value}\n")
-
-
-def _record_vcs_revisions(run_desc, tmp_run_dir):
-    """Record revision and status information from version control system
-    repositories in files in the temporary run directory.
-
-    :param dict run_desc: Run description dictionary.
-
-    :param tmp_run_dir: Path of the temporary run directory.
-    :type tmp_run_dir: :py:class:`pathlib.Path`
-    """
-    mohid_repo = nemo_cmd.prepare.get_run_desc_value(
-        run_desc, ("paths", "mohid repo"), resolve_path=True
-    )
-    nemo_cmd.prepare.write_repo_rev_file(
-        mohid_repo, tmp_run_dir, nemo_cmd.prepare.get_hg_revision
-    )
-    if "vcs revisions" not in run_desc:
-        return
-    vcs_funcs = {"hg": nemo_cmd.prepare.get_hg_revision}
-    vcs_tools = nemo_cmd.prepare.get_run_desc_value(
-        run_desc, ("vcs revisions",), run_dir=tmp_run_dir
-    )
-    for vcs_tool in vcs_tools:
-        repos = nemo_cmd.prepare.get_run_desc_value(
-            run_desc, ("vcs revisions", vcs_tool), run_dir=tmp_run_dir
-        )
-        for repo in repos:
-            nemo_cmd.prepare.write_repo_rev_file(
-                Path(repo), tmp_run_dir, vcs_funcs[vcs_tool]
-            )
