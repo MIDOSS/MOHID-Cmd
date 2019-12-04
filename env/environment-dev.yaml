@@ -29,6 +29,7 @@ dependencies:
   - cookiecutter
   - f90nml
   - gitpython
+  - pandas
   - python-hglib
   - pip
   - python=3
