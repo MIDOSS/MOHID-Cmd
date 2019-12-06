@@ -26,7 +26,9 @@ import subprocess
 import arrow
 import cliff.command
 import cookiecutter.main
+import jinja2
 import nemo_cmd.prepare
+import pandas
 
 import mohid_cmd.run
 
@@ -108,6 +110,7 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
         job_desc, ("paths", "runs directory"), expand_path=True, resolve_path=True,
     )
     job_dir = runs_dir / f"{job_id}_{arrow.now().format('YYYY-MM-DDTHHmmss')}"
+    runs = _get_runs_info(csv_file)
     ## TODO: Calculate walltime from number of runs and number of cores
     run_walltime = nemo_cmd.prepare.get_run_desc_value(
         job_desc, ("run walltime",), run_dir=job_dir
@@ -147,6 +150,17 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
         extra_context=cookiecutter_context,
     )
     nemo_cmd.prepare.record_vcs_revisions(job_desc, job_dir)
+    mohid_config = nemo_cmd.prepare.get_run_desc_value(
+        job_desc,
+        ("paths", "mohid config"),
+        expand_path=True,
+        resolve_path=True,
+        run_dir=job_dir,
+    )
+    tmpl_env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(os.fspath(mohid_config / "templates"))
+    )
+    _render_mohid_run_yamls(job_id, job_dir, runs, tmpl_env)
 
     if no_submit:
         return
@@ -158,3 +172,39 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
         stdout=subprocess.PIPE,
     ).stdout
     return submit_job_msg
+
+
+def _get_runs_info(csv_file):
+    """
+    :param :py:class:`pathlib.Path` csv_file:
+
+    :rtype: :py:class:`pandas.DataFrame`
+    """
+    return pandas.read_csv(csv_file, skipinitialspace=True, parse_dates=[0])
+
+
+def _render_mohid_run_yamls(job_id, job_dir, runs, tmpl_env):
+    """
+    :param str job_id:
+    :param :py:class:`pathlib.Path` job_dir:
+    :param :py:class:`pandas.DataFrame` runs:
+    :param :py:class:`jinja2.Environment` tmpl_env:
+    """
+
+    tmpl = tmpl_env.get_template("mohid-run.yaml")
+    context = {
+        "job_id": job_id,
+        "job_dir": job_dir,
+    }
+    for i, run in runs.iterrows():
+        start_date = arrow.get(run.spill_date_hour.date())
+        end_date = start_date.shift(days=+run.run_days)
+        context.update(
+            {
+                "run_number": i,
+                "start_ddmmmyy": start_date.format("DDMMMYY").lower(),
+                "end_ddmmmyy": end_date.format("DDMMMYY").lower(),
+                "Lagrangian_template": Path(run.Lagrangian_template).stem,
+            }
+        )
+        (job_dir / "mohid-yaml" / f"{job_id}-{i}.yaml").write_text(tmpl.render(context))
