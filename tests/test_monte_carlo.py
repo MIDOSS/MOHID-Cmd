@@ -109,6 +109,16 @@ def mock_render_mohid_run_yamls(monkeypatch):
 
 
 @pytest.fixture
+def mock_render_model_dats(monkeypatch):
+    def mock_render_model_dats(*args):
+        pass
+
+    monkeypatch.setattr(
+        mohid_cmd.monte_carlo, "_render_model_dats", mock_render_model_dats
+    )
+
+
+@pytest.fixture
 def mock_record_vcs_revisions(monkeypatch):
     def mock_record_vcs_revisions(*args):
         pass
@@ -198,6 +208,7 @@ class TestTakeAction:
         self,
         mock_get_runs_info,
         mock_render_mohid_run_yamls,
+        mock_render_model_dats,
         mock_record_vcs_revisions,
         monte_carlo_cmd,
         glost_run_desc,
@@ -218,8 +229,9 @@ class TestTakeAction:
     def test_take_action_no_submit(
         self,
         mock_get_runs_info,
-        mock_render_mohid_run_yamls,
         mock_record_vcs_revisions,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
         monte_carlo_cmd,
         glost_run_desc,
         mock_subprocess_run,
@@ -243,9 +255,10 @@ class TestMonteCarlo:
     def test_no_submit(
         self,
         mock_get_runs_info,
-        mock_render_mohid_run_yamls,
         mock_record_vcs_revisions,
         mock_subprocess_run,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -257,8 +270,9 @@ class TestMonteCarlo:
     def test_submit(
         self,
         mock_get_runs_info,
-        mock_render_mohid_run_yamls,
         mock_record_vcs_revisions,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
         mock_subprocess_run,
         glost_run_desc,
         tmp_path,
@@ -284,21 +298,21 @@ class TestRenderMohidRunYamls:
                 return jinja2.Template(
                     textwrap.dedent(
                         """\
-                    run_id: {{ job_id }}-{{ run_number }}
-
-                    forcing:
-                      winds.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/winds.hdf5
-                      currents.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/currents.hdf5
-                      water_levels.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
-                      temperature.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
-                      salinity.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
-                      ww3.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/waves_stokes.hdf5
-                      e3t.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/e3t.hdf5
-
-                    run data files:
-                      IN_MODEL: {{ job_dir }}/mohid-yaml/Model-{{ run_number }}.dat
-                      PARTIC_DATA: {{ job_dir }}/mohid-yaml/{{ Lagrangian_template }}-{{ run_number }}.dat
-                    """
+                        run_id: {{ job_id }}-{{ run_number }}
+    
+                        forcing:
+                          winds.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/winds.hdf5
+                          currents.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/currents.hdf5
+                          water_levels.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
+                          temperature.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
+                          salinity.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
+                          ww3.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/waves_stokes.hdf5
+                          e3t.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/e3t.hdf5
+    
+                        run data files:
+                          IN_MODEL: {{ job_dir }}/mohid-yaml/Model-{{ run_number }}.dat
+                          PARTIC_DATA: {{ job_dir }}/mohid-yaml/{{ Lagrangian_template }}-{{ run_number }}.dat
+                        """
                     )
                 )
 
@@ -357,6 +371,76 @@ class TestRenderMohidRunYamls:
             run_desc["run data files"]["PARTIC_DATA"]
             == f"{job_dir}/mohid-yaml/Lagrangian_AKNS_crude-0.dat"
         )
+
+
+class TestRenderModelDats:
+    """Unit test for _render_model_dats() function.
+    """
+
+    def test_render_model_dats(self, glost_run_desc, monkeypatch):
+        @attr.s
+        class MockJinja2Environment:
+            loader = attr.ib()
+
+            def get_template(self, name):
+                return jinja2.Template(
+                    textwrap.dedent(
+                        """\
+                        ! Note: Time period must be a multiple of DT
+                        !
+                        START                     : {{ start_yyyy_mm_dd }} 00 30 0
+                        END                       : {{ end_yyyy_mm_dd }} 23 30 0
+                        DT                        : 3600
+                        
+                        VARIABLEDT                : 0
+                        OPENMP_NUM_THREADS        : 1
+                        GMTREFERENCE              : 0
+                        LAGRANGEANE               : 1
+                        LAGRANGIAN                : 1
+                        WAVES                     : 1
+                        NO_ISOLATED_CELLS         : 0
+                        !
+                        ! EOF
+                        """
+                    )
+                )
+
+        job_id = glost_run_desc["job id"]
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_dir = Path(runs_dir) / f"{job_id}_2019-12-04T180843"
+        mohid_yaml_dir = job_dir / "mohid-yaml"
+        mohid_yaml_dir.mkdir(parents=True)
+        runs = pandas.DataFrame(
+            {
+                "spill_date_hour": pandas.Timestamp("2017-06-15 02:00"),
+                "run_days": numpy.array([7], dtype=numpy.int64),
+            }
+        )
+
+        mohid_cmd.monte_carlo._render_model_dats(
+            job_dir, runs, MockJinja2Environment("loader")
+        )
+        model_dat = (mohid_yaml_dir / f"Model-0.dat").read_text().splitlines()
+        expected = textwrap.dedent(
+            """\
+            ! Note: Time period must be a multiple of DT
+            !
+            START                     : 2017 06 15 00 30 0
+            END                       : 2017 06 22 23 30 0
+            DT                        : 3600
+            
+            VARIABLEDT                : 0
+            OPENMP_NUM_THREADS        : 1
+            GMTREFERENCE              : 0
+            LAGRANGEANE               : 1
+            LAGRANGIAN                : 1
+            WAVES                     : 1
+            NO_ISOLATED_CELLS         : 0
+            !
+            ! EOF
+            """
+        ).splitlines()
+        assert model_dat == expected
 
 
 class TestGlostJobDir:
@@ -419,8 +503,9 @@ class TestGlostJobDir:
         self,
         mock_arrow_now,
         mock_get_runs_info,
-        mock_render_mohid_run_yamls,
         mock_hg_repo,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -435,8 +520,9 @@ class TestGlostJobDir:
         self,
         mock_arrow_now,
         mock_get_runs_info,
-        mock_render_mohid_run_yamls,
         mock_hg_repo,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -453,8 +539,9 @@ class TestGlostJobDir:
         self,
         mock_arrow_now,
         mock_get_runs_info,
-        mock_render_mohid_run_yamls,
         mock_hg_repo,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -466,7 +553,13 @@ class TestGlostJobDir:
         assert (Path(runs_dir) / f"{job_id}_2019-11-24T170743" / "mohid-yaml").is_dir()
 
     def test_mohid_yaml_files_created(
-        self, mock_arrow_now, mock_hg_repo, glost_run_desc, tmp_path, monkeypatch
+        self,
+        mock_arrow_now,
+        mock_hg_repo,
+        mock_render_model_dats,
+        glost_run_desc,
+        tmp_path,
+        monkeypatch,
     ):
         n_runs = 2
 
@@ -495,12 +588,48 @@ class TestGlostJobDir:
         for i in range(n_runs):
             assert (mohid_yaml_dir / f"{job_id}-{i}.yaml").exists()
 
+    def test_model_dat_files_created(
+        self,
+        mock_arrow_now,
+        mock_hg_repo,
+        mock_render_mohid_run_yamls,
+        glost_run_desc,
+        tmp_path,
+        monkeypatch,
+    ):
+        n_runs = 2
+
+        def mock_get_runs_info(*args):
+            runs = pandas.DataFrame(
+                {
+                    "spill_date_hour": pandas.Timestamp("2017-06-15 02:00"),
+                    "run_days": numpy.array([7] * n_runs, dtype=numpy.int64),
+                }
+            )
+            return runs
+
+        monkeypatch.setattr(mohid_cmd.monte_carlo, "_get_runs_info", mock_get_runs_info)
+
+        tmpl_dir = Path(glost_run_desc["paths"]["mohid config"], "templates")
+        tmpl_dir.mkdir()
+        (tmpl_dir / "Model.dat").write_text("")
+
+        mohid_cmd.monte_carlo.monte_carlo(
+            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+        )
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_id = glost_run_desc["job id"]
+        mohid_yaml_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743" / "mohid-yaml"
+        for i in range(n_runs):
+            assert (mohid_yaml_dir / f"Model-{i}.dat").exists()
+
     def test_results_dir_created(
         self,
         mock_arrow_now,
         mock_get_runs_info,
-        mock_render_mohid_run_yamls,
         mock_hg_repo,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -515,8 +644,9 @@ class TestGlostJobDir:
         self,
         mock_arrow_now,
         mock_get_runs_info,
-        mock_render_mohid_run_yamls,
         mock_hg_repo,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -532,8 +662,9 @@ class TestGlostJobDir:
         self,
         mock_arrow_now,
         mock_get_runs_info,
-        mock_render_mohid_run_yamls,
         mock_hg_repo,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -569,8 +700,9 @@ class TestGlostJobDir:
         self,
         mock_arrow_now,
         mock_get_runs_info,
-        mock_render_mohid_run_yamls,
         mock_hg_repo,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -586,8 +718,9 @@ class TestGlostJobDir:
         self,
         mock_arrow_now,
         mock_get_runs_info,
-        mock_render_mohid_run_yamls,
         mock_hg_repo,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -631,8 +764,9 @@ class TestGlostJobDir:
         self,
         mock_arrow_now,
         mock_get_runs_info,
-        mock_render_mohid_run_yamls,
         mock_hg_repo,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
         glost_run_desc,
         tmp_path,
     ):
