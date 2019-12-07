@@ -161,6 +161,7 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
         loader=jinja2.FileSystemLoader(os.fspath(mohid_config / "templates"))
     )
     _render_mohid_run_yamls(job_id, job_dir, runs, tmpl_env)
+    _render_model_dats(job_dir, runs, tmpl_env)
 
     if no_submit:
         return
@@ -208,3 +209,17 @@ def _render_mohid_run_yamls(job_id, job_dir, runs, tmpl_env):
             }
         )
         (job_dir / "mohid-yaml" / f"{job_id}-{i}.yaml").write_text(tmpl.render(context))
+
+
+def _render_model_dats(job_dir, runs, tmpl_env):
+    tmpl = tmpl_env.get_template("Model.dat")
+    for i, run in runs.iterrows():
+        ## TODO: Ensure that end_date - start_date are a multiple of DT value in template
+        ##       This depends on how we handle spill hour.
+        start_date = arrow.get(run.spill_date_hour.date())
+        end_date = start_date.shift(days=+run.run_days)
+        context = {
+            "start_yyyy_mm_dd": start_date.format("YYYY MM DD"),
+            "end_yyyy_mm_dd": end_date.format("YYYY MM DD"),
+        }
+        (job_dir / "mohid-yaml" / f"Model-{i}.dat").write_text(tmpl.render(context))
