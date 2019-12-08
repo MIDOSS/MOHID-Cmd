@@ -13,6 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import logging
+import os
 from pathlib import Path
 import textwrap
 from types import SimpleNamespace
@@ -304,34 +305,37 @@ class TestRenderMohidRunYamls:
     """
 
     def test_render_mohid_run_yamls(self, glost_run_desc, monkeypatch):
-        class MockJinja2Environment:
-            def get_template(self, name):
-                return jinja2.Template(
-                    textwrap.dedent(
-                        """\
-                        run_id: {{ job_id }}-{{ run_number }}
-    
-                        forcing:
-                          winds.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/winds.hdf5
-                          currents.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/currents.hdf5
-                          water_levels.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
-                          temperature.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
-                          salinity.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
-                          ww3.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/waves_stokes.hdf5
-                          e3t.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/e3t.hdf5
-    
-                        run data files:
-                          IN_MODEL: {{ job_dir }}/mohid-yaml/Model-{{ run_number }}.dat
-                          PARTIC_DATA: {{ job_dir }}/mohid-yaml/{{ Lagrangian_template }}-{{ run_number }}.dat
-                        """
-                    )
-                )
-
         job_id = glost_run_desc["job id"]
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_dir = Path(runs_dir) / f"{job_id}_2019-12-04T180843"
         mohid_yaml_dir = job_dir / "mohid-yaml"
         mohid_yaml_dir.mkdir(parents=True)
+        tmpl_dir = Path(glost_run_desc["paths"]["mohid config"]) / "templates"
+        tmpl_dir.mkdir(parents=True)
+        (tmpl_dir / "mohid-run.yaml").write_text(
+            textwrap.dedent(
+                """\
+                run_id: {{ job_id }}-{{ run_number }}
+    
+                forcing:
+                  winds.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/winds.hdf5
+                  currents.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/currents.hdf5
+                  water_levels.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
+                  temperature.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
+                  salinity.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
+                  ww3.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/waves_stokes.hdf5
+                  e3t.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/e3t.hdf5
+    
+                run data files:
+                  IN_MODEL: {{ job_dir }}/mohid-yaml/Model-{{ run_number }}.dat
+                  PARTIC_DATA: {{ job_dir }}/mohid-yaml/{{ Lagrangian_template }}-{{ run_number }}.dat
+                """
+            )
+        )
+        tmpl_env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(os.fspath(tmpl_dir))
+        )
+
         runs = pandas.DataFrame(
             {
                 "spill_date_hour": pandas.Timestamp("2017-06-15 02:00"),
@@ -340,9 +344,7 @@ class TestRenderMohidRunYamls:
             }
         )
 
-        mohid_cmd.monte_carlo._render_mohid_run_yamls(
-            job_id, job_dir, runs, MockJinja2Environment()
-        )
+        mohid_cmd.monte_carlo._render_mohid_run_yamls(job_id, job_dir, runs, tmpl_env)
         with (mohid_yaml_dir / f"{job_id}-0.yaml").open("rt") as fp:
             run_desc = yaml.safe_load(fp)
         assert run_desc["run_id"] == f"{job_id}-0"
@@ -389,35 +391,38 @@ class TestRenderModelDats:
     """
 
     def test_render_model_dats(self, glost_run_desc, monkeypatch):
-        class MockJinja2Environment:
-            def get_template(self, name):
-                return jinja2.Template(
-                    textwrap.dedent(
-                        """\
-                        ! Note: Time period must be a multiple of DT
-                        !
-                        START                     : {{ start_yyyy_mm_dd }} 00 30 0
-                        END                       : {{ end_yyyy_mm_dd }} 23 30 0
-                        DT                        : 3600
-                        
-                        VARIABLEDT                : 0
-                        OPENMP_NUM_THREADS        : 1
-                        GMTREFERENCE              : 0
-                        LAGRANGEANE               : 1
-                        LAGRANGIAN                : 1
-                        WAVES                     : 1
-                        NO_ISOLATED_CELLS         : 0
-                        !
-                        ! EOF
-                        """
-                    )
-                )
-
         job_id = glost_run_desc["job id"]
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_dir = Path(runs_dir) / f"{job_id}_2019-12-04T180843"
         mohid_yaml_dir = job_dir / "mohid-yaml"
         mohid_yaml_dir.mkdir(parents=True)
+        tmpl_dir = Path(glost_run_desc["paths"]["mohid config"]) / "templates"
+        tmpl_dir.mkdir(parents=True)
+        (tmpl_dir / "Model.dat").write_text(
+            textwrap.dedent(
+                """\
+                ! Note: Time period must be a multiple of DT
+                !
+                START                     : {{ start_yyyy_mm_dd }} 00 30 0
+                END                       : {{ end_yyyy_mm_dd }} 23 30 0
+                DT                        : 3600
+    
+                VARIABLEDT                : 0
+                OPENMP_NUM_THREADS        : 1
+                GMTREFERENCE              : 0
+                LAGRANGEANE               : 1
+                LAGRANGIAN                : 1
+                WAVES                     : 1
+                NO_ISOLATED_CELLS         : 0
+                !
+                ! EOF
+                """
+            )
+        )
+        tmpl_env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(os.fspath(tmpl_dir))
+        )
+
         runs = pandas.DataFrame(
             {
                 "spill_date_hour": pandas.Timestamp("2017-06-15 02:00"),
@@ -425,7 +430,7 @@ class TestRenderModelDats:
             }
         )
 
-        mohid_cmd.monte_carlo._render_model_dats(job_dir, runs, MockJinja2Environment())
+        mohid_cmd.monte_carlo._render_model_dats(job_dir, runs, tmpl_env)
         model_dat = (mohid_yaml_dir / f"Model-0.dat").read_text().splitlines()
         expected = textwrap.dedent(
             """\
@@ -454,21 +459,24 @@ class TestRenderLagrangianDats:
     """
 
     def test_render_lagrangian_dats(self, glost_run_desc, monkeypatch):
-        class MockJinja2Environment:
-            def get_template(self, name):
-                return jinja2.Template(
-                    textwrap.dedent(
-                        """\
-                        POSITION_COORDINATES      : {{ spill_lon }} {{ spill_lat }}
-                        """
-                    )
-                )
-
         job_id = glost_run_desc["job id"]
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_dir = Path(runs_dir) / f"{job_id}_2019-12-07T104143"
         mohid_yaml_dir = job_dir / "mohid-yaml"
         mohid_yaml_dir.mkdir(parents=True)
+        tmpl_dir = Path(glost_run_desc["paths"]["mohid config"]) / "templates"
+        tmpl_dir.mkdir(parents=True)
+        (tmpl_dir / "Lagrangian.dat").write_text(
+            textwrap.dedent(
+                """\
+                POSITION_COORDINATES      : {{ spill_lon }} {{ spill_lat }}
+                """
+            )
+        )
+        tmpl_env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(os.fspath(tmpl_dir))
+        )
+
         spill_lon = numpy.array([-122.86], dtype=numpy.float32)
         spill_lat = numpy.array([48.38], dtype=numpy.float32)
         runs = pandas.DataFrame(
@@ -479,9 +487,7 @@ class TestRenderLagrangianDats:
             }
         )
 
-        mohid_cmd.monte_carlo._render_lagrangian_dats(
-            job_dir, runs, MockJinja2Environment()
-        )
+        mohid_cmd.monte_carlo._render_lagrangian_dats(job_dir, runs, tmpl_env)
         lagrangian_dat = (mohid_yaml_dir / f"Lagrangian-0.dat").read_text().splitlines()
         lon, lat = lagrangian_dat[0].split()[-2:]
         assert float(lon) == numpy.asscalar(spill_lon)
