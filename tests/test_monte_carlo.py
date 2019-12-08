@@ -308,6 +308,7 @@ class TestRenderMohidRunYamls:
         job_id = glost_run_desc["job id"]
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_dir = Path(runs_dir) / f"{job_id}_2019-12-04T180843"
+        mohid_config = glost_run_desc["paths"]["mohid config"]
         mohid_yaml_dir = job_dir / "mohid-yaml"
         mohid_yaml_dir.mkdir(parents=True)
         tmpl_dir = Path(glost_run_desc["paths"]["mohid config"]) / "templates"
@@ -329,6 +330,14 @@ class TestRenderMohidRunYamls:
                 run data files:
                   IN_MODEL: {{ job_dir }}/mohid-yaml/Model-{{ run_number }}.dat
                   PARTIC_DATA: {{ job_dir }}/mohid-yaml/{{ Lagrangian_template }}-{{ run_number }}.dat
+                  SURF_DAT: {{ mohid_config }}/Atmosphere.dat
+                  IN_DAD3D: {{ mohid_config }}/Hydrodynamic.dat
+                  BOT_DAT: {{ mohid_config }}/InterfaceSedimentWater.dat
+                  AIRW_DAT: {{ mohid_config }}/InterfaceWaterAir.dat
+                  IN_TIDES: {{ mohid_config }}/Tide.dat
+                  IN_TURB: {{ mohid_config }}/Turbulence.dat
+                  DISPQUAL: {{ mohid_config }}/WaterProperties.dat
+                  WAVES_DAT: {{ mohid_config }}/Waves.dat
                 """
             )
         )
@@ -344,46 +353,35 @@ class TestRenderMohidRunYamls:
             }
         )
 
-        mohid_cmd.monte_carlo._render_mohid_run_yamls(job_id, job_dir, runs, tmpl_env)
+        mohid_cmd.monte_carlo._render_mohid_run_yamls(
+            job_id, job_dir, mohid_config, runs, tmpl_env
+        )
         with (mohid_yaml_dir / f"{job_id}-0.yaml").open("rt") as fp:
             run_desc = yaml.safe_load(fp)
         assert run_desc["run_id"] == f"{job_id}-0"
-        assert (
-            run_desc["forcing"]["winds.hdf5"]
-            == "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/winds.hdf5"
-        )
-        assert (
-            run_desc["forcing"]["currents.hdf5"]
-            == "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/currents.hdf5"
-        )
-        assert (
-            run_desc["forcing"]["water_levels.hdf5"]
-            == "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/t.hdf5"
-        )
-        assert (
-            run_desc["forcing"]["temperature.hdf5"]
-            == "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/t.hdf5"
-        )
-        assert (
-            run_desc["forcing"]["salinity.hdf5"]
-            == "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/t.hdf5"
-        )
-        assert (
-            run_desc["forcing"]["ww3.hdf5"]
-            == "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/waves_stokes.hdf5"
-        )
-        assert (
-            run_desc["forcing"]["e3t.hdf5"]
-            == "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/e3t.hdf5"
-        )
-        assert (
-            run_desc["run data files"]["IN_MODEL"]
-            == f"{job_dir}/mohid-yaml/Model-0.dat"
-        )
-        assert (
-            run_desc["run data files"]["PARTIC_DATA"]
-            == f"{job_dir}/mohid-yaml/Lagrangian_AKNS_crude-0.dat"
-        )
+        expected_forcing = {
+            "winds.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/winds.hdf5",
+            "currents.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/currents.hdf5",
+            "water_levels.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/t.hdf5",
+            "temperature.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/t.hdf5",
+            "salinity.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/t.hdf5",
+            "ww3.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/waves_stokes.hdf5",
+            "e3t.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/e3t.hdf5",
+        }
+        assert run_desc["forcing"] == expected_forcing
+        expected_run_data_files = {
+            "IN_MODEL": f"{job_dir}/mohid-yaml/Model-0.dat",
+            "PARTIC_DATA": f"{job_dir}/mohid-yaml/Lagrangian_AKNS_crude-0.dat",
+            "SURF_DAT": f"{mohid_config}/Atmosphere.dat",
+            "IN_DAD3D": f"{mohid_config}/Hydrodynamic.dat",
+            "BOT_DAT": f"{mohid_config}/InterfaceSedimentWater.dat",
+            "AIRW_DAT": f"{mohid_config}/InterfaceWaterAir.dat",
+            "IN_TIDES": f"{mohid_config}/Tide.dat",
+            "IN_TURB": f"{mohid_config}/Turbulence.dat",
+            "DISPQUAL": f"{mohid_config}/WaterProperties.dat",
+            "WAVES_DAT": f"{mohid_config}/Waves.dat",
+        }
+        assert run_desc["run data files"] == expected_run_data_files
 
 
 class TestRenderModelDats:
