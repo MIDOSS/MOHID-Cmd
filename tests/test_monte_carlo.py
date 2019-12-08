@@ -119,6 +119,16 @@ def mock_render_model_dats(monkeypatch):
 
 
 @pytest.fixture
+def mock_render_lagrangian_dats(monkeypatch):
+    def mock_render_lagrangian_dats(*args):
+        pass
+
+    monkeypatch.setattr(
+        mohid_cmd.monte_carlo, "_render_lagrangian_dats", mock_render_lagrangian_dats
+    )
+
+
+@pytest.fixture
 def mock_record_vcs_revisions(monkeypatch):
     def mock_record_vcs_revisions(*args):
         pass
@@ -207,9 +217,10 @@ class TestTakeAction:
     def test_take_action(
         self,
         mock_get_runs_info,
+        mock_record_vcs_revisions,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
-        mock_record_vcs_revisions,
+        mock_render_lagrangian_dats,
         monte_carlo_cmd,
         glost_run_desc,
         mock_subprocess_run,
@@ -232,6 +243,7 @@ class TestTakeAction:
         mock_record_vcs_revisions,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
+        mock_render_lagrangian_dats,
         monte_carlo_cmd,
         glost_run_desc,
         mock_subprocess_run,
@@ -259,6 +271,7 @@ class TestMonteCarlo:
         mock_subprocess_run,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
+        mock_render_lagrangian_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -273,6 +286,7 @@ class TestMonteCarlo:
         mock_record_vcs_revisions,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
+        mock_render_lagrangian_dats,
         mock_subprocess_run,
         glost_run_desc,
         tmp_path,
@@ -290,10 +304,7 @@ class TestRenderMohidRunYamls:
     """
 
     def test_render_mohid_run_yamls(self, glost_run_desc, monkeypatch):
-        @attr.s
         class MockJinja2Environment:
-            loader = attr.ib()
-
             def get_template(self, name):
                 return jinja2.Template(
                     textwrap.dedent(
@@ -330,7 +341,7 @@ class TestRenderMohidRunYamls:
         )
 
         mohid_cmd.monte_carlo._render_mohid_run_yamls(
-            job_id, job_dir, runs, MockJinja2Environment("loader")
+            job_id, job_dir, runs, MockJinja2Environment()
         )
         with (mohid_yaml_dir / f"{job_id}-0.yaml").open("rt") as fp:
             run_desc = yaml.safe_load(fp)
@@ -378,10 +389,7 @@ class TestRenderModelDats:
     """
 
     def test_render_model_dats(self, glost_run_desc, monkeypatch):
-        @attr.s
         class MockJinja2Environment:
-            loader = attr.ib()
-
             def get_template(self, name):
                 return jinja2.Template(
                     textwrap.dedent(
@@ -417,9 +425,7 @@ class TestRenderModelDats:
             }
         )
 
-        mohid_cmd.monte_carlo._render_model_dats(
-            job_dir, runs, MockJinja2Environment("loader")
-        )
+        mohid_cmd.monte_carlo._render_model_dats(job_dir, runs, MockJinja2Environment())
         model_dat = (mohid_yaml_dir / f"Model-0.dat").read_text().splitlines()
         expected = textwrap.dedent(
             """\
@@ -441,6 +447,45 @@ class TestRenderModelDats:
             """
         ).splitlines()
         assert model_dat == expected
+
+
+class TestRenderLagrangianDats:
+    """Unit test for _render_lagrangian_dats() function.
+    """
+
+    def test_render_lagrangian_dats(self, glost_run_desc, monkeypatch):
+        class MockJinja2Environment:
+            def get_template(self, name):
+                return jinja2.Template(
+                    textwrap.dedent(
+                        """\
+                        POSITION_COORDINATES      : {{ spill_lon }} {{ spill_lat }}
+                        """
+                    )
+                )
+
+        job_id = glost_run_desc["job id"]
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_dir = Path(runs_dir) / f"{job_id}_2019-12-07T104143"
+        mohid_yaml_dir = job_dir / "mohid-yaml"
+        mohid_yaml_dir.mkdir(parents=True)
+        spill_lon = numpy.array([-122.86], dtype=numpy.float32)
+        spill_lat = numpy.array([48.38], dtype=numpy.float32)
+        runs = pandas.DataFrame(
+            {
+                "spill_lon": spill_lon,
+                "spill_lat": spill_lat,
+                "Lagrangian_template": "Lagrangian.dat",
+            }
+        )
+
+        mohid_cmd.monte_carlo._render_lagrangian_dats(
+            job_dir, runs, MockJinja2Environment()
+        )
+        lagrangian_dat = (mohid_yaml_dir / f"Lagrangian-0.dat").read_text().splitlines()
+        lon, lat = lagrangian_dat[0].split()[-2:]
+        assert float(lon) == numpy.asscalar(spill_lon)
+        assert float(lat) == numpy.asscalar(spill_lat)
 
 
 class TestGlostJobDir:
@@ -506,6 +551,7 @@ class TestGlostJobDir:
         mock_hg_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
+        mock_render_lagrangian_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -523,6 +569,7 @@ class TestGlostJobDir:
         mock_hg_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
+        mock_render_lagrangian_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -542,6 +589,7 @@ class TestGlostJobDir:
         mock_hg_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
+        mock_render_lagrangian_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -557,6 +605,7 @@ class TestGlostJobDir:
         mock_arrow_now,
         mock_hg_repo,
         mock_render_model_dats,
+        mock_render_lagrangian_dats,
         glost_run_desc,
         tmp_path,
         monkeypatch,
@@ -593,6 +642,7 @@ class TestGlostJobDir:
         mock_arrow_now,
         mock_hg_repo,
         mock_render_mohid_run_yamls,
+        mock_render_lagrangian_dats,
         glost_run_desc,
         tmp_path,
         monkeypatch,
@@ -623,6 +673,43 @@ class TestGlostJobDir:
         for i in range(n_runs):
             assert (mohid_yaml_dir / f"Model-{i}.dat").exists()
 
+    def test_lagrangian_dat_files_created(
+        self,
+        mock_arrow_now,
+        mock_hg_repo,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
+        glost_run_desc,
+        tmp_path,
+        monkeypatch,
+    ):
+        n_runs = 2
+
+        def mock_get_runs_info(*args):
+            runs = pandas.DataFrame(
+                {
+                    "spill_lon": numpy.array([-122.86] * n_runs, dtype=numpy.float32),
+                    "spill_lat": numpy.array([48.38] * n_runs, dtype=numpy.float32),
+                    "Lagrangian_template": "Lagrangian_AKNS_crude.dat",
+                }
+            )
+            return runs
+
+        monkeypatch.setattr(mohid_cmd.monte_carlo, "_get_runs_info", mock_get_runs_info)
+
+        tmpl_dir = Path(glost_run_desc["paths"]["mohid config"], "templates")
+        tmpl_dir.mkdir()
+        (tmpl_dir / "Lagrangian_AKNS_crude.dat").write_text("")
+
+        mohid_cmd.monte_carlo.monte_carlo(
+            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+        )
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_id = glost_run_desc["job id"]
+        mohid_yaml_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743" / "mohid-yaml"
+        for i in range(n_runs):
+            assert (mohid_yaml_dir / f"Lagrangian_AKNS_crude-{i}.dat").exists()
+
     def test_results_dir_created(
         self,
         mock_arrow_now,
@@ -630,6 +717,7 @@ class TestGlostJobDir:
         mock_hg_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
+        mock_render_lagrangian_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -647,6 +735,7 @@ class TestGlostJobDir:
         mock_hg_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
+        mock_render_lagrangian_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -665,6 +754,7 @@ class TestGlostJobDir:
         mock_hg_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
+        mock_render_lagrangian_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -703,6 +793,7 @@ class TestGlostJobDir:
         mock_hg_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
+        mock_render_lagrangian_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -721,6 +812,7 @@ class TestGlostJobDir:
         mock_hg_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
+        mock_render_lagrangian_dats,
         glost_run_desc,
         tmp_path,
     ):
@@ -767,6 +859,7 @@ class TestGlostJobDir:
         mock_hg_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
+        mock_render_lagrangian_dats,
         glost_run_desc,
         tmp_path,
     ):

@@ -162,6 +162,7 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
     )
     _render_mohid_run_yamls(job_id, job_dir, runs, tmpl_env)
     _render_model_dats(job_dir, runs, tmpl_env)
+    _render_lagrangian_dats(job_dir, runs, tmpl_env)
 
     if no_submit:
         return
@@ -212,6 +213,11 @@ def _render_mohid_run_yamls(job_id, job_dir, runs, tmpl_env):
 
 
 def _render_model_dats(job_dir, runs, tmpl_env):
+    """
+    :param :py:class:`pathlib.Path` job_dir:
+    :param :py:class:`pandas.DataFrame` runs:
+    :param :py:class:`jinja2.Environment` tmpl_env:
+    """
     tmpl = tmpl_env.get_template("Model.dat")
     for i, run in runs.iterrows():
         ## TODO: Ensure that end_date - start_date are a multiple of DT value in template
@@ -223,3 +229,20 @@ def _render_model_dats(job_dir, runs, tmpl_env):
             "end_yyyy_mm_dd": end_date.format("YYYY MM DD"),
         }
         (job_dir / "mohid-yaml" / f"Model-{i}.dat").write_text(tmpl.render(context))
+
+
+def _render_lagrangian_dats(job_dir, runs, tmpl_env):
+    """
+    :param :py:class:`pathlib.Path` job_dir:
+    :param :py:class:`pandas.DataFrame` runs:
+    :param :py:class:`jinja2.Environment` tmpl_env:
+    """
+    for i, run in runs.iterrows():
+        lagrangian_template = Path(run.Lagrangian_template)
+        tmpl = tmpl_env.get_template(os.fspath(lagrangian_template))
+        context = {
+            "spill_lon": run.spill_lon,
+            "spill_lat": run.spill_lat,
+        }
+        lagrangian_dat = f"{lagrangian_template.stem}-{i}.dat"
+        (job_dir / "mohid-yaml" / lagrangian_dat).write_text(tmpl.render(context))
