@@ -875,7 +875,7 @@ class TestGlostJobDir:
             module load proj4-fortran/1.0
             module load nco/4.6.6
             
-            export MONTE_CARLO/={job_dir}
+            export MONTE_CARLO={job_dir}
             
             echo "Starting glost at $(date)"
             srun glost_launch {job_dir}/glost-tasks.txt
