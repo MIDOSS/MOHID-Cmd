@@ -16,7 +16,7 @@ module load python/3.7
 module load proj4-fortran/1.0
 module load nco/4.6.6
 
-export MONTE_CARLO/={{ cookiecutter.job_dir }}
+export MONTE_CARLO={{ cookiecutter.job_dir }}
 
 echo "Starting glost at $(date)"
 srun glost_launch {{ cookiecutter.job_dir }}/glost-tasks.txt
