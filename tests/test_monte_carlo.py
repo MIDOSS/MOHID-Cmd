@@ -230,6 +230,7 @@ class TestTakeAction:
     ):
         desc_file = tmp_path / "monte-carlo.yaml"
         csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         parsed_args = SimpleNamespace(
             desc_file=desc_file, csv_file=csv_file, no_submit=False
         )
@@ -253,6 +254,7 @@ class TestTakeAction:
     ):
         desc_file = tmp_path / "monte-carlo.yaml"
         csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         parsed_args = SimpleNamespace(
             desc_file=desc_file, csv_file=csv_file, no_submit=True
         )
@@ -276,8 +278,10 @@ class TestMonteCarlo:
         glost_run_desc,
         tmp_path,
     ):
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         submit_job_msg = mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
         assert submit_job_msg is None
 
@@ -292,6 +296,8 @@ class TestMonteCarlo:
         glost_run_desc,
         tmp_path,
     ):
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         submit_job_msg = mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml",
             tmp_path / "AKNS_spatial.csv",
@@ -559,8 +565,10 @@ class TestGlostJobDir:
         glost_run_desc,
         tmp_path,
     ):
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
@@ -577,8 +585,10 @@ class TestGlostJobDir:
         glost_run_desc,
         tmp_path,
     ):
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
@@ -597,8 +607,10 @@ class TestGlostJobDir:
         glost_run_desc,
         tmp_path,
     ):
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
@@ -632,8 +644,10 @@ class TestGlostJobDir:
         tmpl_dir.mkdir()
         (tmpl_dir / "mohid-run.yaml").write_text("")
 
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
@@ -668,8 +682,10 @@ class TestGlostJobDir:
         tmpl_dir.mkdir()
         (tmpl_dir / "Model.dat").write_text("")
 
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
@@ -705,8 +721,10 @@ class TestGlostJobDir:
         tmpl_dir.mkdir()
         (tmpl_dir / "Lagrangian_AKNS_crude.dat").write_text("")
 
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
@@ -725,8 +743,10 @@ class TestGlostJobDir:
         glost_run_desc,
         tmp_path,
     ):
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
@@ -743,8 +763,10 @@ class TestGlostJobDir:
         glost_run_desc,
         tmp_path,
     ):
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
@@ -762,8 +784,10 @@ class TestGlostJobDir:
         glost_run_desc,
         tmp_path,
     ):
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
@@ -801,8 +825,10 @@ class TestGlostJobDir:
         glost_run_desc,
         tmp_path,
     ):
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
@@ -820,8 +846,10 @@ class TestGlostJobDir:
         glost_run_desc,
         tmp_path,
     ):
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
@@ -856,6 +884,48 @@ class TestGlostJobDir:
         ).splitlines()
         assert glost_script == expected
 
+    def test_glost_job_desc_file_copied(
+        self,
+        mock_arrow_now,
+        mock_get_runs_info,
+        mock_hg_repo,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
+        mock_render_lagrangian_dats,
+        glost_run_desc,
+        tmp_path,
+    ):
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
+        mohid_cmd.monte_carlo.monte_carlo(
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
+        )
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_id = glost_run_desc["job id"]
+        job_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743"
+        assert (job_dir / "monte-carlo.yaml").is_file()
+
+    def test_csv_file_copied(
+        self,
+        mock_arrow_now,
+        mock_get_runs_info,
+        mock_hg_repo,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
+        mock_render_lagrangian_dats,
+        glost_run_desc,
+        tmp_path,
+    ):
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
+        mohid_cmd.monte_carlo.monte_carlo(
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
+        )
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_id = glost_run_desc["job id"]
+        job_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743"
+        assert (job_dir / csv_file.name).is_file()
+
     def test_vcs_rev_record_files_created(
         self,
         mock_arrow_now,
@@ -867,8 +937,10 @@ class TestGlostJobDir:
         glost_run_desc,
         tmp_path,
     ):
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
         mohid_cmd.monte_carlo.monte_carlo(
-            tmp_path / "monte-carlo.yaml", tmp_path / "AKNS_spatial.csv", no_submit=True
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]

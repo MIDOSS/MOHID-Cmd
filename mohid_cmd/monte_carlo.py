@@ -21,6 +21,7 @@ import logging
 import os
 from pathlib import Path
 import shlex
+import shutil
 import subprocess
 
 import arrow
@@ -99,10 +100,12 @@ class MonteCarlo(cliff.command.Command):
 def monte_carlo(desc_file, csv_file, no_submit=False):
     """
 
-    :param desc_file:
+    :param :py:class:`pathlib.Path` desc_file:
     :param :py:class:`pathlib.Path` csv_file:
-    :param no_submit:
+    :param boolean no_submit:
+
     :return:
+    :rtype: str
     """
     job_desc = nemo_cmd.prepare.load_run_desc(desc_file)
     job_id = nemo_cmd.prepare.get_run_desc_value(job_desc, ("job id",))
@@ -149,6 +152,8 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
         output_dir=job_dir,
         extra_context=cookiecutter_context,
     )
+    shutil.copy2(desc_file, job_dir)
+    shutil.copy2(csv_file, job_dir)
     nemo_cmd.prepare.record_vcs_revisions(job_desc, job_dir)
     mohid_config = nemo_cmd.prepare.get_run_desc_value(
         job_desc,
