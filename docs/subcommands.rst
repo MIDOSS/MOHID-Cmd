@@ -38,6 +38,7 @@ The command :kbd:`mohid help` produces a list of the available :program:`mohid` 
     complete       print bash completion command (cliff)
     gather         Gather results files from a MIDOSS-MOHID run.
     help           print detailed help for another command (cliff)
+    monte-carlo    Prepare for and execute a collection of Monte Carlo runs of the MIDOSS-MOHID model.
     prepare        Set up the MIDOSS-MOHID run described in DESC_FILE and print the path of the temporary run directory.
     run            Prepare, execute, and gather results from a MIDOSS-MOHID model run.
 
@@ -128,6 +129,57 @@ The :command:`run` sub-command does the following:
 
 .. note::
     If the :command:`run` sub-command prints an error message,
+    you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
+
+
+.. _mohid-monte-carlo:
+
+:kbd:`monte-carlo` Sub-command
+==============================
+
+.. warning::
+    The :command:`monte-carlo` sub-command is presently under active development,
+    so frequent updates and changes in the code and associated documentation in the ref:`monte-carlo-sub-command` section should be expected.
+
+The :command:`monte-carlo` sub-command prepares an MPI job to execute a collection of MIDOSS-MOHID runs,
+typically for a Monte Carlo experiment.
+The job uses `GLOST`_ to execute the individual runs in the context of a single MPI job.
+The job is described by a YAML file that provides information for the setup and execution of the GLOST job,
+and a CSV file that provides parameters of the individual MIDOSS-MOHID runs.
+
+.. _GLOST: https://docs.computecanada.ca/wiki/GLOST
+
+Please see the :ref:`monte-carlo-sub-command` section for details of the YAML and CSV files,
+how :command:`monte-carlo` works,
+and the directory structure that it produces.
+
+::
+
+    usage: mohid monte-carlo [-h] [--no-submit] DESC_FILE CSV_FILE
+
+    Prepare for and execute a collection of Monte Carlo runs of the MIDOSS-MOHID
+    model as a glost job. The glost job is described in DESC_FILE. The parameters
+    of the MIDOSS-MOHID runs are defined in CSV_FILE. The results directories from
+    the runs are gathered in RESULTS_DIR. If RESULTS_DIR does ont exist, it will
+    be created.
+
+    positional arguments:
+      DESC_FILE    glost job description YAML file
+      CSV_FILE     MIDOSS-MOHID run parameters CSV file
+
+    optional arguments:
+      -h, --help   show this help message and exit
+      --no-submit  Prepare the directories of forcing YAML files,
+                   MIDOSS-MOHID run description YAML files,
+                   top level results directory,
+                   and the bash script to execute the glost job,
+                   but don't submit the glost job to the queue.
+                   This is useful during development runs when you want to hack on
+                   the bash script and/or use the same setup directories
+                   more than once.
+
+.. note::
+    If the :command:`monte-carlo` sub-command prints an error message,
     you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
 
 
