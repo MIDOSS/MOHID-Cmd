@@ -45,6 +45,7 @@ It uses plug-ins from the `NEMO-Cmd`_ package to provide a command processor too
 
    subcommands
    run_description_file/index
+   pkg_development
 
 
 Indices
