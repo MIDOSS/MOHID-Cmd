@@ -332,6 +332,7 @@ class TestRenderMohidRunYamls:
                   salinity.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
                   ww3.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/waves_stokes.hdf5
                   e3t.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/e3t.hdf5
+                  diffusivity.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
     
                 run data files:
                   IN_MODEL: {{ job_dir }}/mohid-yaml/Model-{{ run_number }}.dat
@@ -373,6 +374,7 @@ class TestRenderMohidRunYamls:
             "salinity.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/t.hdf5",
             "ww3.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/waves_stokes.hdf5",
             "e3t.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/e3t.hdf5",
+            "diffusivity.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/t.hdf5",
         }
         assert run_desc["forcing"] == expected_forcing
         expected_run_data_files = {
