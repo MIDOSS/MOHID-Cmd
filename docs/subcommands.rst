@@ -115,7 +115,7 @@ are printed upon completion of the command.
 
 The :command:`run` sub-command does the following:
 
-#. Execute the :ref:`mohid-prepare` via the :ref:`MOHID-CmdAPI` to set up a temporary run directory from which to execute the MIDOSS-MOHID run.
+#. Execute the :ref:`mohid-prepare` to set up a temporary run directory from which to execute the MIDOSS-MOHID run.
 
 #. Create a :file:`MOHID.sh` job script in the temporary run directory.
    The job script:
