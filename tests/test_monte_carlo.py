@@ -325,14 +325,14 @@ class TestRenderMohidRunYamls:
                 run_id: {{ job_id }}-{{ run_number }}
     
                 forcing:
-                  winds.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/winds.hdf5
-                  currents.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/currents.hdf5
-                  water_levels.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
-                  temperature.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
-                  salinity.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
-                  ww3.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/waves_stokes.hdf5
-                  e3t.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/e3t.hdf5
-                  diffusivity.hdf5: /scratch/dlatorne/MIDOSS/forcing/SOG_{{ start_ddmmmyy }}_{{ end_ddmmmyy }}/t.hdf5
+                  winds.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/winds.hdf5
+                  currents.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/currents.hdf5
+                  water_levels.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
+                  temperature.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
+                  salinity.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
+                  ww3.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/waves.hdf5
+                  e3t.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/e3t.hdf5
+                  diffusivity.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
     
                 run data files:
                   IN_MODEL: {{ job_dir }}/mohid-yaml/Model-{{ run_number }}.dat
@@ -367,14 +367,14 @@ class TestRenderMohidRunYamls:
             run_desc = yaml.safe_load(fp)
         assert run_desc["run_id"] == f"{job_id}-0"
         expected_forcing = {
-            "winds.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/winds.hdf5",
-            "currents.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/currents.hdf5",
-            "water_levels.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/t.hdf5",
-            "temperature.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/t.hdf5",
-            "salinity.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/t.hdf5",
-            "ww3.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/waves_stokes.hdf5",
-            "e3t.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/e3t.hdf5",
-            "diffusivity.hdf5": "/scratch/dlatorne/MIDOSS/forcing/SOG_15jun17_22jun17/t.hdf5",
+            "winds.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/winds.hdf5",
+            "currents.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/currents.hdf5",
+            "water_levels.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/t.hdf5",
+            "temperature.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/t.hdf5",
+            "salinity.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/t.hdf5",
+            "ww3.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/waves.hdf5",
+            "e3t.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/e3t.hdf5",
+            "diffusivity.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/t.hdf5",
         }
         assert run_desc["forcing"] == expected_forcing
         expected_run_data_files = {
