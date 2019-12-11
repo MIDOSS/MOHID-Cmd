@@ -443,7 +443,7 @@ class TestRenderModelDats:
             ! Note: Time period must be a multiple of DT
             !
             START                     : 2017 06 15 00 30 0
-            END                       : 2017 06 22 23 30 0
+            END                       : 2017 06 21 23 30 0
             DT                        : 3600
             
             VARIABLEDT                : 0

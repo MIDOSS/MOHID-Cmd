@@ -230,7 +230,7 @@ def _render_model_dats(job_dir, runs, tmpl_env):
         ## TODO: Ensure that end_date - start_date are a multiple of DT value in template
         ##       This depends on how we handle spill hour.
         start_date = arrow.get(run.spill_date_hour.date())
-        end_date = start_date.shift(days=+run.run_days)
+        end_date = start_date.shift(days=+run.run_days - 1)
         context = {
             "start_yyyy_mm_dd": start_date.format("YYYY MM DD"),
             "end_yyyy_mm_dd": end_date.format("YYYY MM DD"),
