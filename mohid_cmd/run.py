@@ -232,7 +232,10 @@ def _sbatch_directives(run_desc, results_dir):
         #SBATCH --output={results_dir/'stdout'}
         #SBATCH --error={results_dir/'stderr'}
     
-        export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+        if ! test -z $SLURM_CPUS_PER_TASK
+        then
+          export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+        fi
         """
     )
     return sbatch_directives

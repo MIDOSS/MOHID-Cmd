@@ -315,7 +315,10 @@ class TestBuildRunScript:
             #SBATCH --output=results_dir/stdout
             #SBATCH --error=results_dir/stderr
             
-            export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+            if ! test -z $SLURM_CPUS_PER_TASK
+            then
+              export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+            fi
             
             RUN_ID="{run_id}"
             RUN_DESC="mohid.yaml"
@@ -394,7 +397,10 @@ class TestSbatchDirectives:
             #SBATCH --output=results_dir/stdout
             #SBATCH --error=results_dir/stderr
             
-            export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+            if ! test -z $SLURM_CPUS_PER_TASK
+            then
+              export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+            fi
             """
         )
         assert sbatch_directives == expected
