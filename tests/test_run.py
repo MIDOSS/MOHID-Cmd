@@ -330,39 +330,39 @@ class TestBuildRunScript:
             
             mkdir -p ${{RESULTS_DIR}}
             cd ${{WORK_DIR}}
-            echo "working dir: $(pwd)"
+            echo "working dir: $(pwd)" >${{RESULTS_DIR}}/stdout
             
-            echo "Starting run at $(date)"
-            {str(p_mohid_exe)}
+            echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
+            {str(p_mohid_exe)} >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
             MOHID_EXIT_CODE=$?
-            echo "Ended run at $(date)"
+            echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
             
             TMPDIR="${{SLURM_TMPDIR}}"
             LAGRANGIAN="Lagrangian_DieselFuel_refined_${{RUN_ID}}"
             if test -f ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5
             then
-              echo "Results hdf5 to netCDF4 conversion started at $(date)"
-              cp ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5 ${{SLURM_TMPDIR}}/ && \\
+              echo "Results hdf5 to netCDF4 conversion started at $(date)" >>${{RESULTS_DIR}}/stdout
+              cp -v ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5 ${{SLURM_TMPDIR}}/ >>${{RESULTS_DIR}}/stdout && \\
               ${{HDF5_TO_NETCDF4}} -v info \\
                 ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.hdf5 \\
-                ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.nc && \\
-              mv ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.nc ${{WORK_DIR}}/ && \\
-              rm ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5
-              echo "Results hdf5 to netCDF4 conversion ended at $(date)"
+                ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.nc >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr && \\
+              mv -v ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.nc ${{WORK_DIR}}/ >>${{RESULTS_DIR}}/stdout && \\
+              rm -v ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5 >>${{RESULTS_DIR}}/stdout
+              echo "Results hdf5 to netCDF4 conversion ended at $(date)" >>${{RESULTS_DIR}}/stdout
             fi
             
-            echo "Results gathering started at $(date)"
-            ${{GATHER}} ${{RESULTS_DIR}} --debug
-            echo "Results gathering ended at $(date)"
+            echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
+            ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
+            echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
             
-            chmod go+rx ${{RESULTS_DIR}}
-            chmod g+rw ${{RESULTS_DIR}}/*
-            chmod o+r ${{RESULTS_DIR}}/*
+            chmod -v go+rx ${{RESULTS_DIR}} >>${{RESULTS_DIR}}/stdout
+            chmod -v g+rw ${{RESULTS_DIR}}/* >>${{RESULTS_DIR}}/stdout
+            chmod -v o+r ${{RESULTS_DIR}}/* >>${{RESULTS_DIR}}/stdout
             
-            echo "Deleting run directory"
-            rmdir $(pwd)
-            echo "Finished at $(date)"
-            exit ${{MPIRUN_EXIT_CODE}}
+            echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout
+            rmdir -v $(pwd) >>${{RESULTS_DIR}}/stdout
+            echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout
+            exit ${{MOHID_EXIT_CODE}}
             """
         )
         assert run_script == expected
@@ -461,30 +461,30 @@ class TestExecute:
             f"""\
             mkdir -p ${{RESULTS_DIR}}
             cd ${{WORK_DIR}}
-            echo "working dir: $(pwd)"
+            echo "working dir: $(pwd)" >${{RESULTS_DIR}}/stdout
             
-            echo "Starting run at $(date)"
-            {str(p_mohid_exe)}
+            echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
+            {str(p_mohid_exe)} >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
             MOHID_EXIT_CODE=$?
-            echo "Ended run at $(date)"
+            echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
             
             TMPDIR="${{SLURM_TMPDIR}}"
             LAGRANGIAN="Lagrangian_DieselFuel_refined_${{RUN_ID}}"
             if test -f ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5
             then
-              echo "Results hdf5 to netCDF4 conversion started at $(date)"
-              cp ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5 ${{SLURM_TMPDIR}}/ && \\
+              echo "Results hdf5 to netCDF4 conversion started at $(date)" >>${{RESULTS_DIR}}/stdout
+              cp -v ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5 ${{SLURM_TMPDIR}}/ >>${{RESULTS_DIR}}/stdout && \\
               ${{HDF5_TO_NETCDF4}} -v info \\
                 ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.hdf5 \\
-                ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.nc && \\
-              mv ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.nc ${{WORK_DIR}}/ && \\
-              rm ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5
-              echo "Results hdf5 to netCDF4 conversion ended at $(date)"
+                ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.nc >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr && \\
+              mv -v ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.nc ${{WORK_DIR}}/ >>${{RESULTS_DIR}}/stdout && \\
+              rm -v ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5 >>${{RESULTS_DIR}}/stdout
+              echo "Results hdf5 to netCDF4 conversion ended at $(date)" >>${{RESULTS_DIR}}/stdout
             fi
             
-            echo "Results gathering started at $(date)"
-            ${{GATHER}} ${{RESULTS_DIR}} --debug
-            echo "Results gathering ended at $(date)"
+            echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
+            ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
+            echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
             """
         )
         assert script == expected
@@ -498,9 +498,9 @@ class TestFixPermissions:
         script = mohid_cmd.run._fix_permissions()
         expected = textwrap.dedent(
             """\
-            chmod go+rx ${RESULTS_DIR}
-            chmod g+rw ${RESULTS_DIR}/*
-            chmod o+r ${RESULTS_DIR}/*
+            chmod -v go+rx ${RESULTS_DIR} >>${RESULTS_DIR}/stdout
+            chmod -v g+rw ${RESULTS_DIR}/* >>${RESULTS_DIR}/stdout
+            chmod -v o+r ${RESULTS_DIR}/* >>${RESULTS_DIR}/stdout
             """
         )
         assert script == expected
@@ -514,10 +514,10 @@ class TestCleanup:
         script = mohid_cmd.run._cleanup()
         expected = textwrap.dedent(
             """\
-            echo "Deleting run directory"
-            rmdir $(pwd)
-            echo "Finished at $(date)"
-            exit ${MPIRUN_EXIT_CODE}
+            echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+            rmdir -v $(pwd) >>${RESULTS_DIR}/stdout
+            echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+            exit ${MOHID_EXIT_CODE}
             """
         )
         assert script == expected
