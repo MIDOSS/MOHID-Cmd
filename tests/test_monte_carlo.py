@@ -66,7 +66,7 @@ def glost_run_desc(tmp_path):
             nodes: 1
             tasks per node: 3
             runs per glost job: 2
-            mem per cpu: 14000M
+            mem per cpu: 14100M
             run walltime: 2:00:00   
 
             paths:
