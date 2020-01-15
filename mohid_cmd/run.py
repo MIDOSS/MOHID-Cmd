@@ -331,8 +331,8 @@ def _execute(run_desc):
           ${{HDF5_TO_NETCDF4}} -v info \\
             ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.hdf5 \\
             ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.nc >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr && \\
-          mv -v ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.nc ${{WORK_DIR}}/ >>${{RESULTS_DIR}}/stdout && \\          
-#          rm -v ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5 >>${{RESULTS_DIR}}/stdout
+          mv -v ${{SLURM_TMPDIR}}/${{LAGRANGIAN}}.nc ${{WORK_DIR}}/ >>${{RESULTS_DIR}}/stdout && \\
+          rm -v ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5 >>${{RESULTS_DIR}}/stdout
           echo "Results hdf5 to netCDF4 conversion ended at $(date)" >>${{RESULTS_DIR}}/stdout
         fi
         
