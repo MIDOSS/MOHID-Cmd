@@ -122,7 +122,7 @@ and building the documentation with the commands below.
 .. code-block:: bash
 
     $ cd MIDOSS
-    $ conda env create -f MOHID-Cmd/env/environment-dev.yaml
+    $ conda env create -f MOHID-Cmd/envs/environment-dev.yaml
     $ source activate mohid-cmd
     (mohid-cmd)$ python3 -m pip install --editable NEMO-Cmd/
     (mohid-cmd)$ python3 -m pip install --editable MOHID-Cmd/
