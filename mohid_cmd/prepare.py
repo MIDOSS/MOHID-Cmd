@@ -208,7 +208,8 @@ def _make_nomfich(run_desc, tmp_run_dir):
     }
     for key, path in run_data_files.items():
         dat_path = nemo_cmd.expanded_path(path)
-        nomfich.update({key: dat_path})
+        shutil.copy2(dat_path, tmp_run_dir / dat_path.name)
+        nomfich.update({key: f"./{dat_path.name}"})
         if key in hdf_files:
             hdf_file = results_dir / f"{dat_path.stem}_{run_id}.hdf"
             nomfich.update({hdf_files[key]: hdf_file})
