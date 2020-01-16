@@ -15,10 +15,11 @@
 """MOHID-Cmd prepare sub-command plug-in unit tests.
 """
 import logging
+import os
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import call, patch
+from unittest.mock import patch
 
 import arrow
 import nemo_cmd.prepare
@@ -291,62 +292,69 @@ class TestMakeNomfich:
         )
         assert caplog.messages[0] == expected
 
-    @patch("mohid_cmd.prepare.Path.mkdir", autospec=True)
-    def test_make_results_dir(self, m_mkdir, tmpdir, run_desc):
-        p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
-        p_bathy = tmpdir.ensure(run_desc["bathymetry"])
-        p_run_files = {
-            key: tmpdir.ensure(path) for key, path in run_desc["run data files"].items()
-        }
-        p_run_desc = patch.dict(
+    def test_make_results_dir(self, run_desc, tmp_path, monkeypatch):
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        bathy_file = tmp_path / run_desc["bathymetry"]
+        bathy_file.write_text("")
+        monkeypatch.setitem(run_desc, "bathymetry", os.fspath(bathy_file))
+        monkeypatch.setitem(
             run_desc,
-            {
-                "bathymetry": str(p_bathy),
-                "run data files": {key: str(path) for key, path in p_run_files.items()},
-            },
+            "run data files",
+            {key: path for key, path in run_desc["run data files"].items()},
         )
-        with p_run_desc:
-            mohid_cmd.prepare._make_nomfich(run_desc, Path(str(p_tmp_run_dir)))
-        assert m_mkdir.called
+        mohid_cmd.prepare._make_nomfich(run_desc, tmp_run_dir)
+        assert (tmp_run_dir / "res").is_dir()
 
-    def test_nomfich_file(self, tmpdir, run_desc):
-        p_tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
-        p_bathy = tmpdir.ensure(run_desc["bathymetry"])
-        p_run_files = {
-            key: tmpdir.ensure(path) for key, path in run_desc["run data files"].items()
-        }
-        p_run_desc = patch.dict(
+    def test_nomfich_file(self, run_desc, tmp_path, monkeypatch):
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        bathy_file = tmp_path / run_desc["bathymetry"]
+        bathy_file.write_text("")
+        monkeypatch.setitem(run_desc, "bathymetry", os.fspath(bathy_file))
+        monkeypatch.setitem(
             run_desc,
-            {
-                "bathymetry": str(p_bathy),
-                "run data files": {key: str(path) for key, path in p_run_files.items()},
-            },
+            "run data files",
+            {key: path for key, path in run_desc["run data files"].items()},
         )
-        with p_run_desc:
-            mohid_cmd.prepare._make_nomfich(run_desc, Path(str(p_tmp_run_dir)))
-        with p_tmp_run_dir.join("nomfich.dat").open("rt") as f:
-            nomfich = f.read()
+        mohid_cmd.prepare._make_nomfich(run_desc, tmp_run_dir)
+        nomfich = (tmp_run_dir / "nomfich.dat").read_text()
         expected = textwrap.dedent(
             f"""\
-            IN_BATIM    : {str(p_bathy)}
-            ROOT        : {str(p_tmp_run_dir.join("res"))}
-            IN_MODEL    : {str(p_run_files["IN_MODEL"])}
-            PARTIC_DATA : {str(p_run_files["PARTIC_DATA"])}
-            PARTIC_HDF  : {str(p_tmp_run_dir.join("res/Lagrangian_DieselFuel_refined_MarathassaConstTS.hdf"))}
-            DOMAIN      : {str(p_run_files["DOMAIN"])}
-            SURF_DAT    : {str(p_run_files["SURF_DAT"])}
-            SURF_HDF    : {str(p_tmp_run_dir.join("res/Atmosphere_MarathassaConstTS.hdf"))}
-            IN_DAD3D    : {str(p_run_files["IN_DAD3D"])}
-            BOT_DAT     : {str(p_run_files["BOT_DAT"])}
-            AIRW_DAT    : {str(p_run_files["AIRW_DAT"])}
-            AIRW_HDF    : {str(p_tmp_run_dir.join("res/InterfaceWaterAir_MarathassaConstTS.hdf"))}
-            IN_TIDES    : {str(p_run_files["IN_TIDES"])}
-            IN_TURB     : {str(p_run_files["IN_TURB"])}
-            TURB_HDF    : {str(p_tmp_run_dir.join("res/Turbulence_MarathassaConstTS.hdf"))}
-            DISPQUAL    : {str(p_run_files["DISPQUAL"])}
-            EUL_HDF     : {str(p_tmp_run_dir.join("res/WaterProperties_MarathassaConstTS.hdf"))}
-            WAVES_DAT   : {str(p_run_files["WAVES_DAT"])}
-            WAVES_HDF   : {str(p_tmp_run_dir.join("res/Waves_MarathassaConstTS.hdf"))}
+            IN_BATIM    : {bathy_file}
+            ROOT        : {tmp_run_dir/"res"}
+            IN_MODEL    : ./{Path(run_desc["run data files"]["IN_MODEL"]).name}
+            PARTIC_DATA : ./{Path(run_desc["run data files"]["PARTIC_DATA"]).name}
+            PARTIC_HDF  : {tmp_run_dir.joinpath("res", "Lagrangian_DieselFuel_refined_MarathassaConstTS.hdf")}
+            DOMAIN      : ./{Path(run_desc["run data files"]["DOMAIN"]).name}
+            SURF_DAT    : ./{Path(run_desc["run data files"]["SURF_DAT"]).name}
+            SURF_HDF    : {tmp_run_dir.joinpath("res", "Atmosphere_MarathassaConstTS.hdf")}
+            IN_DAD3D    : ./{Path(run_desc["run data files"]["IN_DAD3D"]).name}
+            BOT_DAT     : ./{Path(run_desc["run data files"]["BOT_DAT"]).name}
+            AIRW_DAT    : ./{Path(run_desc["run data files"]["AIRW_DAT"]).name}
+            AIRW_HDF    : {tmp_run_dir.joinpath("res", "InterfaceWaterAir_MarathassaConstTS.hdf")}
+            IN_TIDES    : ./{Path(run_desc["run data files"]["IN_TIDES"]).name}
+            IN_TURB     : ./{Path(run_desc["run data files"]["IN_TURB"]).name}
+            TURB_HDF    : {tmp_run_dir.joinpath("res", "Turbulence_MarathassaConstTS.hdf")}
+            DISPQUAL    : ./{Path(run_desc["run data files"]["DISPQUAL"]).name}
+            EUL_HDF     : {tmp_run_dir.joinpath("res", "WaterProperties_MarathassaConstTS.hdf")}
+            WAVES_DAT   : ./{Path(run_desc["run data files"]["WAVES_DAT"]).name}
+            WAVES_HDF   : {tmp_run_dir.joinpath("res", "Waves_MarathassaConstTS.hdf")}
             """
         )
         assert nomfich == expected
+
+    def test_dat_files_in_tmp_run_dir(self, run_desc, tmp_path, monkeypatch):
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        bathy_file = tmp_path / run_desc["bathymetry"]
+        bathy_file.write_text("")
+        monkeypatch.setitem(run_desc, "bathymetry", os.fspath(bathy_file))
+        monkeypatch.setitem(
+            run_desc,
+            "run data files",
+            {key: path for key, path in run_desc["run data files"].items()},
+        )
+        mohid_cmd.prepare._make_nomfich(run_desc, tmp_run_dir)
+        for path in run_desc["run data files"].values():
+            assert (tmp_run_dir / Path(path).name).is_file()
