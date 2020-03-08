@@ -226,19 +226,22 @@ An example :kbd:`vcs revisions` section:
 .. code-block:: yaml
 
     vcs revisions:
+      git:
+        - $PROJECT/$USER/MIDOSS/Make-MIDOSS-Forcin
+        - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-grid
+        - $PROJECT/$USER/MIDOSS/moad_tools
       hg:
         - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config
-        - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-grid
         - $PROJECT/$USER/MIDOSS/MOHID-Cmd
-        - $PROJECT/$USER/MIDOSS/moad_tools
 
 The sub-section keys
-(:kbd:`hg` above)
+(:kbd:`git`,
+and :kbd:`hg` above)
 are the names of the version control tools to use for the repositories listed below them.
-At present only Mercurial
-(:kbd:`hg`)
-and Git
+At present only Git
 (:kbd:`git`)
+and Mercurial
+(:kbd:`hg`)
 are supported.
 
 The paths listed under the version control tool key are the repositories for which the revision and status will be recorded.
