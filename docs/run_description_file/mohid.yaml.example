@@ -62,6 +62,15 @@ run data files:
   WAVES_DAT: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/SalishSeaCast/Waves.dat
 
 vcs revisions:
+  git:
+    # Absolute paths to Git repos that you want revision records of
+    # in your run results.
+    # The MIDOSS-MOHID-CODE repo (from `paths: mohid repo:` above)
+    # will be included automatically, so don't include it in this list.
+    # You can use $SCRATCH, $PROJECT, $USER, ~, $HOME in the path, if you wish.
+    - $PROJECT/$USER/MIDOSS/Make-MIDOSS-Forcin
+    - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-gridg
+    - $PROJECT/$USER/MIDOSS/moad_tools
   hg:
     # Absolute paths to Mercurial repos that you want revision records of
     # in your run results.
@@ -69,6 +78,4 @@ vcs revisions:
     # will be included automatically, so don't include it in this list.
     # You can use $SCRATCH, $PROJECT, $USER, ~, $HOME in the path, if you wish.
     - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config
-    - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-grid
     - $PROJECT/$USER/MIDOSS/MOHID-Cmd
-    - $PROJECT/$USER/MIDOSS/moad_tools
