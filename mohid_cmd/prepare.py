@@ -106,7 +106,7 @@ def prepare(desc_file, tmp_run_dir=""):
         run_desc, ("paths", "mohid repo"), resolve_path=True
     )
     nemo_cmd.prepare.write_repo_rev_file(
-        mohid_repo, tmp_run_dir, nemo_cmd.prepare.get_hg_revision
+        mohid_repo, tmp_run_dir, nemo_cmd.prepare.get_git_revision
     )
     nemo_cmd.prepare.record_vcs_revisions(run_desc, tmp_run_dir)
     return tmp_run_dir

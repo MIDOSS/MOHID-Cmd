@@ -157,7 +157,7 @@ class TestPrepare:
         m_write_vcs_revs.assert_called_once_with(
             tmp_path / "MIDOSS-MOHID-CODE",
             tmp_run_dir,
-            nemo_cmd.prepare.get_hg_revision,
+            nemo_cmd.prepare.get_git_revision,
         )
         m_rec_vcs_revs.assert_called_once_with(run_desc, tmp_run_dir)
         assert (
@@ -185,7 +185,7 @@ class TestPrepare:
         m_write_vcs_revs.assert_called_once_with(
             tmp_path / "MIDOSS-MOHID-CODE",
             tmp_run_dir,
-            nemo_cmd.prepare.get_hg_revision,
+            nemo_cmd.prepare.get_git_revision,
         )
         m_rec_vcs_revs.assert_called_once_with(run_desc, tmp_run_dir)
         assert tmp_run_dir == (tmp_path / "runs_dir") / "tmp_run_dir"
