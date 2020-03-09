@@ -139,7 +139,7 @@ The :command:`run` sub-command does the following:
 
 .. warning::
     The :command:`monte-carlo` sub-command is presently under active development,
-    so frequent updates and changes in the code and associated documentation in the ref:`monte-carlo-sub-command` section should be expected.
+    so frequent updates and changes in the code and associated documentation in the :ref:`monte-carlo-sub-command` section should be expected.
 
 The :command:`monte-carlo` sub-command prepares an MPI job to execute a collection of MIDOSS-MOHID runs,
 typically for a Monte Carlo experiment.
