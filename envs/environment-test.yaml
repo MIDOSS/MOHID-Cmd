@@ -1,0 +1,27 @@
+# conda environment description file for MOHID-Cmd package testing environment
+#
+# Creates a conda environment in which the MOHID-Cmd package unit tests and
+# coverage analysis can be run.
+# Primarily intended for creation of a conda env for use in a GitHub Actions workflow.
+
+name: mohid-cmd-test
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - arrow
+  - attrs
+  - cliff!=2.9.0
+  - cookiecutter
+  - f90nml
+  - gitpython
+  - pandas
+  - python-hglib
+  - pip
+  - pyyaml
+
+  # For unit tests and coverage monitoring
+  - pytest
+  - pytest-cov
