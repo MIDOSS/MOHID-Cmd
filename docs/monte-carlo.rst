@@ -59,13 +59,14 @@ Here is an example:
     mohid command: $HOME/.local/bin/mohid
 
     vcs revisions:
-      hg:
-        - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-CODE
-        - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config
+      git:
+        - $PROJECT/$USER/MIDOSS/Make-MIDOSS-Forcin
         - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-grid
-        - $PROJECT/$USER/MIDOSS/MOHID-Cmd
-        - $PROJECT/$USER/MIDOSS/NEMO-Cmd
         - $PROJECT/$USER/MIDOSS/moad_tools
+      hg:
+        - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config
+        - $PROJECT/$USER/MIDOSS/NEMO-Cmd
+        - $PROJECT/$USER/MIDOSS/MOHID-Cmd
 
 
 .. _MOHID-RunParametersCSV-File:
