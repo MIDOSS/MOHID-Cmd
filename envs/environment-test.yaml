@@ -18,10 +18,12 @@ dependencies:
   - f90nml
   - gitpython
   - pandas
-  - python-hglib
   - pip
   - pyyaml
 
   # For unit tests and coverage monitoring
   - pytest
   - pytest-cov
+
+  - pip:
+      - python-hglib
