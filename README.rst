@@ -8,11 +8,23 @@ MIDOSS-MOHID Command Processor
 .. image:: https://img.shields.io/badge/python-3.7-blue.svg
     :target: https://docs.python.org/3.7/
     :alt: Python Version
-.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
-    :target: https://bitbucket.org/midoss/mohid-cmd/
-    :alt: Mercurial on Bitbucket
-.. image:: https://img.shields.io/bitbucket/issues/43ravens/nemo_nowcast.svg
-    :target: https://bitbucket.org/midoss/mohid-cmd/issues?status=new&status=open
+.. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
+    :target: https://github.com/MIDOSS/MOHID-Cmd
+    :alt: Git on GitHub
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://black.readthedocs.io/en/stable/
+    :alt: The uncompromising Python code formatter
+.. image:: https://readthedocs.org/projects/mohid-cmd/badge/?version=latest
+    :target: https://mohid-cmd.readthedocs.io/en/latest/
+    :alt: Documentation Status
+.. image:: https://github.com/MIDOSS/WWatch3-Cmd/workflows/CI/badge.svg
+    :target: https://github.com/MIDOSS/WWatch3-Cmd/actions?query=workflow%3ACI
+    :alt: GitHub Workflow Status
+.. image:: https://codecov.io/gh/MIDOSS/MOHID-Cmd/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/MIDOSS/MOHID-Cmd
+    :alt: Codecov Testing Coverage Report
+.. image:: https://img.shields.io/github/issues/MIDOSS/MOHID-Cmd?logo=github
+    :target: https://github.com/MIDOSS/MOHID-Cmd/issues
     :alt: Issue Tracker
 
 The MIDOSS-MOHID command processor, ``mohid``, is a command line tool for doing various operations associated with the `MIDOSS project`_ version of the `MOHID model`_.
@@ -47,9 +59,11 @@ License
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
 
-The MIDOSS-MOHID command processor code and documentation are copyright 2018-2020 by the MIDOSS project contributors,
+The MIDOSS-MOHID command processor code and documentation are copyright 2018-2020 by the `MIDOSS project contributors`_,
 The University of British Columbia,
 and Dalhousie University.
+
+.. _MIDOSS project contributors: https://github.com/MIDOSS/docs/blob/master/CONTRIBUTORS.rst
 
 They are licensed under the Apache License, Version 2.0.
 https://www.apache.org/licenses/LICENSE-2.0

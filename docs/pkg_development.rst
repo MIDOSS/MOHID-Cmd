@@ -24,20 +24,26 @@
 .. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
-.. image:: https://img.shields.io/badge/python-3.6+-blue.svg
+.. image:: https://img.shields.io/badge/python-3.7-blue.svg
     :target: https://docs.python.org/3.7/
     :alt: Python Version
-.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
-    :target: https://bitbucket.org/midoss/mohid-cmd/
-    :alt: Mercurial on Bitbucket
+.. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
+    :target: https://github.com/MIDOSS/MOHID-Cmd
+    :alt: Git on GitHub
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://black.readthedocs.io/en/stable/
     :alt: The uncompromising Python code formatter
 .. image:: https://readthedocs.org/projects/mohid-cmd/badge/?version=latest
     :target: https://mohid-cmd.readthedocs.io/en/latest/
     :alt: Documentation Status
-.. image:: https://img.shields.io/bitbucket/issues/midoss/mohid-cmd.svg
-    :target: https://bitbucket.org/midoss/mohid-cmd/issues?status=new&status=open
+.. image:: https://github.com/MIDOSS/MOHID-Cmd/workflows/CI/badge.svg
+    :target: https://github.com/MIDOSS/MOHID-Cmd/actions?query=workflow%3ACI
+    :alt: GitHub Workflow Status
+.. image:: https://codecov.io/gh/MIDOSS/MOHID-Cmd/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/MIDOSS/MOHID-Cmd
+    :alt: Codecov Testing Coverage Report
+.. image:: https://img.shields.io/github/issues/MIDOSS/MOHID-Cmd?logo=github
+    :target: https://github.com/MIDOSS/MOHID-Cmd/issues
     :alt: Issue Tracker
 
 The MIDOSSMOHID command processor package, ``MOHID-Cmd``, provides the ``mohid``
@@ -51,7 +57,7 @@ command-line tool for doing various operations associated with the `MIDOSS proje
 Python Versions
 ===============
 
-.. image:: https://img.shields.io/badge/python-3.6+-blue.svg
+.. image:: https://img.shields.io/badge/python-3.7-blue.svg
     :target: https://docs.python.org/3.7/
     :alt: Python Version
 
@@ -73,29 +79,29 @@ in particular:
 Getting the Code
 ================
 
-.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
-    :target: https://bitbucket.org/midoss/mohid-cmd/
-    :alt: Mercurial on Bitbucket
+.. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
+    :target: https://github.com/MIDOSS/MOHID-Cmd
+    :alt: Git on GitHub
 
-Clone the code and documentation `repository`_ from Bitbucket with:
+Clone the code and documentation `repository`_ from GitHub with:
 
-.. _repository: https://bitbucket.org/midoss/mohid-cmd/
+.. _repository: https://github.com/MIDOSS/MOHID-Cmd
 
 .. code-block:: bash
 
-    $ hg clone ssh://hg@bitbucket.org/midoss/mohid-cmd MOHID-Cmd
+    $ git clone git@github.com:MIDOSS/MOHID-Cmd.git
 
 or
 
 .. code-block:: bash
 
-    $ hg clone https://your_userid@bitbucket.org/midoss/mohid-cmd MOHID-Cmd
+    $ git clone https://github.com/MIDOSS/MOHID-Cmd.git
 
-if you don't have `ssh key authentication`_ set up on Bitbucket
-(replace :kbd:`you_userid` with you Bitbucket userid,
-or copy the link from the :guilabel:`Clone` action pop-up on the `repository`_ page).
+if you don't have `ssh key authentication`_ set up on GitHub
+(replace :kbd:`you_userid` with you GitHub userid,
+or copy the link from the :guilabel:`Clone or download` button on the `repository`_ page).
 
-.. _ssh key authentication: https://confluence.atlassian.com/bitbucket/set-up-an-ssh-key-728138079.html
+.. _ssh key authentication: https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh
 
 
 .. _MOHID-CmdDevelopmentEnvironment:
@@ -123,7 +129,7 @@ and building the documentation with the commands below.
 
     $ cd MIDOSS
     $ conda env create -f MOHID-Cmd/envs/environment-dev.yaml
-    $ source activate mohid-cmd
+    $ conda activate mohid-cmd
     (mohid-cmd)$ python3 -m pip install --editable NEMO-Cmd/
     (mohid-cmd)$ python3 -m pip install --editable MOHID-Cmd/
 
@@ -178,13 +184,43 @@ Building the Documentation
     :alt: Documentation Status
 
 The documentation for the :kbd:`MOHID-Cmd` package is written in `reStructuredText`_ and converted to HTML using `Sphinx`_.
-Creating a :ref:`MOHID-CmdDevelopmentEnvironment` as described above includes the installation of Sphinx.
-Building the documentation is driven by the :file:`docs/Makefile`.
-With your :kbd:`salishsea-nowcast` development environment activated,
-use:
 
 .. _reStructuredText: http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
 .. _Sphinx: http://www.sphinx-doc.org/en/master/
+
+If you have write access to the `repository`_ on GitHub,
+whenever you push changes to GitHub the documentation is automatically re-built and rendered at https://mohid-cmd.readthedocs.io/en/latest/.
+
+Additions,
+improvements,
+and corrections to these docs are *always* welcome.
+
+The quickest way to fix typos, etc. on existing pages is to use the :guilabel:`Edit on GitHub` link in the upper right corner of the page to get to the online editor for the page on `GitHub`_.
+
+.. _GitHub: https://github.com/MIDOSS/MOHID-Cmd
+
+For more substantial work,
+and to add new pages,
+follow the instructions in the :ref:`WWatch3-CmdDevelopmentEnvironment` section above.
+In the development environment you can build the docs locally instead of having to push commits to GitHub to trigger a `build on readthedocs.org`_ and wait for it to complete.
+Below are instructions that explain how to:
+
+.. _build on readthedocs.org: https://readthedocs.org/projects/wwatch3-cmd/builds/
+
+* build the docs with your changes,
+  and preview them in Firefox
+
+* check the docs for broken links
+
+
+.. _WWatch3-CmdBuildingAndPreviewingTheDocumentation:
+
+Building and Previewing the Documentation
+-----------------------------------------
+
+Building the documentation is driven by the :file:`docs/Makefile`.
+With your :kbd:`mohid-cmd` development environment activated,
+use:
 
 .. code-block:: bash
 
@@ -221,8 +257,8 @@ The output looks something like::
 The HTML rendering of the docs ends up in :file:`docs/_build/html/`.
 You can open the :file:`index.html` file in that directory tree in your browser to preview the results of the build.
 
-If you have write access to the `repository`_ on Bitbucket,
-whenever you push changes to Bitbucket the documentation is automatically re-built and rendered at https://mohid-cmd.readthedocs.io/en/latest/.
+If you have write access to the `repository`_ on GitHub,
+whenever you push changes to GitHub the documentation is automatically re-built and rendered at https://mohid-cmd.readthedocs.io/en/latest/.
 
 
 .. _MOHID-CmdLinkCheckingTheDocumentation:
@@ -335,29 +371,54 @@ The output looks something like::
 
   ============================ 84 passed in 2.80s ============================
 
-You can monitor what lines of code the test suite exercises using the `coverage.py`_ tool with the command:
+You can monitor what lines of code the test suite exercises using the `coverage.py`_ and `pytest-cov`_ tools with the command:
 
 .. _coverage.py: https://coverage.readthedocs.io/en/latest/
+.. _pytest-cov: https://pytest-cov.readthedocs.io/en/latest/
 
 .. code-block:: bash
 
     (mohid-cmd)$ cd MOHID-Cmd/
-    (mohid-cmd)$ coverage run -m py.test
+    (mohid-cmd)$ pytest --cov=./
 
-and generate a test coverage report with:
+The test coverage report will be displayed below the test suite run output.
 
-.. code-block:: bash
-
-    (mohid-cmd)$ coverage report
-
-to produce a plain text report,
-or
+Alternatively,
+you can use
 
 .. code-block:: bash
 
-    (mohid-cmd)$ coverage html
+    (mohid-cmd)$ pytest --cov=./ --cov-report html
 
 to produce an HTML report that you can view in your browser by opening :file:`MOHID-Cmd/htmlcov/index.html`.
+
+
+.. _WWatch3-CmdContinuousIntegration:
+
+Continuous Integration
+----------------------
+
+.. image:: https://github.com/MIDOSS/MOHID-Cmd/workflows/CI/badge.svg
+    :target: https://github.com/MIDOSS/MOHID-Cmd/actions?query=workflow%3ACI
+    :alt: GitHub Workflow Status
+.. image:: https://codecov.io/gh/MIDOSS/MOHID-Cmd/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/MIDOSS/MOHID-Cmd
+    :alt: Codecov Testing Coverage Report
+
+The :kbd:`MOHID-Cmd` package unit test suite is run and a coverage report is generated whenever changes are pushed to GitHub.
+The results are visible on the `repo actions page`_,
+from the green checkmarks beside commits on the `repo commits page`_,
+or from the green checkmark to the left of the "Latest commit" message on the `repo code overview page`_ .
+The testing coverage report is uploaded to `codecov.io`_
+
+.. _repo actions page: https://github.com/MIDOSS/MOHID-Cmd/actions
+.. _repo commits page: https://github.com/MIDOSS/MOHID-Cmd/commits/master
+.. _repo code overview page: https://github.com/MIDOSS/MOHID-Cmd
+.. _codecov.io: https://codecov.io/gh/MIDOSS/MOHID-Cmd
+
+The `GitHub Actions`_ workflow configuration that defines the continuous integration tasks is in the :file:`.github/workflows/pytest-coverage.yaml` file.
+
+.. _GitHub Actions: https://help.github.com/en/actions
 
 
 .. _MOHID-CmdVersionControlRepository:
@@ -365,13 +426,13 @@ to produce an HTML report that you can view in your browser by opening :file:`MO
 Version Control Repository
 ==========================
 
-.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
-    :target: https://bitbucket.org/midoss/mohid-cmd/
-    :alt: Mercurial on Bitbucket
+.. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
+    :target: https://github.com/MIDOSS/MOHID-Cmd
+    :alt: Git on GitHub
 
-The :kbd:`MOHID-Cmd` package code and documentation source files are available as a `Mercurial`_ repository at https://bitbucket.org/midoss/mohid-cmd/.
+The :kbd:`MOHID-Cmd` package code and documentation source files are available as a `Git`_ repository at https://github.com/MIDOSS/MOHID-Cmd.
 
-.. _Mercurial: https://www.mercurial-scm.org/
+.. _Git: https://git-scm.com/
 
 
 .. _MOHID-CmdIssueTracker:
@@ -379,13 +440,13 @@ The :kbd:`MOHID-Cmd` package code and documentation source files are available a
 Issue Tracker
 =============
 
-.. image:: https://img.shields.io/bitbucket/issues/midoss/mohid-cmd.svg
-    :target: https://bitbucket.org/midoss/mohid-cmd/issues?status=new&status=open
+.. image:: https://img.shields.io/github/issues/MIDOSS/MOHID-Cmd?logo=github
+    :target: https://github.com/MIDOSS/MOHID-Cmd/issues
     :alt: Issue Tracker
 
 Development tasks,
 bug reports,
-and enhancement ideas are recorded and managed in the issue tracker at https://bitbucket.org/midoss/mohid-cmd/issues.
+and enhancement ideas are recorded and managed in the issue tracker at https://github.com/MIDOSS/MOHID-Cmd/issues.
 
 
 License
@@ -396,8 +457,10 @@ License
     :alt: Licensed under the Apache License, Version 2.0
 
 The code and documentation of the MIDOSS-MOHID Command Processor project
-are copyright 2018-2020 by the MIDOSS project contributors, The University of British Columbia,
+are copyright 2018-2020 by the `MIDOSS project contributors`_, The University of British Columbia,
 and Dalhousie University.
+
+.. _MIDOSS project contributors: https://github.com/MIDOSS/docs/blob/master/CONTRIBUTORS.rst
 
 They are licensed under the Apache License, Version 2.0.
 https://www.apache.org/licenses/LICENSE-2.0
