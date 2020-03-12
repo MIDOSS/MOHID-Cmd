@@ -227,12 +227,13 @@ An example :kbd:`vcs revisions` section:
 
     vcs revisions:
       git:
-        - $PROJECT/$USER/MIDOSS/Make-MIDOSS-Forcin
+        - $PROJECT/$USER/MIDOSS/Make-MIDOSS-Forcing
         - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-grid
         - $PROJECT/$USER/MIDOSS/moad_tools
+        - $PROJECT/$USER/MIDOSS/MOHID-Cmd
       hg:
         - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config
-        - $PROJECT/$USER/MIDOSS/MOHID-Cmd
+        - $PROJECT/$USER/MIDOSS/NEMO-Cmd
 
 The sub-section keys
 (:kbd:`git`,
