@@ -201,11 +201,11 @@ The quickest way to fix typos, etc. on existing pages is to use the :guilabel:`E
 
 For more substantial work,
 and to add new pages,
-follow the instructions in the :ref:`WWatch3-CmdDevelopmentEnvironment` section above.
+follow the instructions in the :ref:`MOHID-CmdDevelopmentEnvironment` section above.
 In the development environment you can build the docs locally instead of having to push commits to GitHub to trigger a `build on readthedocs.org`_ and wait for it to complete.
 Below are instructions that explain how to:
 
-.. _build on readthedocs.org: https://readthedocs.org/projects/wwatch3-cmd/builds/
+.. _build on readthedocs.org: https://readthedocs.org/projects/mohid-cmd/builds/
 
 * build the docs with your changes,
   and preview them in Firefox
@@ -213,7 +213,7 @@ Below are instructions that explain how to:
 * check the docs for broken links
 
 
-.. _WWatch3-CmdBuildingAndPreviewingTheDocumentation:
+.. _MOHID-CmdBuildingAndPreviewingTheDocumentation:
 
 Building and Previewing the Documentation
 -----------------------------------------
@@ -267,13 +267,13 @@ Link Checking the Documentation
 -------------------------------
 
 Sphinx also provides a link checker utility which can be run to find broken or redirected links in the docs.
-With your :kbd:`mohid-cmd)` environment activated,
+With your :kbd:`mohid-cmd` environment activated,
 use:
 
 .. code-block:: bash
 
-    (mohid-cmd))$ cd MOHID-Cmd)/docs/
-    (mohid-cmd)) docs$ make linkcheck
+    (mohid-cmd)$ cd MOHID-Cmd/docs/
+    (mohid-cmd) docs$ make linkcheck
 
 The output looks something like::
 
@@ -393,7 +393,7 @@ you can use
 to produce an HTML report that you can view in your browser by opening :file:`MOHID-Cmd/htmlcov/index.html`.
 
 
-.. _WWatch3-CmdContinuousIntegration:
+.. MOHID-CmdContinuousIntegration:
 
 Continuous Integration
 ----------------------
