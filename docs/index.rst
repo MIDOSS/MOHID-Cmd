@@ -63,7 +63,7 @@ The MIDOSS-MOHID command processor code and documentation are copyright 2018-202
 The University of British Columbia,
 and Dalhousie University.
 
-.. _MIDOSS project contributors: https://bitbucket.org/midoss/docs/src/tip/CONTRIBUTORS.rst
+.. _MIDOSS project contributors: https://github.com/MIDOSS/docs/blob/master/CONTRIBUTORS.rst
 
 They are licensed under the Apache License, Version 2.0.
 https://www.apache.org/licenses/LICENSE-2.0
