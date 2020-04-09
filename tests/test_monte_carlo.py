@@ -14,17 +14,20 @@
 #  limitations under the License.
 import logging
 import os
-from pathlib import Path
 import textwrap
+from datetime import datetime
+from pathlib import Path
 from types import SimpleNamespace
 
 import arrow
 import attr
+import git
 import jinja2
 import numpy
 import pandas
 import pytest
 import yaml
+from dateutil import tz
 
 import mohid_cmd.main
 import mohid_cmd.monte_carlo
@@ -76,13 +79,14 @@ def glost_run_desc(tmp_path):
             mohid command: $HOME/.local/bin/mohid
             
             vcs revisions:
-              hg:
-                - {code_repo}
-                - {config_repo}
+              git:
                 - {grid_repo}
                 - {mohid_cmd_repo}
                 - {nemo_cmd_repo}
                 - {moad_tools_repo}
+              hg:
+                - {code_repo}
+                - {config_repo}
             """
         )
     )
@@ -556,11 +560,43 @@ class TestGlostJobDir:
             mohid_cmd.monte_carlo.nemo_cmd.prepare.hglib, "open", MockHgRepo
         )
 
+    @staticmethod
+    @pytest.fixture
+    def mock_git_repo(monkeypatch):
+        @attr.s
+        class MockGitCommit:
+            branch = attr.ib()
+            hexsha = attr.ib(default="35fc362f3d77866df8c0a8b743aca81359295d59")
+            author = attr.ib(default="Doug Latornell <dlatornell@example.com>")
+            authored_datetime = attr.ib(
+                default=datetime(
+                    2020, 4, 9, 10, 51, 43, tzinfo=tz.gettz("Canada/Pacific")
+                )
+            )
+            message = attr.ib(
+                default="Refactor the Frobnitzicator class\n\nImprove disambiguation\n"
+            )
+
+            def diff(self, other=git.diff.Diffable.Index):
+                return []
+
+        @attr.s
+        class MockGitRepo:
+            path = attr.ib()
+            active_branch = attr.ib(default="master")
+            commit = attr.ib(default=MockGitCommit)
+            tags = attr.ib(default=[])
+
+        monkeypatch.setattr(
+            mohid_cmd.monte_carlo.nemo_cmd.prepare.git, "Repo", MockGitRepo
+        )
+
     def test_job_dir_created(
         self,
         mock_arrow_now,
         mock_get_runs_info,
         mock_hg_repo,
+        mock_git_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
@@ -581,6 +617,7 @@ class TestGlostJobDir:
         mock_arrow_now,
         mock_get_runs_info,
         mock_hg_repo,
+        mock_git_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
@@ -603,6 +640,7 @@ class TestGlostJobDir:
         mock_arrow_now,
         mock_get_runs_info,
         mock_hg_repo,
+        mock_git_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
@@ -622,6 +660,7 @@ class TestGlostJobDir:
         self,
         mock_arrow_now,
         mock_hg_repo,
+        mock_git_repo,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
         glost_run_desc,
@@ -661,6 +700,7 @@ class TestGlostJobDir:
         self,
         mock_arrow_now,
         mock_hg_repo,
+        mock_git_repo,
         mock_render_mohid_run_yamls,
         mock_render_lagrangian_dats,
         glost_run_desc,
@@ -699,6 +739,7 @@ class TestGlostJobDir:
         self,
         mock_arrow_now,
         mock_hg_repo,
+        mock_git_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         glost_run_desc,
@@ -739,6 +780,7 @@ class TestGlostJobDir:
         mock_arrow_now,
         mock_get_runs_info,
         mock_hg_repo,
+        mock_git_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
@@ -759,6 +801,7 @@ class TestGlostJobDir:
         mock_arrow_now,
         mock_get_runs_info,
         mock_hg_repo,
+        mock_git_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
@@ -780,6 +823,7 @@ class TestGlostJobDir:
         mock_arrow_now,
         mock_get_runs_info,
         mock_hg_repo,
+        mock_git_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
@@ -821,6 +865,7 @@ class TestGlostJobDir:
         mock_arrow_now,
         mock_get_runs_info,
         mock_hg_repo,
+        mock_git_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
@@ -842,6 +887,7 @@ class TestGlostJobDir:
         mock_arrow_now,
         mock_get_runs_info,
         mock_hg_repo,
+        mock_git_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
@@ -891,6 +937,7 @@ class TestGlostJobDir:
         mock_arrow_now,
         mock_get_runs_info,
         mock_hg_repo,
+        mock_git_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
@@ -912,6 +959,7 @@ class TestGlostJobDir:
         mock_arrow_now,
         mock_get_runs_info,
         mock_hg_repo,
+        mock_git_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
@@ -933,6 +981,7 @@ class TestGlostJobDir:
         mock_arrow_now,
         mock_get_runs_info,
         mock_hg_repo,
+        mock_git_repo,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
