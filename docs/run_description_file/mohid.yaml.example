@@ -72,6 +72,7 @@ vcs revisions:
     - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-grid
     - $PROJECT/$USER/MIDOSS/moad_tools
     - $PROJECT/$USER/MIDOSS/MOHID-Cmd
+    - $PROJECT/$USER/MIDOSS/NEMO-Cmd
   hg:
     # Absolute paths to Mercurial repos that you want revision records of
     # in your run results.
@@ -79,4 +80,3 @@ vcs revisions:
     # will be included automatically, so don't include it in this list.
     # You can use $SCRATCH, $PROJECT, $USER, ~, $HOME in the path, if you wish.
     - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config
-    - $PROJECT/$USER/MIDOSS/NEMO-Cmd

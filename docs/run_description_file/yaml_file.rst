@@ -231,9 +231,9 @@ An example :kbd:`vcs revisions` section:
         - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-grid
         - $PROJECT/$USER/MIDOSS/moad_tools
         - $PROJECT/$USER/MIDOSS/MOHID-Cmd
+        - $PROJECT/$USER/MIDOSS/NEMO-Cmd
       hg:
         - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config
-        - $PROJECT/$USER/MIDOSS/NEMO-Cmd
 
 The sub-section keys
 (:kbd:`git`,
@@ -264,11 +264,13 @@ So,
 from the example above,
 the files created will be::
 
+  Make-MIDOSS-Forcing_rev.txt
   MIDOSS-MOHID-CODE_rev.txt
   MIDOSS-MOHID-config_rev.txt
   MIDOSS-MOHID-grid_rev.txt
   MOHID-Cmd_rev.txt
   moad_tools_rev.txt
+  NEMO-Cmd_rev.txt
 
 For Mercurial repositories,
 each :file:`_rev.txt` file will contain the output of the :command:`hg parents -v` command for the repository.
