@@ -94,7 +94,7 @@ def run_desc(tmp_path):
               WAVES_DAT: {dat_paths["Waves.dat"]}
 
             vcs revisions:
-              hg:
+              git:
                 - MIDOSS-MOHID-config
             """
         )

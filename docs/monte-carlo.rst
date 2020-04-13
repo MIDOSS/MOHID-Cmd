@@ -64,8 +64,8 @@ Here is an example:
         - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-grid
         - $PROJECT/$USER/MIDOSS/moad_tools
         - $PROJECT/$USER/MIDOSS/MOHID-Cmd
-      hg:
         - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config
+      hg:
         - $PROJECT/$USER/MIDOSS/NEMO-Cmd
 
 

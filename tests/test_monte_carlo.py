@@ -80,13 +80,12 @@ def glost_run_desc(tmp_path):
             
             vcs revisions:
               git:
+                - {code_repo}
+                - {config_repo}
                 - {grid_repo}
                 - {mohid_cmd_repo}
                 - {nemo_cmd_repo}
                 - {moad_tools_repo}
-              hg:
-                - {code_repo}
-                - {config_repo}
             """
         )
     )

@@ -228,12 +228,11 @@ An example :kbd:`vcs revisions` section:
     vcs revisions:
       git:
         - $PROJECT/$USER/MIDOSS/Make-MIDOSS-Forcing
+        - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config
         - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-grid
         - $PROJECT/$USER/MIDOSS/moad_tools
         - $PROJECT/$USER/MIDOSS/MOHID-Cmd
         - $PROJECT/$USER/MIDOSS/NEMO-Cmd
-      hg:
-        - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config
 
 The sub-section keys
 (:kbd:`git`,
@@ -272,33 +271,6 @@ the files created will be::
   moad_tools_rev.txt
   NEMO-Cmd_rev.txt
 
-For Mercurial repositories,
-each :file:`_rev.txt` file will contain the output of the :command:`hg parents -v` command for the repository.
-That is a record of the last committed revision of the repository that will be in effect for the run.
-For example,
-:file:`MOHID-Cmd_rev.txt` might contain::
-
-  changset:   17:190158c9704e17d0a8da8f1c0c59576c880a4559
-  tag:        tip
-  user:       Doug Latornell <dlatornell@eoas.ubc.ca>
-  date:       Tue Jan 01 15:56:34 2019 -08:00
-  files:      mohid_cmd/prepare.py tests/test_prepare.py
-  description:
-  Create results directory in tmp run dir.
-
-If any of the listed repositories contain uncommitted changes,
-the :command:`nemo prepare` command will generate a warning message like::
-
-  nemo_cmd.prepare WARNING: There are uncommitted changes in $PROJECT/$USER/MIDOSS/MOHID-Cmd/
-
-and the list of uncommitted changes and their status codes,
-the output of the :command:`hg status -mardC` command,
-will be appended to the :file:`_rev.txt` file,
-for example::
-
-  uncommitted changes:
-  M mohid_cmd/prepare.py
-
 For Git repositories,
 each :file:`_rev.txt` file will contain the output of the commands:
 
@@ -311,7 +283,6 @@ each :file:`_rev.txt` file will contain the output of the commands:
 for the repository.
 That is a record of the last committed revision of the repository that will be in effect for the run.
 For example,
-if :file:`MIDOSS-MOHID-config` were is Git repository,
 :file:`MIDOSS-MOHID-config_rev.txt` might contain::
 
   branch: master
@@ -336,3 +307,31 @@ for example::
   M MediumFloater/submit_run_AKNScrude.yaml
   M settings/Model.dat
   M settings/Waves.dat
+
+For Mercurial repositories,
+each :file:`_rev.txt` file will contain the output of the :command:`hg parents -v` command for the repository.
+That is a record of the last committed revision of the repository that will be in effect for the run.
+For example,
+if :file:`MOHID-Cmd` were is Git repository,
+:file:`MOHID-Cmd_rev.txt` might contain::
+
+  changset:   17:190158c9704e17d0a8da8f1c0c59576c880a4559
+  tag:        tip
+  user:       Doug Latornell <dlatornell@eoas.ubc.ca>
+  date:       Tue Jan 01 15:56:34 2019 -08:00
+  files:      mohid_cmd/prepare.py tests/test_prepare.py
+  description:
+  Create results directory in tmp run dir.
+
+If any of the listed repositories contain uncommitted changes,
+the :command:`nemo prepare` command will generate a warning message like::
+
+  nemo_cmd.prepare WARNING: There are uncommitted changes in $PROJECT/$USER/MIDOSS/MOHID-Cmd/
+
+and the list of uncommitted changes and their status codes,
+the output of the :command:`hg status -mardC` command,
+will be appended to the :file:`_rev.txt` file,
+for example::
+
+  uncommitted changes:
+  M mohid_cmd/prepare.py

@@ -65,8 +65,8 @@ class Prepare(cliff.command.Command):
         A temporary run directory is created.
         Symbolic links and file copies are created in that directory based on the files and
         directories specified in the run description YAML file for a MIDOSS-MOHID run.
-        The output of :command:`hg parents` is recorded in the directory
-        for the MIDOSS-MOHID code and MIDOSS-MOHID-config repos that the symlinks point to.
+        Version control system (Git or Mercurial) revision and status information is recorded
+        in the directory for the MIDOSS-MOHID code repo.
         The path to the temporary run directory is logged to the console on completion
         of the set-up.
         """
@@ -83,8 +83,8 @@ def prepare(desc_file, tmp_run_dir=""):
     and an ISO-format date/time stamp.
     Symbolic links and file copies are created in that directory based on the files and
     directories specified in the run description YAML file for a MIDOSS-MOHID run.
-    The output of :command:`hg parents` is recorded in the directory
-    for the MIDOSS-MOHID code and MIDOSS-MOHID-config repos that the symlinks point to.
+    Version control system (Git or Mercurial) revision and status information is recorded
+    in the directory for the MIDOSS-MOHID code repo.
     The path to the temporary run directory is returned.
 
     :param desc_file: File path/name of the YAML run description file.
