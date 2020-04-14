@@ -53,6 +53,7 @@ Here is an example:
     run walltime: 2:00:00
 
     paths:
+      forcing directory: $SCRATCH/MIDOSS/forcing/
       runs directory: $SCRATCH/MIDOSS/runs/monte-carlo/
       mohid config: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/monte-carlo/
 

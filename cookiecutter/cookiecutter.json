@@ -7,6 +7,7 @@
   "mem_per_cpu": "14500M",
   "runs_per_job": 100,
   "walltime": "3:00:00",
+  "forcing_dir": "$SCRATCH/MIDOSS/forcing/",
   "job_dir": "/scratch/$USER/MIDOSS/runs/monte-carlo/{{ cookiecutter.job_id }}_yyyy-mm-ddThhmmss",
   "mohid_cmd": "$HOME/.local/bin/mohid"
 }

@@ -40,6 +40,9 @@ def monte_carlo_cmd():
 
 @pytest.fixture
 def glost_run_desc(tmp_path):
+    forcing_dir = tmp_path / "forcing"
+    forcing_dir.mkdir()
+
     runs_dir = tmp_path / "monte-carlo"
     runs_dir.mkdir()
 
@@ -73,6 +76,7 @@ def glost_run_desc(tmp_path):
             run walltime: 2:00:00   
 
             paths:
+              forcing directory: {forcing_dir}
               runs directory: {runs_dir}
               mohid config: {mohid_config_dir}
               
@@ -315,6 +319,7 @@ class TestRenderMohidRunYamls:
 
     def test_render_mohid_run_yamls(self, glost_run_desc, monkeypatch):
         job_id = glost_run_desc["job id"]
+        forcing_dir = Path(glost_run_desc["paths"]["forcing directory"])
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_dir = Path(runs_dir) / f"{job_id}_2019-12-04T180843"
         mohid_config = glost_run_desc["paths"]["mohid config"]
@@ -328,14 +333,14 @@ class TestRenderMohidRunYamls:
                 run_id: {{ job_id }}-{{ run_number }}
     
                 forcing:
-                  winds.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/winds.hdf5
-                  currents.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/currents.hdf5
-                  water_levels.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
-                  temperature.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
-                  salinity.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
-                  ww3.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/waves.hdf5
-                  e3t.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/e3t.hdf5
-                  diffusivity.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
+                  winds.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/winds.hdf5
+                  currents.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/currents.hdf5
+                  water_levels.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
+                  temperature.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
+                  salinity.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
+                  ww3.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/waves.hdf5
+                  e3t.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/e3t.hdf5
+                  diffusivity.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
     
                 run data files:
                   IN_MODEL: {{ job_dir }}/mohid-yaml/Model-{{ run_number }}.dat
@@ -364,20 +369,20 @@ class TestRenderMohidRunYamls:
         )
 
         mohid_cmd.monte_carlo._render_mohid_run_yamls(
-            job_id, job_dir, mohid_config, runs, tmpl_env
+            job_id, job_dir, forcing_dir, mohid_config, runs, tmpl_env
         )
         with (mohid_yaml_dir / f"{job_id}-0.yaml").open("rt") as fp:
             run_desc = yaml.safe_load(fp)
         assert run_desc["run_id"] == f"{job_id}-0"
         expected_forcing = {
-            "winds.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/winds.hdf5",
-            "currents.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/currents.hdf5",
-            "water_levels.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/t.hdf5",
-            "temperature.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/t.hdf5",
-            "salinity.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/t.hdf5",
-            "ww3.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/waves.hdf5",
-            "e3t.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/e3t.hdf5",
-            "diffusivity.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/t.hdf5",
+            "winds.hdf5": f"{forcing_dir}/15jun17-22jun17/winds.hdf5",
+            "currents.hdf5": f"{forcing_dir}/15jun17-22jun17/currents.hdf5",
+            "water_levels.hdf5": f"{forcing_dir}/15jun17-22jun17/t.hdf5",
+            "temperature.hdf5": f"{forcing_dir}/15jun17-22jun17/t.hdf5",
+            "salinity.hdf5": f"{forcing_dir}/15jun17-22jun17/t.hdf5",
+            "ww3.hdf5": f"{forcing_dir}/15jun17-22jun17/waves.hdf5",
+            "e3t.hdf5": f"{forcing_dir}/15jun17-22jun17/e3t.hdf5",
+            "diffusivity.hdf5": f"{forcing_dir}/15jun17-22jun17/t.hdf5",
         }
         assert run_desc["forcing"] == expected_forcing
         expected_run_data_files = {
