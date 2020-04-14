@@ -331,6 +331,9 @@ class TestRenderMohidRunYamls:
             textwrap.dedent(
                 """\
                 run_id: {{ job_id }}-{{ run_number }}
+                
+                paths:
+                  runs directory: {{ runs_dir }}
     
                 forcing:
                   winds.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/winds.hdf5
@@ -369,11 +372,12 @@ class TestRenderMohidRunYamls:
         )
 
         mohid_cmd.monte_carlo._render_mohid_run_yamls(
-            job_id, job_dir, forcing_dir, mohid_config, runs, tmpl_env
+            job_id, job_dir, forcing_dir, runs_dir, mohid_config, runs, tmpl_env
         )
         with (mohid_yaml_dir / f"{job_id}-0.yaml").open("rt") as fp:
             run_desc = yaml.safe_load(fp)
         assert run_desc["run_id"] == f"{job_id}-0"
+        assert run_desc["paths"]["runs directory"] == f"{runs_dir}"
         expected_forcing = {
             "winds.hdf5": f"{forcing_dir}/15jun17-22jun17/winds.hdf5",
             "currents.hdf5": f"{forcing_dir}/15jun17-22jun17/currents.hdf5",

@@ -168,7 +168,9 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
     tmpl_env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(os.fspath(mohid_config / "templates"))
     )
-    _render_mohid_run_yamls(job_id, job_dir, forcing_dir, mohid_config, runs, tmpl_env)
+    _render_mohid_run_yamls(
+        job_id, job_dir, forcing_dir, runs_dir, mohid_config, runs, tmpl_env
+    )
     _render_model_dats(job_dir, runs, tmpl_env)
     _render_lagrangian_dats(job_dir, runs, tmpl_env)
 
@@ -193,11 +195,14 @@ def _get_runs_info(csv_file):
     return pandas.read_csv(csv_file, skipinitialspace=True, parse_dates=[0])
 
 
-def _render_mohid_run_yamls(job_id, job_dir, forcing_dir, mohid_config, runs, tmpl_env):
+def _render_mohid_run_yamls(
+    job_id, job_dir, forcing_dir, runs_dir, mohid_config, runs, tmpl_env
+):
     """
     :param str job_id:
     :param :py:class:`pathlib.Path` job_dir:
     :param :py:class:`pathlib.Path` forcing_dir:
+    :param :py:class:`pathlib.Path` runs_dir:
     :param :py:class:`pathlib.Path` mohid_config:
     :param :py:class:`pandas.DataFrame` runs:
     :param :py:class:`jinja2.Environment` tmpl_env:
@@ -208,6 +213,7 @@ def _render_mohid_run_yamls(job_id, job_dir, forcing_dir, mohid_config, runs, tm
         "job_id": job_id,
         "job_dir": job_dir,
         "forcing_dir": forcing_dir,
+        "runs_dir": runs_dir,
     }
     for i, run in runs.iterrows():
         start_date = arrow.get(run.spill_date_hour.date())
