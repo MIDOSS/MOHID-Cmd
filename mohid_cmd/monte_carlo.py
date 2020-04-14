@@ -173,7 +173,7 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
     )
     _render_model_dats(job_dir, runs, tmpl_env)
     _render_lagrangian_dats(job_dir, runs, tmpl_env)
-
+    logger.info(f"job directory created: {job_dir}")
     if no_submit:
         return
     sbatch_cmd = f"sbatch {job_dir / 'glost-job.sh'}"

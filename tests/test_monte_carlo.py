@@ -222,8 +222,17 @@ class TestTakeAction:
     """Unit tests for `mohid monte-carlo` sub-command take_action() method.
     """
 
+    @staticmethod
+    @pytest.fixture
+    def mock_arrow_now(monkeypatch):
+        def mock_arrow_now():
+            return arrow.get("2020-04-14T163443")
+
+        monkeypatch.setattr(mohid_cmd.monte_carlo.arrow, "now", mock_arrow_now)
+
     def test_take_action(
         self,
+        mock_arrow_now,
         mock_get_runs_info,
         mock_record_vcs_revisions,
         mock_render_mohid_run_yamls,
@@ -242,12 +251,21 @@ class TestTakeAction:
             desc_file=desc_file, csv_file=csv_file, no_submit=False
         )
         caplog.set_level(logging.INFO)
+
         monte_carlo_cmd.take_action(parsed_args)
+
+        job_id = glost_run_desc["job id"]
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_dir = Path(runs_dir) / f"{job_id}_2020-04-14T163443"
         assert caplog.records[0].levelname == "INFO"
-        assert caplog.messages[0] == "Submitted batch job 12345678"
+        assert caplog.messages[0] == f"job directory created: {job_dir}"
+        assert caplog.records[1].levelname == "INFO"
+        assert caplog.messages[1] == "Submitted batch job 12345678"
+        assert len(caplog.records) == 2
 
     def test_take_action_no_submit(
         self,
+        mock_arrow_now,
         mock_get_runs_info,
         mock_record_vcs_revisions,
         mock_render_mohid_run_yamls,
@@ -266,8 +284,15 @@ class TestTakeAction:
             desc_file=desc_file, csv_file=csv_file, no_submit=True
         )
         caplog.set_level(logging.INFO)
+
         monte_carlo_cmd.take_action(parsed_args)
-        assert not caplog.records
+
+        job_id = glost_run_desc["job id"]
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_dir = Path(runs_dir) / f"{job_id}_2020-04-14T163443"
+        assert caplog.records[0].levelname == "INFO"
+        assert caplog.messages[0] == f"job directory created: {job_dir}"
+        assert len(caplog.records) == 1
 
 
 class TestMonteCarlo:
