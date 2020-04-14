@@ -60,7 +60,7 @@ Here is an example:
 
     vcs revisions:
       git:
-        - $PROJECT/$USER/MIDOSS/Make-MIDOSS-Forcin
+        - $PROJECT/$USER/MIDOSS/Make-MIDOSS-Forcing
         - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-grid
         - $PROJECT/$USER/MIDOSS/moad_tools
         - $PROJECT/$USER/MIDOSS/MOHID-Cmd
