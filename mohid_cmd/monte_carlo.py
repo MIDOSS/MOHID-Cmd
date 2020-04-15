@@ -168,6 +168,7 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
     tmpl_env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(os.fspath(mohid_config / "templates"))
     )
+    _render_make_hdf5_yamls(job_id, job_dir, forcing_dir, runs, tmpl_env)
     _render_mohid_run_yamls(
         job_id, job_dir, forcing_dir, runs_dir, mohid_config, runs, tmpl_env
     )
@@ -193,6 +194,22 @@ def _get_runs_info(csv_file):
     :rtype: :py:class:`pandas.DataFrame`
     """
     return pandas.read_csv(csv_file, skipinitialspace=True, parse_dates=[0])
+
+
+def _render_make_hdf5_yamls(job_id, job_dir, forcing_dir, runs, tmpl_env):
+    """
+    :param str job_id:
+    :param :py:class:`pathlib.Path` job_dir:
+    :param :py:class:`pathlib.Path` forcing_dir:
+    :param :py:class:`pandas.DataFrame` runs:
+    :param :py:class:`jinja2.Environment` tmpl_env:
+    """
+    tmpl = tmpl_env.get_template("make-hdf5.yaml")
+    context = {"forcing_dir": forcing_dir}
+    for i, run in runs.iterrows():
+        (job_dir / "forcing-yaml" / f"{job_id}-make-hdf5-{i}.yaml").write_text(
+            tmpl.render(context)
+        )
 
 
 def _render_mohid_run_yamls(
