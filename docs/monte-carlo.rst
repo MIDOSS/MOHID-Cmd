@@ -63,10 +63,9 @@ Here is an example:
         - $PROJECT/$USER/MIDOSS/Make-MIDOSS-Forcing
         - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-grid
         - $PROJECT/$USER/MIDOSS/moad_tools
+        - $PROJECT/$USER/MIDOSS/NEMO-Cmd
         - $PROJECT/$USER/MIDOSS/MOHID-Cmd
         - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config
-      hg:
-        - $PROJECT/$USER/MIDOSS/NEMO-Cmd
 
 
 .. _MOHID-RunParametersCSV-File:
