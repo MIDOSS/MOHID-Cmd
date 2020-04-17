@@ -80,6 +80,7 @@ def glost_run_desc(tmp_path):
               runs directory: {runs_dir}
               mohid config: {mohid_config_dir}
               
+            make-hdf5 command: $HOME/.local/bin/make-hdf5
             mohid command: $HOME/.local/bin/mohid
             
             vcs revisions:

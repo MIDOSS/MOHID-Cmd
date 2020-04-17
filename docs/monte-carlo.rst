@@ -57,6 +57,7 @@ Here is an example:
       runs directory: $SCRATCH/MIDOSS/runs/monte-carlo/
       mohid config: $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-config/monte-carlo/
 
+    make-hdf5 command: $HOME/.local/bin/make-hdf5
     mohid command: $HOME/.local/bin/mohid
 
     vcs revisions:

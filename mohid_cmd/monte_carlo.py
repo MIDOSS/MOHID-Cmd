@@ -145,6 +145,9 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
             job_desc, ("runs per glost job",), run_dir=job_dir
         ),
         "walltime": walltime,
+        "make_hdf5_cmd": nemo_cmd.prepare.get_run_desc_value(
+            job_desc, ("make-hdf5 command",), run_dir=job_dir
+        ),
         "mohid_cmd": nemo_cmd.prepare.get_run_desc_value(
             job_desc, ("mohid command",), run_dir=job_dir
         ),
