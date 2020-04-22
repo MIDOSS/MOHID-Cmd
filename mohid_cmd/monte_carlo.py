@@ -145,12 +145,6 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
             job_desc, ("runs per glost job",), run_dir=job_dir
         ),
         "walltime": walltime,
-        "make_hdf5_cmd": nemo_cmd.prepare.get_run_desc_value(
-            job_desc, ("make-hdf5 command",), run_dir=job_dir
-        ),
-        "mohid_cmd": nemo_cmd.prepare.get_run_desc_value(
-            job_desc, ("mohid command",), run_dir=job_dir
-        ),
     }
     cookiecutter.main.cookiecutter(
         os.fspath(Path(__file__).parent.parent / "cookiecutter"),
@@ -169,7 +163,8 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
         run_dir=job_dir,
     )
     tmpl_env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(os.fspath(mohid_config / "templates"))
+        loader=jinja2.FileSystemLoader(os.fspath(mohid_config / "templates")),
+        keep_trailing_newline=True,
     )
     _render_make_hdf5_yamls(job_id, job_dir, forcing_dir, runs, tmpl_env)
     _render_mohid_run_yamls(
@@ -177,6 +172,15 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
     )
     _render_model_dats(job_dir, runs, tmpl_env)
     _render_lagrangian_dats(job_dir, runs, tmpl_env)
+    make_hdf5_cmd = nemo_cmd.prepare.get_run_desc_value(
+        job_desc, ("make-hdf5 command",), run_dir=job_dir
+    )
+    mohid_cli_cmd = nemo_cmd.prepare.get_run_desc_value(
+        job_desc, ("mohid command",), run_dir=job_dir
+    )
+    _render_glost_task_scripts(
+        job_id, job_dir, runs, make_hdf5_cmd, mohid_cli_cmd, tmpl_env
+    )
     logger.info(f"job directory created: {job_dir}")
     if no_submit:
         return
@@ -284,3 +288,33 @@ def _render_lagrangian_dats(job_dir, runs, tmpl_env):
         }
         lagrangian_dat = f"{lagrangian_template.stem}-{i}.dat"
         (job_dir / "mohid-yaml" / lagrangian_dat).write_text(tmpl.render(context))
+
+
+def _render_glost_task_scripts(
+    job_id, job_dir, runs, make_hdf5_cmd, mohid_cli_cmd, tmpl_env
+):
+    """
+    :param str job_id:
+    :param :py:class:`pathlib.Path` job_dir:
+    :param :py:class:`pandas.DataFrame` runs:
+    :param str make_hdf5_cmd:
+    :param str mohid_cli_cmd:
+    :param :py:class:`jinja2.Environment` tmpl_env:
+    """
+    tmpl = tmpl_env.get_template("glost-task.sh")
+    context = {
+        "job_id": job_id,
+        "job_dir": job_dir,
+        "make_hdf5_cmd": make_hdf5_cmd,
+        "mohid_cmd": mohid_cli_cmd,
+    }
+    for i, run in runs.iterrows():
+        start_date = arrow.get(run.spill_date_hour.date())
+        context.update(
+            {
+                "run_number": i,
+                "start_yyyy_mm_dd": start_date.format("YYYY-MM-DD"),
+                "n_days": run.run_days,
+            }
+        )
+        (job_dir / "glost-tasks" / f"{job_id}-{i}.sh").write_text(tmpl.render(context))

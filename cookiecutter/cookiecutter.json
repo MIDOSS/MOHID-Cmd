@@ -9,7 +9,5 @@
   "walltime": "3:00:00",
   "forcing_dir": "$SCRATCH/MIDOSS/forcing/",
   "runs_dir": "$SCRATCH/MIDOSS/runs/monte-carlo/",
-  "job_dir": "{{ runs_dir }}/{{ cookiecutter.job_id }}_yyyy-mm-ddThhmmss",
-  "make_hdf5_cmd": "$HOME/.local/bin/make-hdf5",
-  "mohid_cmd": "$HOME/.local/bin/mohid"
+  "job_dir": "{{ runs_dir }}/{{ cookiecutter.job_id }}_yyyy-mm-ddThhmmss"
 }
