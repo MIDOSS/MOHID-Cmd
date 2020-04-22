@@ -10,7 +10,7 @@ The defaults are (mostly) overridden by values calculated by the :ref:`mohid-mon
 Sadly,
 comments are not allowed in JSON files,
 so you will have to guess the meaning of the template variables from their names and values,
-or read the cdoe in the :file:`mohid_cmd/monte_carlo.py` module to learn more about them.
+or read the code in the :file:`mohid_cmd/monte_carlo.py` module to learn more about them.
 
 The :file:`{{cookiecutter.job_dir}}` directory is the temporary run directory template.
 The rendered temporary run directory will have the name given by the :kbd:`job_dir` template variable.
