@@ -402,17 +402,12 @@ class TestRenderMakeHDF5Yamls:
         )
 
         mohid_cmd.monte_carlo._render_make_hdf5_yamls(
-            job_id,
-            job_dir,
-            forcing_dir,
-            runs,
-            tmpl_env
-            # job_id, job_dir, forcing_dir, runs_dir, mohid_config, runs, tmpl_env
+            job_id, job_dir, forcing_dir, runs, tmpl_env
         )
 
         with (forcing_yaml_dir / f"{job_id}-make-hdf5-0.yaml").open("rt") as fp:
             run_desc = yaml.safe_load(fp)
-        assert run_desc["paths"]["output"] == f"{forcing_dir}"
+        assert run_desc["paths"]["output"] == f"{forcing_dir}/{job_id}-{0}"
 
 
 class TestRenderMohidRunYamls:
@@ -481,14 +476,14 @@ class TestRenderMohidRunYamls:
         assert run_desc["run_id"] == f"{job_id}-0"
         assert run_desc["paths"]["runs directory"] == f"{runs_dir}"
         expected_forcing = {
-            "winds.hdf5": f"{forcing_dir}/15jun17-22jun17/winds.hdf5",
-            "currents.hdf5": f"{forcing_dir}/15jun17-22jun17/currents.hdf5",
-            "water_levels.hdf5": f"{forcing_dir}/15jun17-22jun17/t.hdf5",
-            "temperature.hdf5": f"{forcing_dir}/15jun17-22jun17/t.hdf5",
-            "salinity.hdf5": f"{forcing_dir}/15jun17-22jun17/t.hdf5",
-            "ww3.hdf5": f"{forcing_dir}/15jun17-22jun17/waves.hdf5",
-            "e3t.hdf5": f"{forcing_dir}/15jun17-22jun17/e3t.hdf5",
-            "diffusivity.hdf5": f"{forcing_dir}/15jun17-22jun17/t.hdf5",
+            "winds.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/winds.hdf5",
+            "currents.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/currents.hdf5",
+            "water_levels.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/t.hdf5",
+            "temperature.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/t.hdf5",
+            "salinity.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/t.hdf5",
+            "ww3.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/waves.hdf5",
+            "e3t.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/e3t.hdf5",
+            "diffusivity.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/t.hdf5",
         }
         assert run_desc["forcing"] == expected_forcing
         expected_run_data_files = {
@@ -620,6 +615,7 @@ class TestRenderGlostTaskScripts:
 
     def test_render_glost_task_scripts(self, glost_run_desc, monkeypatch):
         job_id = glost_run_desc["job id"]
+        forcing_dir = Path(glost_run_desc["paths"]["forcing directory"])
         runs_dir = glost_run_desc["paths"]["runs directory"]
         make_hdf5_cmd = glost_run_desc["make-hdf5 command"]
         mohid_cli_cmd = glost_run_desc["mohid command"]
@@ -635,6 +631,7 @@ class TestRenderGlostTaskScripts:
                 && {{ mohid_cmd }} run --no-submit --tmp-run-dir $MONTE_CARLO/{{ job_id }}-{{ run_number }}/ \\
                   $MONTE_CARLO/mohid-yaml/{{ job_id }}-{{ run_number }}.yaml $MONTE_CARLO/results/{{ job_id }}-{{ run_number }}/ \\
                 && bash $MONTE_CARLO/{{ job_id }}-{{ run_number }}/MOHID.sh
+                rm -rf {{ forcing_dir }}/{{ job_id }}-{{ run_number }}/
                 """
             )
         )
@@ -650,15 +647,16 @@ class TestRenderGlostTaskScripts:
         )
 
         mohid_cmd.monte_carlo._render_glost_task_scripts(
-            job_id, job_dir, runs, make_hdf5_cmd, mohid_cli_cmd, tmpl_env
+            job_id, job_dir, forcing_dir, runs, make_hdf5_cmd, mohid_cli_cmd, tmpl_env
         )
         glost_task_sh = (glost_tasks_dir / f"{job_id}-0.sh").read_text().splitlines()
         expected = textwrap.dedent(
-            """\
+            f"""\
             $HOME/.local/bin/make-hdf5 $MONTE_CARLO/forcing-yaml/AKNS-spatial-make-hdf5-0.yaml 2017-06-15 7 \\
             && $HOME/.local/bin/mohid run --no-submit --tmp-run-dir $MONTE_CARLO/AKNS-spatial-0/ \\
               $MONTE_CARLO/mohid-yaml/AKNS-spatial-0.yaml $MONTE_CARLO/results/AKNS-spatial-0/ \\
             && bash $MONTE_CARLO/AKNS-spatial-0/MOHID.sh
+            rm -rf {forcing_dir}/AKNS-spatial-0/
             """
         ).splitlines()
         assert glost_task_sh == expected

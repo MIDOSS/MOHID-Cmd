@@ -179,7 +179,7 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
         job_desc, ("mohid command",), run_dir=job_dir
     )
     _render_glost_task_scripts(
-        job_id, job_dir, runs, make_hdf5_cmd, mohid_cli_cmd, tmpl_env
+        job_id, job_dir, forcing_dir, runs, make_hdf5_cmd, mohid_cli_cmd, tmpl_env
     )
     logger.info(f"job directory created: {job_dir}")
     if no_submit:
@@ -203,29 +203,31 @@ def _get_runs_info(csv_file):
     return pandas.read_csv(csv_file, skipinitialspace=True, parse_dates=[0])
 
 
-def _render_make_hdf5_yamls(job_id, job_dir, forcing_dir, runs, tmpl_env):
+def _render_make_hdf5_yamls(job_id, job_dir, forcing_dir_root, runs, tmpl_env):
     """
     :param str job_id:
     :param :py:class:`pathlib.Path` job_dir:
-    :param :py:class:`pathlib.Path` forcing_dir:
+    :param :py:class:`pathlib.Path` forcing_dir_root:
     :param :py:class:`pandas.DataFrame` runs:
     :param :py:class:`jinja2.Environment` tmpl_env:
     """
     tmpl = tmpl_env.get_template("make-hdf5.yaml")
-    context = {"forcing_dir": forcing_dir}
     for i, run in runs.iterrows():
+        forcing_dir = forcing_dir_root / f"{job_id}-{i}"
+        forcing_dir.mkdir(parents=True, exist_ok=True)
+        context = {"forcing_dir": forcing_dir}
         (job_dir / "forcing-yaml" / f"{job_id}-make-hdf5-{i}.yaml").write_text(
             tmpl.render(context)
         )
 
 
 def _render_mohid_run_yamls(
-    job_id, job_dir, forcing_dir, runs_dir, mohid_config, runs, tmpl_env
+    job_id, job_dir, forcing_dir_root, runs_dir, mohid_config, runs, tmpl_env
 ):
     """
     :param str job_id:
     :param :py:class:`pathlib.Path` job_dir:
-    :param :py:class:`pathlib.Path` forcing_dir:
+    :param :py:class:`pathlib.Path` forcing_dir_root:
     :param :py:class:`pathlib.Path` runs_dir:
     :param :py:class:`pathlib.Path` mohid_config:
     :param :py:class:`pandas.DataFrame` runs:
@@ -236,7 +238,6 @@ def _render_mohid_run_yamls(
     context = {
         "job_id": job_id,
         "job_dir": job_dir,
-        "forcing_dir": forcing_dir,
         "runs_dir": runs_dir,
     }
     for i, run in runs.iterrows():
@@ -247,6 +248,7 @@ def _render_mohid_run_yamls(
                 "run_number": i,
                 "start_ddmmmyy": start_date.format("DDMMMYY").lower(),
                 "end_ddmmmyy": end_date.format("DDMMMYY").lower(),
+                "forcing_dir": forcing_dir_root / f"{job_id}-{i}",
                 "Lagrangian_template": Path(run.Lagrangian_template).stem,
                 "mohid_config": mohid_config,
             }
@@ -291,11 +293,12 @@ def _render_lagrangian_dats(job_dir, runs, tmpl_env):
 
 
 def _render_glost_task_scripts(
-    job_id, job_dir, runs, make_hdf5_cmd, mohid_cli_cmd, tmpl_env
+    job_id, job_dir, forcing_dir, runs, make_hdf5_cmd, mohid_cli_cmd, tmpl_env
 ):
     """
     :param str job_id:
     :param :py:class:`pathlib.Path` job_dir:
+    :param :py:class:`pathlib.Path` forcing_dir:
     :param :py:class:`pandas.DataFrame` runs:
     :param str make_hdf5_cmd:
     :param str mohid_cli_cmd:
@@ -305,6 +308,7 @@ def _render_glost_task_scripts(
     context = {
         "job_id": job_id,
         "job_dir": job_dir,
+        "forcing_dir": forcing_dir,
         "make_hdf5_cmd": make_hdf5_cmd,
         "mohid_cmd": mohid_cli_cmd,
     }
