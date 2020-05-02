@@ -142,9 +142,7 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
         "mem_per_cpu": nemo_cmd.prepare.get_run_desc_value(
             job_desc, ("mem per cpu",), run_dir=job_dir
         ),
-        "runs_per_job": nemo_cmd.prepare.get_run_desc_value(
-            job_desc, ("runs per glost job",), run_dir=job_dir
-        ),
+        "runs_per_job": len(runs),
         "walltime": walltime,
     }
     cookiecutter.main.cookiecutter(

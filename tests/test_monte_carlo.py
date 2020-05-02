@@ -70,7 +70,6 @@ def glost_run_desc(tmp_path):
             account: rrg-allen
             email: dlatorne@example.com
             nodes: 1
-            runs per glost job: 2
             mem per cpu: 14100M
             run walltime: 2:00:00   
 
@@ -1113,7 +1112,6 @@ class TestGlostJobDir:
     def test_glost_tasks_file_contents(
         self,
         mock_arrow_now,
-        mock_get_runs_info,
         mock_hg_repo,
         mock_git_repo,
         mock_render_make_hdf5_yamls,
@@ -1123,7 +1121,21 @@ class TestGlostJobDir:
         mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
+        monkeypatch,
     ):
+        n_runs = 2
+
+        def mock_get_runs_info(*args):
+            runs = pandas.DataFrame(
+                {
+                    "spill_date_hour": pandas.Timestamp("2017-06-15 02:00"),
+                    "run_days": numpy.array([7] * n_runs, dtype=numpy.int64),
+                }
+            )
+            return runs
+
+        monkeypatch.setattr(mohid_cmd.monte_carlo, "_get_runs_info", mock_get_runs_info)
+
         csv_file = tmp_path / "AKNS_spatial.csv"
         csv_file.write_text("")
         mohid_cmd.monte_carlo.monte_carlo(
