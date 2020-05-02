@@ -18,6 +18,7 @@ Prepare for and execute a collection of Monte Carlo runs of the MIDOSS-MOHID mod
 """
 import datetime
 import logging
+import math
 import os
 import shlex
 import shutil
@@ -120,11 +121,10 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
     ntasks_per_node = min(
         32, len(runs) + 1
     )  # One task is always allocated to the GLOST manager
-    ## TODO: Calculate walltime from number of runs and number of cores
     run_walltime = nemo_cmd.prepare.get_run_desc_value(
         job_desc, ("run walltime",), run_dir=job_dir
     )
-    run_walltime = datetime.timedelta(seconds=run_walltime)
+    run_walltime = datetime.timedelta(seconds=run_walltime * math.ceil(len(runs) / 31))
     walltime = mohid_cmd.run.td_to_hms(run_walltime)
     cookiecutter_context = {
         "job_id": job_id,

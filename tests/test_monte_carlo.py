@@ -71,7 +71,7 @@ def glost_run_desc(tmp_path):
             email: dlatorne@example.com
             nodes: 1
             mem per cpu: 14100M
-            run walltime: 2:00:00   
+            run walltime: 3:00:00   
 
             paths:
               forcing directory: {forcing_dir}
@@ -1214,7 +1214,7 @@ class TestGlostJobDir:
             #SBATCH --nodes={glost_run_desc["nodes"]}
             #SBATCH --ntasks-per-node=2
             #SBATCH --mem-per-cpu={glost_run_desc["mem per cpu"]}
-            #SBATCH --time=2:00:00
+            #SBATCH --time=3:00:00
             #SBATCH --output={job_dir}/glost-job.stdout
             #SBATCH --error={job_dir}/glost-job.stderr
             
@@ -1231,6 +1231,63 @@ class TestGlostJobDir:
             """
         ).splitlines()
         assert glost_script == expected
+
+    @pytest.mark.parametrize(
+        "n_runs, walltime",
+        (
+            (2, "3:00:00"),
+            (31, "3:00:00"),
+            (32, "6:00:00"),
+            (62, "6:00:00"),
+            (63, "9:00:00"),
+            (124, "12:00:00"),
+            (125, "15:00:00"),
+            (248, "24:00:00"),
+            (249, "27:00:00"),
+            (496, "48:00:00"),
+            (992, "96:00:00"),
+            (993, "99:00:00"),
+        ),
+    )
+    def test_glost_job_script_walltime(
+        self,
+        n_runs,
+        walltime,
+        mock_arrow_now,
+        mock_hg_repo,
+        mock_git_repo,
+        mock_render_make_hdf5_yamls,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
+        mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
+        glost_run_desc,
+        tmp_path,
+        monkeypatch,
+    ):
+        def mock_get_runs_info(*args):
+            runs = pandas.DataFrame(
+                {
+                    "spill_date_hour": pandas.Timestamp("2017-06-15 02:00"),
+                    "run_days": numpy.array([7] * n_runs, dtype=numpy.int64),
+                }
+            )
+            return runs
+
+        monkeypatch.setattr(mohid_cmd.monte_carlo, "_get_runs_info", mock_get_runs_info)
+
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
+
+        mohid_cmd.monte_carlo.monte_carlo(
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
+        )
+
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_id = glost_run_desc["job id"]
+        job_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743"
+        glost_script = (job_dir / "glost-job.sh").read_text()
+        assert f"#SBATCH --time={walltime}" in glost_script
 
     def test_glost_job_desc_file_copied(
         self,
