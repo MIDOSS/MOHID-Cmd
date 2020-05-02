@@ -117,6 +117,9 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
     )
     job_dir = runs_dir / f"{job_id}_{arrow.now().format('YYYY-MM-DDTHHmmss')}"
     runs = _get_runs_info(csv_file)
+    ntasks_per_node = min(
+        32, len(runs) + 1
+    )  # One task is always allocated to the GLOST manager
     ## TODO: Calculate walltime from number of runs and number of cores
     run_walltime = nemo_cmd.prepare.get_run_desc_value(
         job_desc, ("run walltime",), run_dir=job_dir
@@ -135,9 +138,7 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
         "nodes": nemo_cmd.prepare.get_run_desc_value(
             job_desc, ("nodes",), run_dir=job_dir
         ),
-        "ntasks_per_node": nemo_cmd.prepare.get_run_desc_value(
-            job_desc, ("tasks per node",), run_dir=job_dir
-        ),
+        "ntasks_per_node": ntasks_per_node,
         "mem_per_cpu": nemo_cmd.prepare.get_run_desc_value(
             job_desc, ("mem per cpu",), run_dir=job_dir
         ),

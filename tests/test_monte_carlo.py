@@ -70,7 +70,6 @@ def glost_run_desc(tmp_path):
             account: rrg-allen
             email: dlatorne@example.com
             nodes: 1
-            tasks per node: 3
             runs per glost job: 2
             mem per cpu: 14100M
             run walltime: 2:00:00   
@@ -102,7 +101,13 @@ def glost_run_desc(tmp_path):
 @pytest.fixture
 def mock_get_runs_info(monkeypatch):
     def mock_get_runs_info(*args):
-        pass
+        runs = pandas.DataFrame(
+            {
+                "spill_date_hour": pandas.Timestamp("2017-06-15 02:00"),
+                "run_days": numpy.array([7], dtype=numpy.int64),
+            }
+        )
+        return runs
 
     monkeypatch.setattr(mohid_cmd.monte_carlo, "_get_runs_info", mock_get_runs_info)
 
@@ -1195,7 +1200,7 @@ class TestGlostJobDir:
             #SBATCH --mail-user={glost_run_desc["email"]}
             #SBATCH --mail-type=ALL
             #SBATCH --nodes={glost_run_desc["nodes"]}
-            #SBATCH --ntasks-per-node={glost_run_desc["tasks per node"]}
+            #SBATCH --ntasks-per-node=2
             #SBATCH --mem-per-cpu={glost_run_desc["mem per cpu"]}
             #SBATCH --time=2:00:00
             #SBATCH --output={job_dir}/glost-job.stdout
