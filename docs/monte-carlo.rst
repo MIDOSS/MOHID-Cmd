@@ -62,6 +62,7 @@ Here is an example:
       git:
         - $PROJECT/$USER/MIDOSS/Make-MIDOSS-Forcing
         - $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-grid
+        - $PROJECT/$USER/MIDOSS/SalishSeaCast-grid
         - $PROJECT/$USER/MIDOSS/moad_tools
         - $PROJECT/$USER/MIDOSS/NEMO-Cmd
         - $PROJECT/$USER/MIDOSS/MOHID-Cmd
