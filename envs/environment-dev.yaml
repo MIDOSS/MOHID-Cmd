@@ -30,7 +30,6 @@ dependencies:
   - f90nml
   - gitpython
   - pandas
-  - python-hglib
   - pip
   - python>=3.6
   - pyyaml
@@ -45,3 +44,7 @@ dependencies:
 
   # For coding style
   - black
+
+  - pip:
+    - python-hglib
+
