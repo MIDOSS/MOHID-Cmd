@@ -609,8 +609,8 @@ class TestRenderLagrangianDats:
         mohid_cmd.monte_carlo._render_lagrangian_dats(job_dir, runs, tmpl_env)
         lagrangian_dat = (mohid_yaml_dir / f"Lagrangian-0.dat").read_text().splitlines()
         lon, lat = lagrangian_dat[0].split()[-2:]
-        assert float(lon) == numpy.asscalar(spill_lon)
-        assert float(lat) == numpy.asscalar(spill_lat)
+        assert float(lon) == spill_lon.item()
+        assert float(lat) == spill_lat.item()
 
 
 class TestRenderGlostTaskScripts:
