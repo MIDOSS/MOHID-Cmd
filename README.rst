@@ -59,7 +59,7 @@ License
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
 
-The MIDOSS-MOHID command processor code and documentation are copyright 2018-2020 by the `MIDOSS project contributors`_,
+The MIDOSS-MOHID command processor code and documentation are copyright 2018-2021 by the `MIDOSS project contributors`_,
 The University of British Columbia,
 and Dalhousie University.
 

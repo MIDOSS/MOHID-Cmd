@@ -1,4 +1,4 @@
-#  Copyright 2018-2020 the MIDOSS project contributors, The University of British Columbia,
+#  Copyright 2018-2021 the MIDOSS project contributors, The University of British Columbia,
 #  and Dalhousie University.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,15 +19,15 @@ Prepare for, execute, and gather the results of a run of the MIDOSS-MOHID model.
 import datetime
 import logging
 import os
-import textwrap
-from pathlib import Path
 import shlex
 import subprocess
+import textwrap
+from pathlib import Path
 
 import cliff.command
+import nemo_cmd.prepare
 
 import mohid_cmd.prepare
-import nemo_cmd.prepare
 
 logger = logging.getLogger(__name__)
 

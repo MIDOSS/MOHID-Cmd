@@ -1,4 +1,4 @@
-#  Copyright 2018-2020 the MIDOSS project contributors, The University of British Columbia,
+#  Copyright 2018-2021 the MIDOSS project contributors, The University of British Columbia,
 #  and Dalhousie University.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +15,9 @@
 """MOHID-Cmd run sub-command plug-in unit tests.
 """
 import logging
+import subprocess
 import textwrap
 from pathlib import Path
-import subprocess
 from types import SimpleNamespace
 from unittest.mock import patch, call
 

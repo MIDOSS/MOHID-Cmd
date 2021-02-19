@@ -1,4 +1,4 @@
-.. Copyright 2018-2020, the MIDOSS project contributors, The University of British Columbia,
+.. Copyright 2018-2021, the MIDOSS project contributors, The University of British Columbia,
 .. and Dalhousie University.
 ..
 .. Licensed under the Apache License, Version 2.0 (the "License");
@@ -456,7 +456,7 @@ License
     :alt: Licensed under the Apache License, Version 2.0
 
 The code and documentation of the MIDOSS-MOHID Command Processor project
-are copyright 2018-2020 by the `MIDOSS project contributors`_, The University of British Columbia,
+are copyright 2018-2021 by the `MIDOSS project contributors`_, The University of British Columbia,
 and Dalhousie University.
 
 .. _MIDOSS project contributors: https://github.com/MIDOSS/docs/blob/master/CONTRIBUTORS.rst

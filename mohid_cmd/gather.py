@@ -1,4 +1,4 @@
-#  Copyright 2018-2020 the MIDOSS project contributors, The University of British Columbia,
+#  Copyright 2018-2021 the MIDOSS project contributors, The University of British Columbia,
 #  and Dalhousie University.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,8 +17,8 @@
 Gather results files from a MIDOSS-MOHID run into a specified directory.
 """
 import logging
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 import cliff.command
 import nemo_cmd
