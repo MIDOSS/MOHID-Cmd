@@ -33,16 +33,16 @@ dependencies:
   - python>=3.6
   - pyyaml
 
+  # For coding style
+  - black
+
   # For unit tests
-  - coverage
   - pytest
+  - pytest-cov
 
   # For documentation
   - sphinx
   - sphinx_rtd_theme
-
-  # For coding style
-  - black
 
   - pip:
     - python-hglib
