@@ -30,7 +30,7 @@ dependencies:
   - gitpython
   - pandas
   - pip
-  - python>=3.6
+  - python=3.8
   - pyyaml
 
   # For coding style

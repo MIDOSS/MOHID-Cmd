@@ -24,8 +24,8 @@
 .. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
-.. image:: https://img.shields.io/badge/python-3.7-blue.svg
-    :target: https://docs.python.org/3.7/
+.. image:: https://img.shields.io/badge/python-3.8-blue.svg
+    :target: https://docs.python.org/3.8/
     :alt: Python Version
 .. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
     :target: https://github.com/MIDOSS/MOHID-Cmd
@@ -57,11 +57,11 @@ command-line tool for doing various operations associated with the `MIDOSS proje
 Python Versions
 ===============
 
-.. image:: https://img.shields.io/badge/python-3.7-blue.svg
-    :target: https://docs.python.org/3.7/
+.. image:: https://img.shields.io/badge/python-3.8-blue.svg
+    :target: https://docs.python.org/3.8/
     :alt: Python Version
 
-The :kbd:`mohid_cmd` package is developed and tested using `Python`_ 3.7 or later.
+The :kbd:`mohid_cmd` package is developed and tested using `Python`_ 3.8.
 The package uses some Python language features that are not available in versions prior to 3.6,
 in particular:
 
@@ -284,7 +284,7 @@ The output looks something like::
   (line   23) ok        http://www.mohid.com/
   (line   67) ok        https://www.apache.org/licenses/LICENSE-2.0
   writing output... [ 40%] pkg_development
-  (line   21) ok        https://docs.python.org/3.7/
+  (line   21) ok        https://docs.python.org/3.8/
   (line   58) ok        https://www.python.org/
   (line   62) ok        https://docs.python.org/3/reference/lexical_analysis.html#f-strings
   (line   64) ok        https://docs.python.org/3/whatsnew/3.6.html#whatsnew36-pep519

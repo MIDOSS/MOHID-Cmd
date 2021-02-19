@@ -1219,7 +1219,7 @@ class TestGlostJobDir:
             #SBATCH --error={job_dir}/glost-job.stderr
             
             module load glost/0.3.1
-            module load python/3.7
+            module load python/3.8.2
             module load proj4-fortran/1.0
             module load nco/4.6.6
             
