@@ -40,6 +40,9 @@ def monte_carlo_cmd():
 
 @pytest.fixture
 def glost_run_desc(tmp_path):
+    forcing_dir = tmp_path / "forcing"
+    forcing_dir.mkdir()
+
     runs_dir = tmp_path / "monte-carlo"
     runs_dir.mkdir()
 
@@ -67,15 +70,15 @@ def glost_run_desc(tmp_path):
             account: rrg-allen
             email: dlatorne@example.com
             nodes: 1
-            tasks per node: 3
-            runs per glost job: 2
             mem per cpu: 14100M
-            run walltime: 2:00:00   
+            run walltime: 3:00:00   
 
             paths:
+              forcing directory: {forcing_dir}
               runs directory: {runs_dir}
               mohid config: {mohid_config_dir}
               
+            make-hdf5 command: $HOME/.local/bin/make-hdf5
             mohid command: $HOME/.local/bin/mohid
             
             vcs revisions:
@@ -97,9 +100,25 @@ def glost_run_desc(tmp_path):
 @pytest.fixture
 def mock_get_runs_info(monkeypatch):
     def mock_get_runs_info(*args):
-        pass
+        runs = pandas.DataFrame(
+            {
+                "spill_date_hour": pandas.Timestamp("2017-06-15 02:00"),
+                "run_days": numpy.array([7], dtype=numpy.int64),
+            }
+        )
+        return runs
 
     monkeypatch.setattr(mohid_cmd.monte_carlo, "_get_runs_info", mock_get_runs_info)
+
+
+@pytest.fixture
+def mock_render_make_hdf5_yamls(monkeypatch):
+    def mock_render_make_hdf5_yamls(*args):
+        pass
+
+    monkeypatch.setattr(
+        mohid_cmd.monte_carlo, "_render_make_hdf5_yamls", mock_render_make_hdf5_yamls
+    )
 
 
 @pytest.fixture
@@ -129,6 +148,18 @@ def mock_render_lagrangian_dats(monkeypatch):
 
     monkeypatch.setattr(
         mohid_cmd.monte_carlo, "_render_lagrangian_dats", mock_render_lagrangian_dats
+    )
+
+
+@pytest.fixture
+def mock_render_glost_task_scripts(monkeypatch):
+    def mock_render_glost_task_scripts(*args):
+        pass
+
+    monkeypatch.setattr(
+        mohid_cmd.monte_carlo,
+        "_render_glost_task_scripts",
+        mock_render_glost_task_scripts,
     )
 
 
@@ -218,13 +249,24 @@ class TestTakeAction:
     """Unit tests for `mohid monte-carlo` sub-command take_action() method.
     """
 
+    @staticmethod
+    @pytest.fixture
+    def mock_arrow_now(monkeypatch):
+        def mock_arrow_now():
+            return arrow.get("2020-04-14T163443")
+
+        monkeypatch.setattr(mohid_cmd.monte_carlo.arrow, "now", mock_arrow_now)
+
     def test_take_action(
         self,
+        mock_arrow_now,
         mock_get_runs_info,
         mock_record_vcs_revisions,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         monte_carlo_cmd,
         glost_run_desc,
         mock_subprocess_run,
@@ -238,17 +280,28 @@ class TestTakeAction:
             desc_file=desc_file, csv_file=csv_file, no_submit=False
         )
         caplog.set_level(logging.INFO)
+
         monte_carlo_cmd.take_action(parsed_args)
+
+        job_id = glost_run_desc["job id"]
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_dir = Path(runs_dir) / f"{job_id}_2020-04-14T163443"
         assert caplog.records[0].levelname == "INFO"
-        assert caplog.messages[0] == "Submitted batch job 12345678"
+        assert caplog.messages[0] == f"job directory created: {job_dir}"
+        assert caplog.records[1].levelname == "INFO"
+        assert caplog.messages[1] == "Submitted batch job 12345678"
+        assert len(caplog.records) == 2
 
     def test_take_action_no_submit(
         self,
+        mock_arrow_now,
         mock_get_runs_info,
         mock_record_vcs_revisions,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         monte_carlo_cmd,
         glost_run_desc,
         mock_subprocess_run,
@@ -262,8 +315,15 @@ class TestTakeAction:
             desc_file=desc_file, csv_file=csv_file, no_submit=True
         )
         caplog.set_level(logging.INFO)
+
         monte_carlo_cmd.take_action(parsed_args)
-        assert not caplog.records
+
+        job_id = glost_run_desc["job id"]
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_dir = Path(runs_dir) / f"{job_id}_2020-04-14T163443"
+        assert caplog.records[0].levelname == "INFO"
+        assert caplog.messages[0] == f"job directory created: {job_dir}"
+        assert len(caplog.records) == 1
 
 
 class TestMonteCarlo:
@@ -275,9 +335,11 @@ class TestMonteCarlo:
         mock_get_runs_info,
         mock_record_vcs_revisions,
         mock_subprocess_run,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
     ):
@@ -292,9 +354,11 @@ class TestMonteCarlo:
         self,
         mock_get_runs_info,
         mock_record_vcs_revisions,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         mock_subprocess_run,
         glost_run_desc,
         tmp_path,
@@ -309,12 +373,54 @@ class TestMonteCarlo:
         assert submit_job_msg == "Submitted batch job 12345678"
 
 
+class TestRenderMakeHDF5Yamls:
+    """Unit test for _render_make_hdf5_yamls() function.
+    """
+
+    def test_render_make_hdf5_yamls(self, glost_run_desc, monkeypatch):
+        job_id = glost_run_desc["job id"]
+        forcing_dir = Path(glost_run_desc["paths"]["forcing directory"])
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_dir = Path(runs_dir) / f"{job_id}_2019-12-04T180843"
+        forcing_yaml_dir = job_dir / "forcing-yaml"
+        forcing_yaml_dir.mkdir(parents=True)
+        tmpl_dir = Path(glost_run_desc["paths"]["mohid config"]) / "templates"
+        tmpl_dir.mkdir(parents=True)
+        (tmpl_dir / "make-hdf5.yaml").write_text(
+            textwrap.dedent(
+                """\
+                paths:
+                  output: {{ forcing_dir }}
+                """
+            )
+        )
+        tmpl_env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(os.fspath(tmpl_dir))
+        )
+        runs = pandas.DataFrame(
+            {
+                "spill_date_hour": pandas.Timestamp("2017-06-15 02:00"),
+                "run_days": numpy.array([7], dtype=numpy.int64),
+                "Lagrangian_template": "Lagrangian_AKNS_crude.dat",
+            }
+        )
+
+        mohid_cmd.monte_carlo._render_make_hdf5_yamls(
+            job_id, job_dir, forcing_dir, runs, tmpl_env
+        )
+
+        with (forcing_yaml_dir / f"{job_id}-make-hdf5-0.yaml").open("rt") as fp:
+            run_desc = yaml.safe_load(fp)
+        assert run_desc["paths"]["output"] == f"{forcing_dir}/{job_id}-{0}"
+
+
 class TestRenderMohidRunYamls:
     """Unit test for _render_mohid_run_yamls() function.
     """
 
     def test_render_mohid_run_yamls(self, glost_run_desc, monkeypatch):
         job_id = glost_run_desc["job id"]
+        forcing_dir = Path(glost_run_desc["paths"]["forcing directory"])
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_dir = Path(runs_dir) / f"{job_id}_2019-12-04T180843"
         mohid_config = glost_run_desc["paths"]["mohid config"]
@@ -326,16 +432,19 @@ class TestRenderMohidRunYamls:
             textwrap.dedent(
                 """\
                 run_id: {{ job_id }}-{{ run_number }}
+                
+                paths:
+                  runs directory: {{ runs_dir }}
     
                 forcing:
-                  winds.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/winds.hdf5
-                  currents.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/currents.hdf5
-                  water_levels.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
-                  temperature.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
-                  salinity.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
-                  ww3.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/waves.hdf5
-                  e3t.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/e3t.hdf5
-                  diffusivity.hdf5: /scratch/dlatorne/MIDOSS/forcing/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
+                  winds.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/winds.hdf5
+                  currents.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/currents.hdf5
+                  water_levels.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
+                  temperature.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
+                  salinity.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
+                  ww3.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/waves.hdf5
+                  e3t.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/e3t.hdf5
+                  diffusivity.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
     
                 run data files:
                   IN_MODEL: {{ job_dir }}/mohid-yaml/Model-{{ run_number }}.dat
@@ -354,7 +463,6 @@ class TestRenderMohidRunYamls:
         tmpl_env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(os.fspath(tmpl_dir))
         )
-
         runs = pandas.DataFrame(
             {
                 "spill_date_hour": pandas.Timestamp("2017-06-15 02:00"),
@@ -364,20 +472,22 @@ class TestRenderMohidRunYamls:
         )
 
         mohid_cmd.monte_carlo._render_mohid_run_yamls(
-            job_id, job_dir, mohid_config, runs, tmpl_env
+            job_id, job_dir, forcing_dir, runs_dir, mohid_config, runs, tmpl_env
         )
+
         with (mohid_yaml_dir / f"{job_id}-0.yaml").open("rt") as fp:
             run_desc = yaml.safe_load(fp)
         assert run_desc["run_id"] == f"{job_id}-0"
+        assert run_desc["paths"]["runs directory"] == f"{runs_dir}"
         expected_forcing = {
-            "winds.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/winds.hdf5",
-            "currents.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/currents.hdf5",
-            "water_levels.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/t.hdf5",
-            "temperature.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/t.hdf5",
-            "salinity.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/t.hdf5",
-            "ww3.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/waves.hdf5",
-            "e3t.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/e3t.hdf5",
-            "diffusivity.hdf5": "/scratch/dlatorne/MIDOSS/forcing/15jun17-22jun17/t.hdf5",
+            "winds.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/winds.hdf5",
+            "currents.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/currents.hdf5",
+            "water_levels.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/t.hdf5",
+            "temperature.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/t.hdf5",
+            "salinity.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/t.hdf5",
+            "ww3.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/waves.hdf5",
+            "e3t.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/e3t.hdf5",
+            "diffusivity.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/t.hdf5",
         }
         assert run_desc["forcing"] == expected_forcing
         expected_run_data_files = {
@@ -503,6 +613,59 @@ class TestRenderLagrangianDats:
         assert float(lat) == numpy.asscalar(spill_lat)
 
 
+class TestRenderGlostTaskScripts:
+    """Unit test for _render_glost_task_scripts() function.
+    """
+
+    def test_render_glost_task_scripts(self, glost_run_desc, monkeypatch):
+        job_id = glost_run_desc["job id"]
+        forcing_dir = Path(glost_run_desc["paths"]["forcing directory"])
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        make_hdf5_cmd = glost_run_desc["make-hdf5 command"]
+        mohid_cli_cmd = glost_run_desc["mohid command"]
+        job_dir = Path(runs_dir) / f"{job_id}_2020-04-21T175343"
+        glost_tasks_dir = job_dir / "glost-tasks"
+        glost_tasks_dir.mkdir(parents=True)
+        tmpl_dir = Path(glost_run_desc["paths"]["mohid config"]) / "templates"
+        tmpl_dir.mkdir(parents=True)
+        (tmpl_dir / "glost-task.sh").write_text(
+            textwrap.dedent(
+                """\
+                {{ make_hdf5_cmd }} $MONTE_CARLO/forcing-yaml/{{ job_id }}-make-hdf5-{{ run_number }}.yaml {{ start_yyyy_mm_dd }} {{ n_days }} \\
+                && {{ mohid_cmd }} run --no-submit --tmp-run-dir $MONTE_CARLO/{{ job_id }}-{{ run_number }}/ \\
+                  $MONTE_CARLO/mohid-yaml/{{ job_id }}-{{ run_number }}.yaml $MONTE_CARLO/results/{{ job_id }}-{{ run_number }}/ \\
+                && bash $MONTE_CARLO/{{ job_id }}-{{ run_number }}/MOHID.sh
+                rm -rf {{ forcing_dir }}/{{ job_id }}-{{ run_number }}/
+                """
+            )
+        )
+        tmpl_env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(os.fspath(tmpl_dir))
+        )
+
+        runs = pandas.DataFrame(
+            {
+                "spill_date_hour": pandas.Timestamp("2017-06-15 02:00"),
+                "run_days": numpy.array([7], dtype=numpy.int64),
+            }
+        )
+
+        mohid_cmd.monte_carlo._render_glost_task_scripts(
+            job_id, job_dir, forcing_dir, runs, make_hdf5_cmd, mohid_cli_cmd, tmpl_env
+        )
+        glost_task_sh = (glost_tasks_dir / f"{job_id}-0.sh").read_text().splitlines()
+        expected = textwrap.dedent(
+            f"""\
+            $HOME/.local/bin/make-hdf5 $MONTE_CARLO/forcing-yaml/AKNS-spatial-make-hdf5-0.yaml 2017-06-15 7 \\
+            && $HOME/.local/bin/mohid run --no-submit --tmp-run-dir $MONTE_CARLO/AKNS-spatial-0/ \\
+              $MONTE_CARLO/mohid-yaml/AKNS-spatial-0.yaml $MONTE_CARLO/results/AKNS-spatial-0/ \\
+            && bash $MONTE_CARLO/AKNS-spatial-0/MOHID.sh
+            rm -rf {forcing_dir}/AKNS-spatial-0/
+            """
+        ).splitlines()
+        assert glost_task_sh == expected
+
+
 class TestGlostJobDir:
     """Integration tests for GLOST job directory generated by `mohid monte-carlo` sub-command.
     """
@@ -596,9 +759,11 @@ class TestGlostJobDir:
         mock_get_runs_info,
         mock_hg_repo,
         mock_git_repo,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
     ):
@@ -617,9 +782,11 @@ class TestGlostJobDir:
         mock_get_runs_info,
         mock_hg_repo,
         mock_git_repo,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
     ):
@@ -640,9 +807,11 @@ class TestGlostJobDir:
         mock_get_runs_info,
         mock_hg_repo,
         mock_git_repo,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
     ):
@@ -655,13 +824,81 @@ class TestGlostJobDir:
         job_id = glost_run_desc["job id"]
         assert (Path(runs_dir) / f"{job_id}_2019-11-24T170743" / "mohid-yaml").is_dir()
 
+    def test_glost_tasks_dir_created(
+        self,
+        mock_arrow_now,
+        mock_get_runs_info,
+        mock_hg_repo,
+        mock_git_repo,
+        mock_render_make_hdf5_yamls,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
+        mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
+        glost_run_desc,
+        tmp_path,
+    ):
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
+        mohid_cmd.monte_carlo.monte_carlo(
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
+        )
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_id = glost_run_desc["job id"]
+        assert (Path(runs_dir) / f"{job_id}_2019-11-24T170743" / "glost-tasks").is_dir()
+
+    def test_make_hdf5_yaml_files_created(
+        self,
+        mock_arrow_now,
+        mock_git_repo,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
+        mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
+        glost_run_desc,
+        tmp_path,
+        monkeypatch,
+    ):
+        n_runs = 2
+
+        def mock_get_runs_info(*args):
+            runs = pandas.DataFrame(
+                {
+                    "spill_date_hour": pandas.Timestamp("2017-06-15 02:00"),
+                    "run_days": numpy.array([7] * n_runs, dtype=numpy.int64),
+                }
+            )
+            return runs
+
+        monkeypatch.setattr(mohid_cmd.monte_carlo, "_get_runs_info", mock_get_runs_info)
+
+        tmpl_dir = Path(glost_run_desc["paths"]["mohid config"], "templates")
+        tmpl_dir.mkdir()
+        (tmpl_dir / "make-hdf5.yaml").write_text("")
+
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
+        mohid_cmd.monte_carlo.monte_carlo(
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
+        )
+
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_id = glost_run_desc["job id"]
+        forcing_yaml_dir = (
+            Path(runs_dir) / f"{job_id}_2019-11-24T170743" / "forcing-yaml"
+        )
+        for i in range(n_runs):
+            assert (forcing_yaml_dir / f"{job_id}-make-hdf5-{i}.yaml").exists()
+
     def test_mohid_yaml_files_created(
         self,
         mock_arrow_now,
         mock_hg_repo,
         mock_git_repo,
+        mock_render_make_hdf5_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
         monkeypatch,
@@ -689,6 +926,7 @@ class TestGlostJobDir:
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
+
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
         mohid_yaml_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743" / "mohid-yaml"
@@ -700,8 +938,10 @@ class TestGlostJobDir:
         mock_arrow_now,
         mock_hg_repo,
         mock_git_repo,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
         monkeypatch,
@@ -728,6 +968,7 @@ class TestGlostJobDir:
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
+
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
         mohid_yaml_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743" / "mohid-yaml"
@@ -739,8 +980,10 @@ class TestGlostJobDir:
         mock_arrow_now,
         mock_hg_repo,
         mock_git_repo,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
+        mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
         monkeypatch,
@@ -768,11 +1011,54 @@ class TestGlostJobDir:
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
+
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
         mohid_yaml_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743" / "mohid-yaml"
         for i in range(n_runs):
             assert (mohid_yaml_dir / f"Lagrangian_AKNS_crude-{i}.dat").exists()
+
+    def test_glost_task_files_created(
+        self,
+        mock_arrow_now,
+        mock_hg_repo,
+        mock_git_repo,
+        mock_render_make_hdf5_yamls,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
+        mock_render_lagrangian_dats,
+        glost_run_desc,
+        tmp_path,
+        monkeypatch,
+    ):
+        n_runs = 2
+
+        def mock_get_runs_info(*args):
+            runs = pandas.DataFrame(
+                {
+                    "spill_date_hour": pandas.Timestamp("2017-06-15 02:00"),
+                    "run_days": numpy.array([7] * n_runs, dtype=numpy.int64),
+                }
+            )
+            return runs
+
+        monkeypatch.setattr(mohid_cmd.monte_carlo, "_get_runs_info", mock_get_runs_info)
+
+        tmpl_dir = Path(glost_run_desc["paths"]["mohid config"], "templates")
+        tmpl_dir.mkdir()
+        (tmpl_dir / "glost-task.sh").write_text("")
+
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
+        mohid_cmd.monte_carlo.monte_carlo(
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
+        )
+
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_id = glost_run_desc["job id"]
+        glost_tasks_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743" / "glost-tasks"
+        for i in range(n_runs):
+            assert (glost_tasks_dir / f"{job_id}-{i}.sh").exists()
 
     def test_results_dir_created(
         self,
@@ -780,9 +1066,11 @@ class TestGlostJobDir:
         mock_get_runs_info,
         mock_hg_repo,
         mock_git_repo,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
     ):
@@ -791,6 +1079,7 @@ class TestGlostJobDir:
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
+
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
         assert (Path(runs_dir) / f"{job_id}_2019-11-24T170743" / "results").is_dir()
@@ -801,9 +1090,11 @@ class TestGlostJobDir:
         mock_get_runs_info,
         mock_hg_repo,
         mock_git_repo,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
     ):
@@ -812,6 +1103,7 @@ class TestGlostJobDir:
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
+
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
         job_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743"
@@ -820,20 +1112,36 @@ class TestGlostJobDir:
     def test_glost_tasks_file_contents(
         self,
         mock_arrow_now,
-        mock_get_runs_info,
         mock_hg_repo,
         mock_git_repo,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
+        monkeypatch,
     ):
+        n_runs = 2
+
+        def mock_get_runs_info(*args):
+            runs = pandas.DataFrame(
+                {
+                    "spill_date_hour": pandas.Timestamp("2017-06-15 02:00"),
+                    "run_days": numpy.array([7] * n_runs, dtype=numpy.int64),
+                }
+            )
+            return runs
+
+        monkeypatch.setattr(mohid_cmd.monte_carlo, "_get_runs_info", mock_get_runs_info)
+
         csv_file = tmp_path / "AKNS_spatial.csv"
         csv_file.write_text("")
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
+
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
         job_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743"
@@ -841,21 +1149,8 @@ class TestGlostJobDir:
         glost_tasks = (job_dir / "glost-tasks.txt").read_text().splitlines()[:-1]
         expected = [
             # 2 GLOST tasks
-            f"$HOME/.local/bin/mohid run "
-            f"--no-submit "
-            f"--tmp-run-dir $MONTE_CARLO/{job_id}-0 "
-            f"$MONTE_CARLO/mohid-yaml/{job_id}-0.yaml "
-            f"$MONTE_CARLO/results/{job_id}-0/ "
-            f"&& "
-            f"bash $MONTE_CARLO/{job_id}-0/MOHID.sh",
-            #
-            f"$HOME/.local/bin/mohid run "
-            f"--no-submit "
-            f"--tmp-run-dir $MONTE_CARLO/{job_id}-1 "
-            f"$MONTE_CARLO/mohid-yaml/{job_id}-1.yaml "
-            f"$MONTE_CARLO/results/{job_id}-1/ "
-            f"&& "
-            f"bash $MONTE_CARLO/{job_id}-1/MOHID.sh",
+            f"bash $MONTE_CARLO/glost-tasks/{job_id}-0.sh",
+            f"bash $MONTE_CARLO/glost-tasks/{job_id}-1.sh",
         ]
         assert glost_tasks == expected
 
@@ -865,9 +1160,11 @@ class TestGlostJobDir:
         mock_get_runs_info,
         mock_hg_repo,
         mock_git_repo,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
     ):
@@ -876,6 +1173,7 @@ class TestGlostJobDir:
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
+
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
         job_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743"
@@ -887,9 +1185,11 @@ class TestGlostJobDir:
         mock_get_runs_info,
         mock_hg_repo,
         mock_git_repo,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
     ):
@@ -898,6 +1198,7 @@ class TestGlostJobDir:
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
+
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
         job_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743"
@@ -911,9 +1212,9 @@ class TestGlostJobDir:
             #SBATCH --mail-user={glost_run_desc["email"]}
             #SBATCH --mail-type=ALL
             #SBATCH --nodes={glost_run_desc["nodes"]}
-            #SBATCH --ntasks-per-node={glost_run_desc["tasks per node"]}
+            #SBATCH --ntasks-per-node=2
             #SBATCH --mem-per-cpu={glost_run_desc["mem per cpu"]}
-            #SBATCH --time=2:00:00
+            #SBATCH --time=3:00:00
             #SBATCH --output={job_dir}/glost-job.stdout
             #SBATCH --error={job_dir}/glost-job.stderr
             
@@ -931,15 +1232,74 @@ class TestGlostJobDir:
         ).splitlines()
         assert glost_script == expected
 
+    @pytest.mark.parametrize(
+        "n_runs, walltime",
+        (
+            (2, "3:00:00"),
+            (31, "3:00:00"),
+            (32, "6:00:00"),
+            (62, "6:00:00"),
+            (63, "9:00:00"),
+            (124, "12:00:00"),
+            (125, "15:00:00"),
+            (248, "24:00:00"),
+            (249, "27:00:00"),
+            (496, "48:00:00"),
+            (992, "96:00:00"),
+            (993, "99:00:00"),
+        ),
+    )
+    def test_glost_job_script_walltime(
+        self,
+        n_runs,
+        walltime,
+        mock_arrow_now,
+        mock_hg_repo,
+        mock_git_repo,
+        mock_render_make_hdf5_yamls,
+        mock_render_mohid_run_yamls,
+        mock_render_model_dats,
+        mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
+        glost_run_desc,
+        tmp_path,
+        monkeypatch,
+    ):
+        def mock_get_runs_info(*args):
+            runs = pandas.DataFrame(
+                {
+                    "spill_date_hour": pandas.Timestamp("2017-06-15 02:00"),
+                    "run_days": numpy.array([7] * n_runs, dtype=numpy.int64),
+                }
+            )
+            return runs
+
+        monkeypatch.setattr(mohid_cmd.monte_carlo, "_get_runs_info", mock_get_runs_info)
+
+        csv_file = tmp_path / "AKNS_spatial.csv"
+        csv_file.write_text("")
+
+        mohid_cmd.monte_carlo.monte_carlo(
+            tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
+        )
+
+        runs_dir = glost_run_desc["paths"]["runs directory"]
+        job_id = glost_run_desc["job id"]
+        job_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743"
+        glost_script = (job_dir / "glost-job.sh").read_text()
+        assert f"#SBATCH --time={walltime}" in glost_script
+
     def test_glost_job_desc_file_copied(
         self,
         mock_arrow_now,
         mock_get_runs_info,
         mock_hg_repo,
         mock_git_repo,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
     ):
@@ -948,6 +1308,7 @@ class TestGlostJobDir:
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
+
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
         job_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743"
@@ -959,9 +1320,11 @@ class TestGlostJobDir:
         mock_get_runs_info,
         mock_hg_repo,
         mock_git_repo,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
     ):
@@ -970,6 +1333,7 @@ class TestGlostJobDir:
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
+
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
         job_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743"
@@ -981,9 +1345,11 @@ class TestGlostJobDir:
         mock_get_runs_info,
         mock_hg_repo,
         mock_git_repo,
+        mock_render_make_hdf5_yamls,
         mock_render_mohid_run_yamls,
         mock_render_model_dats,
         mock_render_lagrangian_dats,
+        mock_render_glost_task_scripts,
         glost_run_desc,
         tmp_path,
     ):
@@ -992,6 +1358,7 @@ class TestGlostJobDir:
         mohid_cmd.monte_carlo.monte_carlo(
             tmp_path / "monte-carlo.yaml", csv_file, no_submit=True
         )
+
         runs_dir = glost_run_desc["paths"]["runs directory"]
         job_id = glost_run_desc["job id"]
         job_dir = Path(runs_dir) / f"{job_id}_2019-11-24T170743"
