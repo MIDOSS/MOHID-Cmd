@@ -1,12 +1,11 @@
-# Python packages and versions used most recently in development
-# environment
+# Python packages and versions used most recently in development environment
 #
 # This list is intended to be for reference only.
 # Use the conda environment description file (environment-dev.yaml)
 # to create an isolated development environment.
 #
 # Create/update this file with:
-#   (mohid-cmd)$ python3 -m pip freeze --path $CONDA_PREFIX/lib/python3*/site-packages >> requirements.txt
+#   (mohid-cmd)$ python3 -m pip list --format=freeze >> requirements.txt
 
 alabaster==0.7.12
 appdirs==1.4.4
