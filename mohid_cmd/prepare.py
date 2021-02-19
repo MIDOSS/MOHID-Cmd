@@ -137,8 +137,7 @@ def _check_mohid_exec(run_desc):
 
 def _make_run_dir(run_desc, tmp_run_dir):
     """
-    :param desc_file: File path/name of the YAML run description file.
-    :type desc_file: :py:class:`pathlib.Path`
+    :param dict run_desc: Run description dictionary.
 
     :param string tmp_run_dir: Name to use for temporary run directory.
 
@@ -157,8 +156,9 @@ def _make_run_dir(run_desc, tmp_run_dir):
 
 def _make_forcing_links(run_desc, tmp_run_dir):
     """
-    :param dict run_desc:
-    :param :py:class:`pathlib.Path` tmp_run_dir:
+    :param dict run_desc: Run description dictionary.
+
+    :param string tmp_run_dir: Name to use for temporary run directory.
     """
     link_names = nemo_cmd.prepare.get_run_desc_value(
         run_desc, ("forcing",), run_dir=tmp_run_dir
@@ -179,8 +179,9 @@ def _make_forcing_links(run_desc, tmp_run_dir):
 
 def _make_nomfich(run_desc, tmp_run_dir):
     """
-    :param dict run_desc:
-    :param :py:class:`pathlib.Path` tmp_run_dir:
+    :param dict run_desc: Run description dictionary.
+
+    :param string tmp_run_dir: Name to use for temporary run directory.
     """
     bathymetry = nemo_cmd.prepare.get_run_desc_value(
         run_desc,
