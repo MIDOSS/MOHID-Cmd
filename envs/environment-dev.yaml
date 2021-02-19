@@ -24,7 +24,7 @@ channels:
 dependencies:
   - arrow
   - attrs
-  - cliff!=2.9.0
+  - cliff
   - cookiecutter
   - f90nml
   - gitpython
