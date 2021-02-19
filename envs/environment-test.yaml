@@ -25,4 +25,7 @@ dependencies:
   - pytest-cov
 
   - pip:
-      - python-hglib
+    - python-hglib
+
+    # For unit tests
+    - pytest-randomly

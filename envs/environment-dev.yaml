@@ -47,3 +47,6 @@ dependencies:
   - pip:
     - python-hglib
 
+    # For unit tests
+    - pytest-randomly
+
