@@ -46,7 +46,7 @@
     :target: https://github.com/MIDOSS/MOHID-Cmd/issues
     :alt: Issue Tracker
 
-The MIDOSSMOHID command processor package, ``MOHID-Cmd``, provides the ``mohid``
+The MIDOSS-MOHID command processor package, ``MOHID-Cmd``, provides the ``mohid``
 command-line tool for doing various operations associated with the `MIDOSS project`_ version of the `MOHID model`_.
 
 .. _MIDOSS project: https://midoss-docs.readthedocs.io/en/latest/
@@ -90,17 +90,6 @@ Clone the code and documentation `repository`_ from GitHub with:
 .. code-block:: bash
 
     $ git clone git@github.com:MIDOSS/MOHID-Cmd.git
-
-or
-
-.. code-block:: bash
-
-    $ git clone https://github.com/MIDOSS/MOHID-Cmd.git
-
-if you don't have `ssh key authentication`_ set up on GitHub
-(or copy the link from the :guilabel:`Clone or download` button on the `repository`_ page).
-
-.. _ssh key authentication: https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh
 
 
 .. _MOHID-CmdDevelopmentEnvironment:
