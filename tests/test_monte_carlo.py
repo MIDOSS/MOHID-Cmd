@@ -589,6 +589,7 @@ class TestRenderLagrangianDats:
             textwrap.dedent(
                 """\
                 POSITION_COORDINATES      : {{ spill_lon }} {{ spill_lat }}
+                POINT_VOLUME              : {{ spill_volume }}
                 """
             )
         )
@@ -598,10 +599,12 @@ class TestRenderLagrangianDats:
 
         spill_lon = numpy.array([-122.86], dtype=numpy.float32)
         spill_lat = numpy.array([48.38], dtype=numpy.float32)
+        spill_volume = numpy.array([21300.43], dtype=numpy.float32)
         runs = pandas.DataFrame(
             {
                 "spill_lon": spill_lon,
                 "spill_lat": spill_lat,
+                "spill_volume": spill_volume,
                 "Lagrangian_template": "Lagrangian.dat",
             }
         )
@@ -611,6 +614,9 @@ class TestRenderLagrangianDats:
         lon, lat = lagrangian_dat[0].split()[-2:]
         assert float(lon) == spill_lon.item()
         assert float(lat) == spill_lat.item()
+        spill_vol_m3 = lagrangian_dat[1].split()[-1]
+        # Spill volume in CSV file is in litres while it is in m^3 in the Lagrangian.dat file
+        assert float(spill_vol_m3) == spill_volume.item() / 1_000
 
 
 class TestRenderGlostTaskScripts:
@@ -995,6 +1001,7 @@ class TestGlostJobDir:
                 {
                     "spill_lon": numpy.array([-122.86] * n_runs, dtype=numpy.float32),
                     "spill_lat": numpy.array([48.38] * n_runs, dtype=numpy.float32),
+                    "spill_volume": numpy.array([21300.43] * n_runs, dtype=numpy.float32),
                     "Lagrangian_template": "Lagrangian_AKNS_crude.dat",
                 }
             )

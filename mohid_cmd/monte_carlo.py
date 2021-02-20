@@ -286,6 +286,9 @@ def _render_lagrangian_dats(job_dir, runs, tmpl_env):
         context = {
             "spill_lon": run.spill_lon,
             "spill_lat": run.spill_lat,
+            # Spill volume in CSV file is in litres,
+            # but MOHID expects it to be in m^3 in the Lagrangian.dat file
+            "spill_volume": run.spill_volume / 1_000,
         }
         lagrangian_dat = f"{lagrangian_template.stem}-{i}.dat"
         (job_dir / "mohid-yaml" / lagrangian_dat).write_text(tmpl.render(context))
