@@ -285,7 +285,7 @@ That is a record of the last committed revision of the repository that will be i
 For example,
 :file:`MIDOSS-MOHID-config_rev.txt` might contain::
 
-  branch: master
+  branch: main
   commit: 35fc362f3d77866df8c0a8b743aca81359295d59
   author: Rachael D. Mueller <rmueller@eoas.ubc.ca>
   date:   Fri Nov 01 21:26:36 2019 -04:00

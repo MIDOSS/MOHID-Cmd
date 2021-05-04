@@ -20,7 +20,7 @@ MIDOSS-MOHID Command Processor
 .. image:: https://github.com/MIDOSS/WWatch3-Cmd/workflows/CI/badge.svg
     :target: https://github.com/MIDOSS/WWatch3-Cmd/actions?query=workflow%3ACI
     :alt: GitHub Workflow Status
-.. image:: https://codecov.io/gh/MIDOSS/MOHID-Cmd/branch/master/graph/badge.svg
+.. image:: https://codecov.io/gh/MIDOSS/MOHID-Cmd/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/MIDOSS/MOHID-Cmd
     :alt: Codecov Testing Coverage Report
 .. image:: https://img.shields.io/github/issues/MIDOSS/MOHID-Cmd?logo=github
@@ -63,7 +63,7 @@ The MIDOSS-MOHID command processor code and documentation are copyright 2018-202
 The University of British Columbia,
 and Dalhousie University.
 
-.. _MIDOSS project contributors: https://github.com/MIDOSS/docs/blob/master/CONTRIBUTORS.rst
+.. _MIDOSS project contributors: https://github.com/MIDOSS/docs/blob/main/CONTRIBUTORS.rst
 
 They are licensed under the Apache License, Version 2.0.
 https://www.apache.org/licenses/LICENSE-2.0

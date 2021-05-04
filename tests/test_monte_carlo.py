@@ -751,7 +751,7 @@ class TestGlostJobDir:
         @attr.s
         class MockGitRepo:
             path = attr.ib()
-            active_branch = attr.ib(default="master")
+            active_branch = attr.ib(default="main")
             commit = attr.ib(default=MockGitCommit)
             tags = attr.ib(default=[])
 
