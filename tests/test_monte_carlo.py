@@ -1225,6 +1225,7 @@ class TestGlostJobDir:
             #SBATCH --output={job_dir}/glost-job.stdout
             #SBATCH --error={job_dir}/glost-job.stderr
             
+            module load StdEnv/2016.4
             module load glost/0.3.1
             module load python/3.8.2
             module load proj4-fortran/1.0
