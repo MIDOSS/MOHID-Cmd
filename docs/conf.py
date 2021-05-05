@@ -60,7 +60,7 @@ release = version
 # ones.
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.intersphinx", "sphinx.ext.viewcode"]
 
-intersphinx_mapping = {"python": ("https://docs.python.org/", None)}
+intersphinx_mapping = {"python": ("https://docs.python.org/3/", None)}
 
 
 # Private GitHub repositories that linkcheck will ignore

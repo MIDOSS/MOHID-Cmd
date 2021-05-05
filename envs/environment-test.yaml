@@ -24,6 +24,10 @@ dependencies:
   - pytest
   - pytest-cov
 
+  # For documentation
+  - sphinx
+  - sphinx_rtd_theme
+
   - pip:
     - python-hglib
 

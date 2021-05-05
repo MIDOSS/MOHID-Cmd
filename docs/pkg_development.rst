@@ -36,6 +36,9 @@
 .. image:: https://readthedocs.org/projects/mohid-cmd/badge/?version=latest
     :target: https://mohid-cmd.readthedocs.io/en/latest/
     :alt: Documentation Status
+.. image:: https://github.com/MIDOSS/Make-MIDOSS-Forcing/workflows/sphinx-linkcheck/badge.svg
+      :target: https://github.com/MIDOSS/MOHID-Cmd/actions?query=workflow:sphinx-linkcheck
+      :alt: Sphinx linkcheck
 .. image:: https://github.com/MIDOSS/MOHID-Cmd/workflows/CI/badge.svg
     :target: https://github.com/MIDOSS/MOHID-Cmd/actions?query=workflow%3ACI
     :alt: GitHub Workflow Status
@@ -253,6 +256,10 @@ whenever you push changes to GitHub the documentation is automatically re-built 
 Link Checking the Documentation
 -------------------------------
 
+.. image:: https://github.com/MIDOSS/Make-MIDOSS-Forcing/workflows/sphinx-linkcheck/badge.svg
+      :target: https://github.com/MIDOSS/MOHID-Cmd/actions?query=workflow:sphinx-linkcheck
+      :alt: Sphinx linkcheck
+
 Sphinx also provides a link checker utility which can be run to find broken or redirected links in the docs.
 With your :kbd:`mohid-cmd` environment activated,
 use:
@@ -264,65 +271,73 @@ use:
 
 The output looks something like::
 
-  Running Sphinx v2.2.2
+  Running Sphinx v3.5.4
   making output directory... done
-  loading pickled environment... done
+  loading intersphinx inventory from https://docs.python.org/3/objects.inv...
   building [mo]: targets for 0 po files that are out of date
-  building [linkcheck]: targets for 5 source files that are out of date
-  updating environment: 0 added, 1 changed, 0 removed
-  reading sources... [100%] pkg_development
+  building [linkcheck]: targets for 6 source files that are out of date
+  updating environment: [new config] 6 added, 0 changed, 0 removed
+  reading sources... [100%] subcommands
   looking for now-outdated files... none found
   pickling environment... done
   checking consistency... done
   preparing documents... done
-  writing output... [ 20%] index
-  (line   23) ok        https://midoss-docs.readthedocs.io/en/latest/
-  (line   33) ok        https://docs.openstack.org/cliff/latest/
-  (line   33) ok        https://bitbucket.org/salishsea/nemo-cmd
-  (line   61) ok        https://bitbucket.org/midoss/docs/src/tip/CONTRIBUTORS.rst
-  (line   23) ok        http://www.mohid.com/
-  (line   67) ok        https://www.apache.org/licenses/LICENSE-2.0
-  writing output... [ 40%] pkg_development
-  (line   21) ok        https://docs.python.org/3.8/
-  (line   58) ok        https://www.python.org/
-  (line   62) ok        https://docs.python.org/3/reference/lexical_analysis.html#f-strings
-  (line   64) ok        https://docs.python.org/3/whatsnew/3.6.html#whatsnew36-pep519
-  (line   21) ok        https://black.readthedocs.io/en/stable/
-  (line   21) ok        https://mohid-cmd.readthedocs.io/en/latest/
-  (line   21) ok        https://bitbucket.org/midoss/mohid-cmd/
-  (line   21) ok        https://bitbucket.org/midoss/mohid-cmd/issues?status=new&status=open
-  (line   74) ok        https://bitbucket.org/midoss/mohid-cmd/
-  (line   80) ok        https://bitbucket.org/midoss/mohid-cmd/
-  (line  112) ok        https://conda.io/en/latest/
-  (line  148) ok        https://www.python.org/dev/peps/pep-0008/
-  (line  112) ok        https://docs.conda.io/en/latest/miniconda.html
-  (line  180) ok        http://www.sphinx-doc.org/en/master/
-  (line  180) ok        http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
-  (line  300) ok        https://docs.pytest.org/en/latest/
-  (line  112) ok        https://www.anaconda.com/distribution/
-  (line  325) ok        https://coverage.readthedocs.io/en/latest/
-  (line   21) ok        https://img.shields.io/badge/license-Apache%202-cb2533.svg
-  (line   21) ok        https://img.shields.io/badge/python-3.6+-blue.svg
-  (line   21) ok        https://img.shields.io/badge/version%20control-hg-blue.svg
-  (line   94) ok        https://confluence.atlassian.com/bitbucket/set-up-an-ssh-key-728138079.html
-  (line  373) ok        https://bitbucket.org/midoss/mohid-cmd/issues
-  (line  142) ok        https://img.shields.io/badge/code%20style-black-000000.svg
-  (line   21) ok        https://readthedocs.org/projects/mohid-cmd/badge/?version=latest
-  (line  359) ok        https://www.mercurial-scm.org/
-  (line  174) ok        https://readthedocs.org/projects/mohid-cmd/badge/?version=latest
-  (line   21) ok        https://img.shields.io/badge/code%20style-black-000000.svg
-  (line   21) ok        https://img.shields.io/bitbucket/issues/midoss/mohid-cmd.svg
-  (line  367) ok        https://img.shields.io/bitbucket/issues/midoss/mohid-cmd.svg
-  writing output... [ 60%] run_description_file/index
-  (line   23) ok        https://pyyaml.org/wiki/PyYAMLDocumentation
-  (line   28) ok        https://bitbucket.org/midoss/midoss-mohid-config/
-  writing output... [ 80%] run_description_file/yaml_file
-  (line   70) ok        https://bitbucket.org/midoss/midoss-mohid-code/
   writing output... [100%] subcommands
 
+  (run_description_file/yaml_file: line   70) -ignored- https://github.com/MIDOSS/MIDOSS-MOHID-CODE
+  ( pkg_development: line   21) ok        https://black.readthedocs.io/en/stable/
+  ( pkg_development: line   21) ok        https://codecov.io/gh/MIDOSS/MOHID-Cmd/branch/main/graph/badge.svg
+  ( pkg_development: line  397) ok        https://codecov.io/gh/MIDOSS/MOHID-Cmd/branch/master/graph/badge.svg
+  ( pkg_development: line   21) ok        https://app.codecov.io/gh/MIDOSS/MOHID-Cmd
+  ( pkg_development: line  372) ok        https://coverage.readthedocs.io/en/latest/
+  (           index: line   33) ok        https://docs.openstack.org/cliff/latest/
+  ( pkg_development: line  344) ok        https://docs.pytest.org/en/latest/
+  ( pkg_development: line   21) ok        https://docs.python.org/3.8/
+  ( pkg_development: line   71) ok        https://docs.python.org/3/reference/lexical_analysis.html#f-strings
+  ( pkg_development: line   73) ok        https://docs.python.org/3/whatsnew/3.6.html#whatsnew36-pep519
+  ( pkg_development: line  417) ok        https://docs.github.com/en/actions
+  ( pkg_development: line  431) ok        https://git-scm.com/
+  (     monte-carlo: line   27) ok        https://docs.computecanada.ca/wiki/GLOST
+  ( pkg_development: line  109) ok        https://conda.io/en/latest/
+  (           index: line   23) ok        http://www.mohid.com/
+  (     monte-carlo: line  160) ok        https://github.com/MIDOSS/MIDOSS-MOHID-config/blob/main/monte-carlo/templates/glost-task.sh
+  (     monte-carlo: line  172) ok        https://github.com/MIDOSS/MIDOSS-MOHID-config/blob/main/monte-carlo/templates/mohid-run.yaml
+  (run_description_file/index: line   28) ok        https://github.com/MIDOSS/MIDOSS-MOHID-config
+  (     monte-carlo: line  155) ok        https://github.com/MIDOSS/MIDOSS-MOHID-config/blob/main/monte-carlo/templates/make-hdf5.yaml
+  ( pkg_development: line   21) ok        https://github.com/MIDOSS/MOHID-Cmd
+  ( pkg_development: line  334) ok        https://github.com/MIDOSS/MOHID-Cmd/actions?query=workflow%3Asphinx-linkcheck
+  ( pkg_development: line   21) ok        https://github.com/MIDOSS/MOHID-Cmd/actions?query=workflow:sphinx-linkcheck
+  ( pkg_development: line  406) ok        https://github.com/MIDOSS/MOHID-Cmd/actions
+  ( pkg_development: line   21) ok        https://github.com/MIDOSS/MOHID-Cmd/actions?query=workflow%3ACI
+  ( pkg_development: line   21) ok        https://github.com/MIDOSS/MOHID-Cmd/workflows/CI/badge.svg
+  ( pkg_development: line   21) ok        https://github.com/MIDOSS/Make-MIDOSS-Forcing/workflows/sphinx-linkcheck/badge.svg
+  ( pkg_development: line   21) ok        https://github.com/MIDOSS/MOHID-Cmd/issues
+  ( pkg_development: line   21) ok        https://img.shields.io/badge/code%20style-black-000000.svg
+  (           index: line   62) ok        https://github.com/MIDOSS/docs/blob/main/CONTRIBUTORS.rst
+  ( pkg_development: line   21) ok        https://img.shields.io/badge/license-Apache%202-cb2533.svg
+  ( pkg_development: line  406) ok        https://github.com/MIDOSS/MOHID-Cmd/commits/main
+  ( pkg_development: line   21) ok        https://img.shields.io/badge/python-3.8-blue.svg
+  ( pkg_development: line   21) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
+  (           index: line   23) ok        https://midoss-docs.readthedocs.io/en/latest/
+  ( pkg_development: line   21) ok        https://mohid-cmd.readthedocs.io/en/latest/
+  (run_description_file/index: line   23) ok        https://pyyaml.org/wiki/PyYAMLDocumentation
+  ( pkg_development: line  372) ok        https://pytest-cov.readthedocs.io/en/latest/
+  ( pkg_development: line   21) ok        https://img.shields.io/github/issues/MIDOSS/MOHID-Cmd?logo=github
+  (           index: line   33) ok        https://github.com/SalishSeaCast/NEMO-Cmd
+  ( pkg_development: line   67) ok        https://www.python.org/
+  ( pkg_development: line  144) ok        https://www.python.org/dev/peps/pep-0008/
+  ( pkg_development: line  176) ok        https://www.sphinx-doc.org/en/master/
+  ( pkg_development: line  176) ok        https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
+  ( pkg_development: line   21) ok        https://readthedocs.org/projects/mohid-cmd/badge/?version=latest
+  ( pkg_development: line  192) ok        https://readthedocs.org/projects/mohid-cmd/builds/
+  (           index: line   68) ok        https://www.apache.org/licenses/LICENSE-2.0
   build succeeded.
 
   Look for any errors in the above output or in _build/linkcheck/output.txt
+
+:command:`make linkcheck` is run monthly via a `scheduled GitHub Actions workflow`_
+
+.. _scheduled GitHub Actions workflow: https://github.com/MIDOSS/MOHID-Cmd/actions?query=workflow%3Asphinx-linkcheck
 
 
 .. _MOHID-CmdRunningTheUnitTests:

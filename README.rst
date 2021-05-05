@@ -17,6 +17,9 @@ MIDOSS-MOHID Command Processor
 .. image:: https://readthedocs.org/projects/mohid-cmd/badge/?version=latest
     :target: https://mohid-cmd.readthedocs.io/en/latest/
     :alt: Documentation Status
+.. image:: https://github.com/MIDOSS/Make-MIDOSS-Forcing/workflows/sphinx-linkcheck/badge.svg
+      :target: https://github.com/MIDOSS/MOHID-Cmd/actions?query=workflow:sphinx-linkcheck
+      :alt: Sphinx linkcheck
 .. image:: https://github.com/MIDOSS/WWatch3-Cmd/workflows/CI/badge.svg
     :target: https://github.com/MIDOSS/WWatch3-Cmd/actions?query=workflow%3ACI
     :alt: GitHub Workflow Status
