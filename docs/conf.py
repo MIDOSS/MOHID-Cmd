@@ -62,6 +62,12 @@ extensions = ["sphinx.ext.autodoc", "sphinx.ext.intersphinx", "sphinx.ext.viewco
 
 intersphinx_mapping = {"python": ("https://docs.python.org/", None)}
 
+
+# Private GitHub repositories that linkcheck will ignore
+linkcheck_ignore = [
+    'https://github.com/MIDOSS/MIDOSS-MOHID-CODE',
+]
+
 autodoc_mock_imports = []
 
 # Add any paths that contain templates here, relative to this directory.

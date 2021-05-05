@@ -27,7 +27,7 @@ They contain key-value pairs that define the names and locations of files and di
 
 Run description files are typically stored in a sub-directory of your clone of the `MIDOSS-MOHID-config-repo`_.
 
-.. _MIDOSS-MOHID-config-repo: https://bitbucket.org/midoss/midoss-mohid-config/
+.. _MIDOSS-MOHID-config-repo: https://github.com/MIDOSS/MIDOSS-MOHID-config
 
 .. toctree::
    :maxdepth: 3

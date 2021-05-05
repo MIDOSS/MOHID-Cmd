@@ -69,7 +69,7 @@ The :kbd:`paths` section of the run description file is a collection of director
 :kbd:`mohid repo`
   The path to the `MIDOSS-MOHID-CODE`_ repository clone where the :file:`MohidWater.exe` executable for the run is to be found.
 
-  .. _MIDOSS-MOHID-CODE: https://bitbucket.org/midoss/midoss-mohid-code/
+  .. _MIDOSS-MOHID-CODE: https://github.com/MIDOSS/MIDOSS-MOHID-CODE
 
   This path may be either absolute or relative.
   It may contain:

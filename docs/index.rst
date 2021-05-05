@@ -36,7 +36,7 @@ package.
 It uses plug-ins from the `NEMO-Cmd`_ package to provide a command processor tool that is specifically tailored to the MOHID model as it is used in the MIDOSS project.
 
 .. _Command Line Interface Formulation Framework: https://docs.openstack.org/cliff/latest/
-.. _NEMO-Cmd: https://bitbucket.org/salishsea/nemo-cmd
+.. _NEMO-Cmd: https://github.com/SalishSeaCast/NEMO-Cmd
 
 
 .. toctree::

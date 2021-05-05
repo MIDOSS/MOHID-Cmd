@@ -40,7 +40,7 @@
     :target: https://github.com/MIDOSS/MOHID-Cmd/actions?query=workflow%3ACI
     :alt: GitHub Workflow Status
 .. image:: https://codecov.io/gh/MIDOSS/MOHID-Cmd/branch/main/graph/badge.svg
-    :target: https://codecov.io/gh/MIDOSS/MOHID-Cmd
+    :target: https://app.codecov.io/gh/MIDOSS/MOHID-Cmd
     :alt: Codecov Testing Coverage Report
 .. image:: https://img.shields.io/github/issues/MIDOSS/MOHID-Cmd?logo=github
     :target: https://github.com/MIDOSS/MOHID-Cmd/issues
@@ -101,17 +101,16 @@ The :kbd:`MOHID-Cmd` package depends on the :kbd:`NEMO-Cmd` package,
 so you need to clone the `NEMO-Cmd repo`_
 beside your clone of the :kbd:`MOHID-Cmd` `repository`_.
 
-.. _NEMO-Cmd repo: https://bitbucket.org/salishsea/nemo-cmd
+.. _NEMO-Cmd repo: https://github.com/SalishSeaCast/NEMO-Cmd
 
 Setting up an isolated development environment using `Conda`_ is recommended.
-Assuming that you have the `Anaconda Python Distribution`_ or `Miniconda3`_ installed,
+Assuming that you have Miniconda`_ installed,
 you can create and activate an environment called :kbd:`mohid-cmd` that will have all of the Python packages necessary for development,
 testing,
 and building the documentation with the commands below.
 
 .. _Conda: https://conda.io/en/latest/
-.. _Anaconda Python Distribution: https://www.anaconda.com/distribution/
-.. _Miniconda3:  https://docs.conda.io/en/latest/miniconda.html
+.. _Miniconda:  https://docs.conda.io/en/latest/miniconda.html
 
 .. code-block:: bash
 
@@ -173,8 +172,8 @@ Building the Documentation
 
 The documentation for the :kbd:`MOHID-Cmd` package is written in `reStructuredText`_ and converted to HTML using `Sphinx`_.
 
-.. _reStructuredText: http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
-.. _Sphinx: http://www.sphinx-doc.org/en/master/
+.. _reStructuredText: https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
+.. _Sphinx: https://www.sphinx-doc.org/en/master/
 
 If you have write access to the `repository`_ on GitHub,
 whenever you push changes to GitHub the documentation is automatically re-built and rendered at https://mohid-cmd.readthedocs.io/en/latest/.
@@ -390,7 +389,7 @@ Continuous Integration
     :target: https://github.com/MIDOSS/MOHID-Cmd/actions?query=workflow%3ACI
     :alt: GitHub Workflow Status
 .. image:: https://codecov.io/gh/MIDOSS/MOHID-Cmd/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/MIDOSS/MOHID-Cmd
+    :target: https://app.codecov.io/gh/MIDOSS/MOHID-Cmd
     :alt: Codecov Testing Coverage Report
 
 The :kbd:`MOHID-Cmd` package unit test suite is run and a coverage report is generated whenever changes are pushed to GitHub.
@@ -402,11 +401,11 @@ The testing coverage report is uploaded to `codecov.io`_
 .. _repo actions page: https://github.com/MIDOSS/MOHID-Cmd/actions
 .. _repo commits page: https://github.com/MIDOSS/MOHID-Cmd/commits/main
 .. _repo code overview page: https://github.com/MIDOSS/MOHID-Cmd
-.. _codecov.io: https://codecov.io/gh/MIDOSS/MOHID-Cmd
+.. _codecov.io: https://app.codecov.io/gh/MIDOSS/MOHID-Cmd
 
 The `GitHub Actions`_ workflow configuration that defines the continuous integration tasks is in the :file:`.github/workflows/pytest-coverage.yaml` file.
 
-.. _GitHub Actions: https://help.github.com/en/actions
+.. _GitHub Actions: https://docs.github.com/en/actions
 
 
 .. _MOHID-CmdVersionControlRepository:

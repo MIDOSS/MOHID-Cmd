@@ -89,13 +89,6 @@ Here is an example:
 How It Works
 ============
 
-.. note::
-    The implementation of :command:`mohid monte-carlo` described here is presently in feature branches:
-
-    * https://github.com/MIDOSS/MOHID-Cmd/tree/add-make-hdf5
-    * https://github.com/MIDOSS/MIDOSS-MOHID-config/tree/add-make-hdf5
-    * https://github.com/MIDOSS/Make-MIDOSS-Forcing/tree/monte-carlo
-
 Running the :command:`mohid monte-carlo` command with a YAML file like the one above,
 and a CSV file containg parameter lines for 5 runs results in the creation of a directory tree for a collection of 5 MOHID runs that will be executed as a single MPI job under `GLOST`_,
 and submission of that job to the scheduler via :command:`sbatch`.
@@ -160,12 +153,12 @@ Initially that directory tree would look like::
       └── README.rst
 
 * The :file:`forcing-yaml/` directory contains YAML config files to drive :command:`make-hdf5` for each of the runs.
-  They are generated from the https://github.com/MIDOSS/MIDOSS-MOHID-config/blob/add-make-hdf5/monte-carlo/templates/make-hdf5.yaml template.
+  They are generated from the https://github.com/MIDOSS/MIDOSS-MOHID-config/blob/main/monte-carlo/templates/make-hdf5.yaml template.
 
 * The :file:`glost-job.sh` file is the shell script that is submitted via :command:`sbatch` to run run Monte Carlo GLOST job.
 
 * The :file:`glost-tasks/` directory contains shell scripts for each of the individual MOHID runs that GLOST farms.
-  They are generated from the https://github.com/MIDOSS/MIDOSS-MOHID-config/blob/add-make-hdf5/monte-carlo/templates/glost-task.sh template.
+  They are generated from the https://github.com/MIDOSS/MIDOSS-MOHID-config/blob/main/monte-carlo/templates/glost-task.sh template.
 
 * The :file:`glost-tasks.txt` file is the collection of bash execution lines for the scripts in the :file:`glost-tasks/` directory.
   This is the file that GLOST uses to launch each of the MOHID runs.
@@ -177,7 +170,7 @@ Initially that directory tree would look like::
 * The :file:`*_rev.txt` files are VCS recording files.
 
 * The :file:`mohid-yaml/` directory contains YAML run description files for each of the MOHID runs.
-  They are generated from the https://github.com/MIDOSS/MIDOSS-MOHID-config/blob/add-make-hdf5/monte-carlo/templates/mohid-run.yaml template.
+  They are generated from the https://github.com/MIDOSS/MIDOSS-MOHID-config/blob/main/monte-carlo/templates/mohid-run.yaml template.
 
 * The :file:`results/` directory will be empty at this point except for it's :file:`README.rst` file.
 

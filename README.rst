@@ -21,7 +21,7 @@ MIDOSS-MOHID Command Processor
     :target: https://github.com/MIDOSS/WWatch3-Cmd/actions?query=workflow%3ACI
     :alt: GitHub Workflow Status
 .. image:: https://codecov.io/gh/MIDOSS/MOHID-Cmd/branch/main/graph/badge.svg
-    :target: https://codecov.io/gh/MIDOSS/MOHID-Cmd
+    :target: https://app.codecov.io/gh/MIDOSS/MOHID-Cmd
     :alt: Codecov Testing Coverage Report
 .. image:: https://img.shields.io/github/issues/MIDOSS/MOHID-Cmd?logo=github
     :target: https://github.com/MIDOSS/MOHID-Cmd/issues
