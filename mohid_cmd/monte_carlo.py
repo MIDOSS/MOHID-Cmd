@@ -51,7 +51,7 @@ class MonteCarlo(cliff.command.Command):
             The parameters of the MIDOSS-MOHID runs are defined in CSV_FILE.
             The results directories from the runs are gathered in RESULTS_DIR.
             
-            If RESULTS_DIR does ont exist, it will be created.
+            If RESULTS_DIR does not exist, it will be created.
         """
         parser.add_argument(
             "desc_file",
