@@ -48,7 +48,7 @@ Here is an example:
     email: dlatorne@eoas.ubc.ca
     nodes: 1
     mem per cpu: 14100M
-    run walltime: 2:00:00
+    run walltime: 3:00:00
 
     paths:
       forcing directory: $SCRATCH/MIDOSS/forcing/
