@@ -340,6 +340,9 @@ def _execute(run_desc):
         echo "Rename mass balance file to MassBalance_${{RUN_ID}}.sro" >>${{RESULTS_DIR}}/stdout
         mv -v ${{WORK_DIR}}/resOilOutput.sro ${{WORK_DIR}}/MassBalance_${{RUN_ID}}.sro >>${{RESULTS_DIR}}/stdout
         
+        echo "Delete large unused output files"  >>${{RESULTS_DIR}}/stdout
+        rm -v ${{WORK_DIR}}/res/Turbulence*.hdf5 ${{WORK_DIR}}/res*.elf5 ${{WORK_DIR}}/res*.ptf
+        
         echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
         ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
