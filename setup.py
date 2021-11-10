@@ -17,16 +17,4 @@
 import setuptools
 
 
-setuptools.setup(
-    entry_points={
-        # The mohid command:
-        "console_scripts": ["mohid = mohid_cmd.main:main"],
-        # Sub-command plug-ins:
-        "mohid.app": [
-            "gather = mohid_cmd.gather:Gather",
-            "monte-carlo = mohid_cmd.monte_carlo:MonteCarlo",
-            "prepare = mohid_cmd.prepare:Prepare",
-            "run = mohid_cmd.run:Run",
-        ],
-    }
-)
+setuptools.setup()
