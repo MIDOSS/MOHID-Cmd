@@ -8,6 +8,7 @@ name: mohid-cmd-test
 
 channels:
   - conda-forge
+  - nodefaults
 
 dependencies:
   - arrow
