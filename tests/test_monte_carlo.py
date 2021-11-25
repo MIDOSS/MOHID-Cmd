@@ -71,16 +71,16 @@ def glost_run_desc(tmp_path):
             email: dlatorne@example.com
             nodes: 1
             mem per cpu: 14100M
-            run walltime: 3:00:00   
+            run walltime: 3:00:00
 
             paths:
               forcing directory: {forcing_dir}
               runs directory: {runs_dir}
               mohid config: {mohid_config_dir}
-              
+
             make-hdf5 command: $HOME/.local/bin/make-hdf5
             mohid command: $HOME/.local/bin/mohid
-            
+
             vcs revisions:
               git:
                 - {code_repo}
@@ -188,8 +188,7 @@ def mock_subprocess_run(monkeypatch):
 
 
 class TestParser:
-    """Unit tests for `mohid monte-carlo` sub-command command-line parser.
-    """
+    """Unit tests for `mohid monte-carlo` sub-command command-line parser."""
 
     def test_get_parser(self, monte_carlo_cmd):
         parser = monte_carlo_cmd.get_parser("mohid monte-carlo")
@@ -246,8 +245,7 @@ class TestParser:
 
 
 class TestTakeAction:
-    """Unit tests for `mohid monte-carlo` sub-command take_action() method.
-    """
+    """Unit tests for `mohid monte-carlo` sub-command take_action() method."""
 
     @staticmethod
     @pytest.fixture
@@ -327,8 +325,7 @@ class TestTakeAction:
 
 
 class TestMonteCarlo:
-    """Unit tests for monte_carlo() function.
-    """
+    """Unit tests for monte_carlo() function."""
 
     def test_no_submit(
         self,
@@ -374,8 +371,7 @@ class TestMonteCarlo:
 
 
 class TestRenderMakeHDF5Yamls:
-    """Unit test for _render_make_hdf5_yamls() function.
-    """
+    """Unit test for _render_make_hdf5_yamls() function."""
 
     def test_render_make_hdf5_yamls(self, glost_run_desc, monkeypatch):
         job_id = glost_run_desc["job id"]
@@ -415,8 +411,7 @@ class TestRenderMakeHDF5Yamls:
 
 
 class TestRenderMohidRunYamls:
-    """Unit test for _render_mohid_run_yamls() function.
-    """
+    """Unit test for _render_mohid_run_yamls() function."""
 
     def test_render_mohid_run_yamls(self, glost_run_desc, monkeypatch):
         job_id = glost_run_desc["job id"]
@@ -432,10 +427,10 @@ class TestRenderMohidRunYamls:
             textwrap.dedent(
                 """\
                 run_id: {{ job_id }}-{{ run_number }}
-                
+
                 paths:
                   runs directory: {{ runs_dir }}
-    
+
                 forcing:
                   winds.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/winds.hdf5
                   currents.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/currents.hdf5
@@ -445,7 +440,7 @@ class TestRenderMohidRunYamls:
                   ww3.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/waves.hdf5
                   e3t.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/e3t.hdf5
                   diffusivity.hdf5: {{ forcing_dir }}/{{ start_ddmmmyy }}-{{ end_ddmmmyy }}/t.hdf5
-    
+
                 run data files:
                   IN_MODEL: {{ job_dir }}/mohid-yaml/Model-{{ run_number }}.dat
                   PARTIC_DATA: {{ job_dir }}/mohid-yaml/{{ Lagrangian_template }}-{{ run_number }}.dat
@@ -506,8 +501,7 @@ class TestRenderMohidRunYamls:
 
 
 class TestRenderModelDats:
-    """Unit test for _render_model_dats() function.
-    """
+    """Unit test for _render_model_dats() function."""
 
     def test_render_model_dats(self, glost_run_desc, monkeypatch):
         job_id = glost_run_desc["job id"]
@@ -525,7 +519,7 @@ class TestRenderModelDats:
                 START                     : {{ start_yyyy_mm_dd }} 00 30 0
                 END                       : {{ end_yyyy_mm_dd }} 23 30 0
                 DT                        : 3600
-    
+
                 VARIABLEDT                : 0
                 OPENMP_NUM_THREADS        : 1
                 GMTREFERENCE              : 0
@@ -558,7 +552,7 @@ class TestRenderModelDats:
             START                     : 2017 06 15 00 30 0
             END                       : 2017 06 21 23 30 0
             DT                        : 3600
-            
+
             VARIABLEDT                : 0
             OPENMP_NUM_THREADS        : 1
             GMTREFERENCE              : 0
@@ -574,8 +568,7 @@ class TestRenderModelDats:
 
 
 class TestRenderLagrangianDats:
-    """Unit test for _render_lagrangian_dats() function.
-    """
+    """Unit test for _render_lagrangian_dats() function."""
 
     def test_render_lagrangian_dats(self, glost_run_desc, monkeypatch):
         job_id = glost_run_desc["job id"]
@@ -620,8 +613,7 @@ class TestRenderLagrangianDats:
 
 
 class TestRenderGlostTaskScripts:
-    """Unit test for _render_glost_task_scripts() function.
-    """
+    """Unit test for _render_glost_task_scripts() function."""
 
     def test_render_glost_task_scripts(self, glost_run_desc, monkeypatch):
         job_id = glost_run_desc["job id"]
@@ -673,8 +665,7 @@ class TestRenderGlostTaskScripts:
 
 
 class TestGlostJobDir:
-    """Integration tests for GLOST job directory generated by `mohid monte-carlo` sub-command.
-    """
+    """Integration tests for GLOST job directory generated by `mohid monte-carlo` sub-command."""
 
     @staticmethod
     @pytest.fixture
@@ -1001,7 +992,9 @@ class TestGlostJobDir:
                 {
                     "spill_lon": numpy.array([-122.86] * n_runs, dtype=numpy.float32),
                     "spill_lat": numpy.array([48.38] * n_runs, dtype=numpy.float32),
-                    "spill_volume": numpy.array([21300.43] * n_runs, dtype=numpy.float32),
+                    "spill_volume": numpy.array(
+                        [21300.43] * n_runs, dtype=numpy.float32
+                    ),
                     "Lagrangian_template": "Lagrangian_AKNS_crude.dat",
                 }
             )
@@ -1213,7 +1206,7 @@ class TestGlostJobDir:
         expected = textwrap.dedent(
             f"""\
             #!/bin/bash
-            
+
             #SBATCH --job-name={job_id}
             #SBATCH --account={glost_run_desc["account"]}
             #SBATCH --mail-user={glost_run_desc["email"]}
@@ -1224,15 +1217,15 @@ class TestGlostJobDir:
             #SBATCH --time=3:00:00
             #SBATCH --output={job_dir}/glost-job.stdout
             #SBATCH --error={job_dir}/glost-job.stderr
-            
+
             module load StdEnv/2016.4
             module load glost/0.3.1
             module load python/3.8.2
             module load proj4-fortran/1.0
             module load nco/4.6.6
-            
+
             export MONTE_CARLO={job_dir}
-            
+
             echo "Starting glost at $(date)"
             srun glost_launch {job_dir}/glost-tasks.txt
             echo "Ended glost at $(date)"

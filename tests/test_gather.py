@@ -30,8 +30,7 @@ def gather_cmd():
 
 
 class TestParser:
-    """Unit tests for `mohid gather` sub-command command-line parser.
-    """
+    """Unit tests for `mohid gather` sub-command command-line parser."""
 
     def test_get_parser(self, gather_cmd):
         parser = gather_cmd.get_parser("mohid gather")
@@ -52,8 +51,7 @@ class TestParser:
 
 
 class TestTakeAction:
-    """Unit tests for `mohid gather` sub-command take_action() method.
-    """
+    """Unit tests for `mohid gather` sub-command take_action() method."""
 
     @patch("mohid_cmd.gather.gather", autospec=True)
     def test_take_action(self, m_gather, gather_cmd):
@@ -82,8 +80,7 @@ class TestTakeAction:
 @patch("mohid_cmd.gather.Path.is_symlink", return_value=True, autospec=True)
 @patch("mohid_cmd.gather._move_results", autospec=True)
 class TestGather:
-    """Unit test for `mohid gather` gather() function.
-    """
+    """Unit test for `mohid gather` gather() function."""
 
     def test_gather(
         self, m_mv_results, m_is_link, m_glob, m_rslv_path, res_files, expected, tmpdir

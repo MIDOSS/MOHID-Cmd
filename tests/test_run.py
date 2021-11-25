@@ -35,8 +35,7 @@ def run_cmd():
 
 
 class TestParser:
-    """Unit tests for `mohid run` sub-command command-line parser.
-    """
+    """Unit tests for `mohid run` sub-command command-line parser."""
 
     def test_get_parser(self, run_cmd):
         parser = run_cmd.get_parser("mohid run")
@@ -118,8 +117,7 @@ class TestParser:
 
 
 class TestTakeAction:
-    """Unit tests for `mohid run` sub-command take_action() method.
-    """
+    """Unit tests for `mohid run` sub-command take_action() method."""
 
     @staticmethod
     @pytest.fixture
@@ -235,8 +233,7 @@ class TestTakeAction:
 @patch("mohid_cmd.run.nemo_cmd.prepare.load_run_desc", spec=True)
 @patch("mohid_cmd.run.mohid_cmd.prepare.prepare", spec=True)
 class TestRun:
-    """Unit tests for `mohid run` run() function.
-    """
+    """Unit tests for `mohid run` run() function."""
 
     def test_run_submit(
         self, m_prepare, m_ld_run_desc, m_bld_run_script, m_rslv_path, m_run, tmpdir
@@ -282,8 +279,7 @@ class TestRun:
 
 
 class TestBuildRunScript:
-    """Unit test for _build_run_script() function.
-    """
+    """Unit test for _build_run_script() function."""
 
     def test_build_run_script(self, run_desc, tmpdir):
         p_mohid_repo = tmpdir.ensure_dir(run_desc["paths"]["mohid repo"])
@@ -304,7 +300,7 @@ class TestBuildRunScript:
         expected = textwrap.dedent(
             f"""\
             #!/bin/bash
-            
+
             #SBATCH --job-name={run_id}
             #SBATCH --account={account}
             #SBATCH --mail-user={email}
@@ -314,33 +310,33 @@ class TestBuildRunScript:
             #SBATCH --time={walltime}
             #SBATCH --output=results_dir/stdout
             #SBATCH --error=results_dir/stderr
-            
+
             if ! test -z $SLURM_CPUS_PER_TASK
             then
               export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
             fi
-            
+
             RUN_ID="{run_id}"
             RUN_DESC="mohid.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
             HDF5_TO_NETCDF4="${{HOME}}/.local/bin/hdf5-to-netcdf4"
             GATHER="${{HOME}}/.local/bin/mohid gather"
-            
+
             module load StdEnv/2016.4
             module load proj4-fortran/1.0
             module load python/3.8.2
             module load nco/4.6.6
-            
+
             mkdir -p ${{RESULTS_DIR}}
             cd ${{WORK_DIR}}
             echo "working dir: $(pwd)" >${{RESULTS_DIR}}/stdout
-            
+
             echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
             {str(p_mohid_exe)} >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
             MOHID_EXIT_CODE=$?
             echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
-            
+
             TMPDIR="${{SLURM_TMPDIR}}"
             LAGRANGIAN="Lagrangian_DieselFuel_refined_${{RUN_ID}}"
             if test -f ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5
@@ -354,21 +350,21 @@ class TestBuildRunScript:
               rm -v ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5 >>${{RESULTS_DIR}}/stdout
               echo "Results hdf5 to netCDF4 conversion ended at $(date)" >>${{RESULTS_DIR}}/stdout
             fi
-        
+
             echo "Rename mass balance file to MassBalance_${{RUN_ID}}.sro" >>${{RESULTS_DIR}}/stdout
             mv -v ${{WORK_DIR}}/resOilOutput.sro ${{WORK_DIR}}/MassBalance_${{RUN_ID}}.sro >>${{RESULTS_DIR}}/stdout
-        
+
             echo "Delete large unused output files"  >>${{RESULTS_DIR}}/stdout
             rm -v ${{WORK_DIR}}/res/Turbulence*.hdf5 ${{WORK_DIR}}/res*.elf5 ${{WORK_DIR}}/res*.ptf
-            
+
             echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
             ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
             echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
-            
+
             chmod -v go+rx ${{RESULTS_DIR}} >>${{RESULTS_DIR}}/stdout
             chmod -v g+rw ${{RESULTS_DIR}}/* >>${{RESULTS_DIR}}/stdout
             chmod -v o+r ${{RESULTS_DIR}}/* >>${{RESULTS_DIR}}/stdout
-            
+
             echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout
             rmdir -v $(pwd) >>${{RESULTS_DIR}}/stdout
             echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout
@@ -379,8 +375,7 @@ class TestBuildRunScript:
 
 
 class TestSbatchDirectives:
-    """Unit tests for _sbatch_directives() function.
-    """
+    """Unit tests for _sbatch_directives() function."""
 
     def test_email(self, run_desc):
         pass
@@ -403,7 +398,7 @@ class TestSbatchDirectives:
             #SBATCH --time={run_desc['walltime']}
             #SBATCH --output=results_dir/stdout
             #SBATCH --error=results_dir/stderr
-            
+
             if ! test -z $SLURM_CPUS_PER_TASK
             then
               export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
@@ -414,13 +409,11 @@ class TestSbatchDirectives:
 
 
 class TestTdToHms:
-    """Unit tests for td_to_hms() function.
-    """
+    """Unit tests for td_to_hms() function."""
 
 
 class TestDefinitions:
-    """Unit tests for _definitions() function.
-    """
+    """Unit tests for _definitions() function."""
 
     def test_defns(self, run_desc):
         defns = mohid_cmd.run._definitions(
@@ -441,8 +434,7 @@ class TestDefinitions:
 
 
 class TestModules:
-    """Unit tests for _modules() function.
-    """
+    """Unit tests for _modules() function."""
 
     def test_modules(self):
         modules = mohid_cmd.run._modules()
@@ -458,8 +450,7 @@ class TestModules:
 
 
 class TestExecute:
-    """Unit tests for _execute() function.
-    """
+    """Unit tests for _execute() function."""
 
     def test_execute(self, run_desc, tmpdir):
         p_mohid_repo = tmpdir.ensure_dir(run_desc["paths"]["mohid repo"])
@@ -476,12 +467,12 @@ class TestExecute:
             mkdir -p ${{RESULTS_DIR}}
             cd ${{WORK_DIR}}
             echo "working dir: $(pwd)" >${{RESULTS_DIR}}/stdout
-            
+
             echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
             {str(p_mohid_exe)} >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
             MOHID_EXIT_CODE=$?
             echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
-            
+
             TMPDIR="${{SLURM_TMPDIR}}"
             LAGRANGIAN="Lagrangian_DieselFuel_refined_${{RUN_ID}}"
             if test -f ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5
@@ -495,10 +486,10 @@ class TestExecute:
               rm -v ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5 >>${{RESULTS_DIR}}/stdout
               echo "Results hdf5 to netCDF4 conversion ended at $(date)" >>${{RESULTS_DIR}}/stdout
             fi
-        
+
             echo "Rename mass balance file to MassBalance_${{RUN_ID}}.sro" >>${{RESULTS_DIR}}/stdout
             mv -v ${{WORK_DIR}}/resOilOutput.sro ${{WORK_DIR}}/MassBalance_${{RUN_ID}}.sro >>${{RESULTS_DIR}}/stdout
-                    
+
             echo "Delete large unused output files"  >>${{RESULTS_DIR}}/stdout
             rm -v ${{WORK_DIR}}/res/Turbulence*.hdf5 ${{WORK_DIR}}/res*.elf5 ${{WORK_DIR}}/res*.ptf
 
@@ -511,8 +502,7 @@ class TestExecute:
 
 
 class TestFixPermissions:
-    """Unit tests for _fix_permissions() function.
-    """
+    """Unit tests for _fix_permissions() function."""
 
     def test_fix_permissions(self):
         script = mohid_cmd.run._fix_permissions()
@@ -527,8 +517,7 @@ class TestFixPermissions:
 
 
 class TestCleanup:
-    """Unit tests for _cleanup() function.
-    """
+    """Unit tests for _cleanup() function."""
 
     def test_cleanup(self):
         script = mohid_cmd.run._cleanup()

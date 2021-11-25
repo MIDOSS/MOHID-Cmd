@@ -65,7 +65,7 @@ intersphinx_mapping = {"python": ("https://docs.python.org/3/", None)}
 
 # Private GitHub repositories that linkcheck will ignore
 linkcheck_ignore = [
-    'https://github.com/MIDOSS/MIDOSS-MOHID-CODE',
+    "https://github.com/MIDOSS/MIDOSS-MOHID-CODE",
 ]
 
 autodoc_mock_imports = []

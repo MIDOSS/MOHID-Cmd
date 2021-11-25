@@ -35,8 +35,7 @@ def prepare_cmd():
 
 
 class TestParser:
-    """Unit tests for `mohid prepare` sub-command command-line parser.
-    """
+    """Unit tests for `mohid prepare` sub-command command-line parser."""
 
     def test_get_parser(self, prepare_cmd):
         parser = prepare_cmd.get_parser("mohid prepare")
@@ -99,8 +98,7 @@ class TestParser:
     autospec=True,
 )
 class TestTakeAction:
-    """Unit tests for `mohid prepare` sub-command take_action() method.
-    """
+    """Unit tests for `mohid prepare` sub-command take_action() method."""
 
     def test_return_tmp_run_dir(self, m_prepare, m_logger, prepare_cmd):
         parsed_args = SimpleNamespace(desc_file="foo.yaml", quiet=False, tmp_run_dir="")
@@ -122,8 +120,7 @@ class TestTakeAction:
 @patch("mohid_cmd.prepare.nemo_cmd.prepare.write_repo_rev_file", spec=True)
 @patch("mohid_cmd.prepare.nemo_cmd.prepare.record_vcs_revisions", spec=True)
 class TestPrepare:
-    """Unit tests for `mohid prepare` prepare() function.
-    """
+    """Unit tests for `mohid prepare` prepare() function."""
 
     def test_prepare(
         self,
@@ -193,8 +190,7 @@ class TestPrepare:
 
 @patch("mohid_cmd.prepare.logger", autospec=True)
 class TestCheckMohidExec:
-    """Unit tests for `mohid prepare` _check_mohid_exec() function.
-    """
+    """Unit tests for `mohid prepare` _check_mohid_exec() function."""
 
     def test_mohid_exe(self, m_logger, tmpdir, run_desc):
         p_mohid_repo = tmpdir.ensure_dir("MIDOSS-MOHID/")
@@ -211,8 +207,7 @@ class TestCheckMohidExec:
 
 
 class TestMakeRunDir:
-    """Unit tests for `mohid prepare` _make_run_dir() function.
-    """
+    """Unit tests for `mohid prepare` _make_run_dir() function."""
 
     def test_timestamp_run_dir(self, run_desc, monkeypatch):
         def mock_arrow_now():
@@ -233,8 +228,7 @@ class TestMakeRunDir:
 
 
 class TestMakeForcingLinks:
-    """Unit tests for `mohid prepare` _make_forcing_links() function.
-    """
+    """Unit tests for `mohid prepare` _make_forcing_links() function."""
 
     def test_no_link_path(self, run_desc, caplog, tmp_path, monkeypatch):
         monkeypatch.setitem(run_desc["forcing"], "winds.hdf5", "not a file")
@@ -264,8 +258,7 @@ class TestMakeForcingLinks:
 
 
 class TestMakeNomfich:
-    """Unit tests for `mohid prepare` _make_nomfich() function.
-    """
+    """Unit tests for `mohid prepare` _make_nomfich() function."""
 
     def test_no_bathymetry_key(self, run_desc, caplog, monkeypatch):
         monkeypatch.delitem(run_desc, "bathymetry")

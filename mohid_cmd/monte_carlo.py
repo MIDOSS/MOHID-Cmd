@@ -38,15 +38,14 @@ logger = logging.getLogger(__name__)
 
 
 class MonteCarlo(cliff.command.Command):
-    """Prepare for and execute a collection of Monte Carlo runs of the MIDOSS-MOHID model.
-    """
+    """Prepare for and execute a collection of Monte Carlo runs of the MIDOSS-MOHID model."""
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
         parser.description = """
             Prepare for and execute a collection of Monte Carlo runs of the MIDOSS-MOHID model
             as a glost job.
-            
+
             The glost job is described in DESC_FILE.
             The parameters of the MIDOSS-MOHID runs are defined in CSV_FILE.
         """
@@ -69,11 +68,11 @@ class MonteCarlo(cliff.command.Command):
             help="""
             Prepare the directories of forcing YAML files,
             MIDOSS-MOHID run description YAML files,
-            top level results directory, 
-            and the bash script to execute the glost job, 
+            top level results directory,
+            and the bash script to execute the glost job,
             but don't submit the glost job to the queue.
-            This is useful during development runs when you want to hack on 
-            the bash script and/or use the same setup directories 
+            This is useful during development runs when you want to hack on
+            the bash script and/or use the same setup directories
             more than once.
             """,
         )
@@ -108,10 +107,16 @@ def monte_carlo(desc_file, csv_file, no_submit=False):
     job_desc = nemo_cmd.prepare.load_run_desc(desc_file)
     job_id = nemo_cmd.prepare.get_run_desc_value(job_desc, ("job id",))
     forcing_dir = nemo_cmd.prepare.get_run_desc_value(
-        job_desc, ("paths", "forcing directory"), expand_path=True, resolve_path=True,
+        job_desc,
+        ("paths", "forcing directory"),
+        expand_path=True,
+        resolve_path=True,
     )
     runs_dir = nemo_cmd.prepare.get_run_desc_value(
-        job_desc, ("paths", "runs directory"), expand_path=True, resolve_path=True,
+        job_desc,
+        ("paths", "runs directory"),
+        expand_path=True,
+        resolve_path=True,
     )
     job_dir = runs_dir / f"{job_id}_{arrow.now().format('YYYY-MM-DDTHHmmss')}"
     runs = _get_runs_info(csv_file)

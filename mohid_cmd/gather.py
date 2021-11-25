@@ -27,8 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class Gather(cliff.command.Command):
-    """Gather results files from a MIDOSS-MOHID run.
-    """
+    """Gather results files from a MIDOSS-MOHID run."""
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)

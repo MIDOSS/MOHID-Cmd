@@ -28,8 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class Prepare(cliff.command.Command):
-    """Set up the MIDOSS-MOHID run described in DESC_FILE and print the path of the temporary run directory.
-    """
+    """Set up the MIDOSS-MOHID run described in DESC_FILE and print the path of the temporary run directory."""
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
