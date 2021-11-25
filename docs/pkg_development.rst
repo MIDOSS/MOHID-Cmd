@@ -24,8 +24,8 @@
 .. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
-.. image:: https://img.shields.io/badge/python-3.8-blue.svg
-    :target: https://docs.python.org/3.8/
+.. image:: https://img.shields.io/badge/python-3.9-blue.svg
+    :target: https://docs.python.org/3.9/
     :alt: Python Version
 .. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
     :target: https://github.com/MIDOSS/MOHID-Cmd
@@ -60,11 +60,11 @@ command-line tool for doing various operations associated with the `MIDOSS proje
 Python Versions
 ===============
 
-.. image:: https://img.shields.io/badge/python-3.8-blue.svg
-    :target: https://docs.python.org/3.8/
+.. image:: https://img.shields.io/badge/python-3.9-blue.svg
+    :target: https://docs.python.org/3.9/
     :alt: Python Version
 
-The :kbd:`mohid_cmd` package is developed and tested using `Python`_ 3.8.
+The :kbd:`mohid_cmd` package is developed and tested using `Python`_ 3.9.
 The package uses some Python language features that are not available in versions prior to 3.6,
 in particular:
 
@@ -316,7 +316,7 @@ The output looks something like::
   (           index: line   62) ok        https://github.com/MIDOSS/docs/blob/main/CONTRIBUTORS.rst
   ( pkg_development: line   21) ok        https://img.shields.io/badge/license-Apache%202-cb2533.svg
   ( pkg_development: line  406) ok        https://github.com/MIDOSS/MOHID-Cmd/commits/main
-  ( pkg_development: line   21) ok        https://img.shields.io/badge/python-3.8-blue.svg
+  ( pkg_development: line   21) ok        https://img.shields.io/badge/python-3.9-blue.svg
   ( pkg_development: line   21) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
   (           index: line   23) ok        https://midoss-docs.readthedocs.io/en/latest/
   ( pkg_development: line   21) ok        https://mohid-cmd.readthedocs.io/en/latest/
