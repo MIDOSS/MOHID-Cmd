@@ -33,8 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 class Run(cliff.command.Command):
-    """Prepare, execute, and gather results from a MIDOSS-MOHID model run.
-    """
+    """Prepare, execute, and gather results from a MIDOSS-MOHID model run."""
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
@@ -62,10 +61,10 @@ class Run(cliff.command.Command):
             dest="no_submit",
             action="store_true",
             help="""
-            Prepare the temporary run directory, and the bash script to 
+            Prepare the temporary run directory, and the bash script to
             execute the MOHID run, but don't submit the run to the queue.
-            This is useful during development runs when you want to hack on 
-            the bash script and/or use the same temporary run directory 
+            This is useful during development runs when you want to hack on
+            the bash script and/or use the same temporary run directory
             more than once.
             """,
         )
@@ -231,7 +230,7 @@ def _sbatch_directives(run_desc, results_dir):
         #SBATCH --time={walltime}
         #SBATCH --output={results_dir/'stdout'}
         #SBATCH --error={results_dir/'stderr'}
-    
+
         if ! test -z $SLURM_CPUS_PER_TASK
         then
           export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
@@ -317,12 +316,12 @@ def _execute(run_desc):
         mkdir -p ${{RESULTS_DIR}}
         cd ${{WORK_DIR}}
         echo "working dir: $(pwd)" >${{RESULTS_DIR}}/stdout
-        
+
         echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
         {str(mohid_exe)} >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         MOHID_EXIT_CODE=$?
         echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
-        
+
         TMPDIR="${{SLURM_TMPDIR}}"
         LAGRANGIAN="{partic_data.stem}_${{RUN_ID}}"
         if test -f ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5
@@ -336,13 +335,13 @@ def _execute(run_desc):
           rm -v ${{WORK_DIR}}/res/${{LAGRANGIAN}}.hdf5 >>${{RESULTS_DIR}}/stdout
           echo "Results hdf5 to netCDF4 conversion ended at $(date)" >>${{RESULTS_DIR}}/stdout
         fi
-        
+
         echo "Rename mass balance file to MassBalance_${{RUN_ID}}.sro" >>${{RESULTS_DIR}}/stdout
         mv -v ${{WORK_DIR}}/resOilOutput.sro ${{WORK_DIR}}/MassBalance_${{RUN_ID}}.sro >>${{RESULTS_DIR}}/stdout
-        
+
         echo "Delete large unused output files"  >>${{RESULTS_DIR}}/stdout
         rm -v ${{WORK_DIR}}/res/Turbulence*.hdf5 ${{WORK_DIR}}/res*.elf5 ${{WORK_DIR}}/res*.ptf
-        
+
         echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
         ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
