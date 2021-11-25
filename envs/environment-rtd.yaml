@@ -8,4 +8,11 @@ channels:
   - nodefaults
 
 dependencies:
+  - pip
   - python=3.9
+
+  # RTD packages
+  - mock
+  - pillow
+  - sphinx
+  - sphinx_rtd_theme
