@@ -34,8 +34,8 @@ dependencies:
   - python=3.9
   - pyyaml
 
-  # For coding style
-  - black
+  # For code style & repo QA
+  - pre-commit
 
   # For unit tests
   - pytest
@@ -50,4 +50,3 @@ dependencies:
 
     # For unit tests
     - pytest-randomly
-

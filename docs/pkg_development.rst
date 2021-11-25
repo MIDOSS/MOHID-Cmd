@@ -30,6 +30,9 @@
 .. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
     :target: https://github.com/MIDOSS/MOHID-Cmd
     :alt: Git on GitHub
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+   :target: https://github.com/pre-commit/pre-commit
+   :alt: pre-commit
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://black.readthedocs.io/en/stable/
     :alt: The uncompromising Python code formatter
@@ -137,31 +140,33 @@ To deactivate the environment use:
 Coding Style
 ============
 
+Coding Style
+============
+
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+   :target: https://github.com/pre-commit/pre-commit
+   :alt: pre-commit
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://black.readthedocs.io/en/stable/
     :alt: The uncompromising Python code formatter
 
-The :kbd:`MOHID-Cmd` package uses the `black`_ code formatting tool to maintain a coding style that is very close to `PEP 8`_.
+The :kbd:`SalishSeaNowcast` package uses Git pre-commit hooks managed by `pre-commit`_ to maintain consistent code style and and other aspects of code,
+docs,
+and repo QA.
 
-.. _black: https://black.readthedocs.io/en/stable/
-.. _PEP 8: https://www.python.org/dev/peps/pep-0008/
+.. _pre-commit: https://pre-commit.com/
 
-:command:`black` is installed as part of the :ref:`MOHID-CmdDevelopmentEnvironment` setup.
-
-To run :command:`black` on the entire code-base use:
+To install the `pre-commit` hooks in a newly cloned repo,
+activate the conda development environment,
+and run :command:`pre-commit install`:
 
 .. code-block:: bash
 
     $ cd MOHID-Cmd
-    $ conda activate mohid_cmd
-    (mohid-cmd)$ black ./
+    $ conda activate mohid-cmd
+    (salishsea-nowcast)$ pre-commit install
 
-in the repository root directory.
-The output looks something like::
-
-  reformatted /media/doug/warehouse/MIDOSS/MOHID-Cmd/docs/conf.py
-  All done! ✨ 🍰 ✨
-  1 file reformatted, 3 files left unchanged.
+.. note:: You only need to install the hooks once immediately after you make a new clone of the `SalishSeaNowcast repository`_ and build your :ref:`SalishSeaNowcastDevelopmentEnvironment`.
 
 
 .. _MOHID-CmdBuildingTheDocumentation:
