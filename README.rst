@@ -30,7 +30,7 @@ MIDOSS-MOHID Command Processor
     :target: https://app.codecov.io/gh/MIDOSS/MOHID-Cmd
     :alt: Codecov Testing Coverage Report
 .. image:: https://github.com/MIDOSS/MOHID-Cmd/actions/workflows/codeql-analysis.yaml/badge.svg
-      :target: https://github.com/MIDOSS/MOHID-Cmd/actions?query=workflow:codeql-analysis
+      :target: https://github.com/MIDOSS/MOHID-Cmd/actions?query=workflow:CodeQL
       :alt: CodeQL analysis
 .. image:: https://img.shields.io/github/issues/MIDOSS/MOHID-Cmd?logo=github
     :target: https://github.com/MIDOSS/MOHID-Cmd/issues
