@@ -27,11 +27,18 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Install dependencies and package
+      shell: bash -l {0}
+      run: |
+        python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/NEMO-Cmd.git#egg=NEMO-Cmd
+        python3 -m pip install --editable $GITHUB_WORKSPACE
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
       with:
         languages: ${{ matrix.language }}
+        setup-python-dependencies: false
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
