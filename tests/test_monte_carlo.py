@@ -654,7 +654,7 @@ class TestRenderGlostTaskScripts:
         glost_task_sh = (glost_tasks_dir / f"{job_id}-0.sh").read_text().splitlines()
         expected = textwrap.dedent(
             f"""\
-            $HOME/.local/bin/make-hdf5 $MONTE_CARLO/forcing-yaml/AKNS-spatial-make-hdf5-0.yaml 2017-06-15 7 \\
+            $HOME/.local/bin/make-hdf5 $MONTE_CARLO/forcing-yaml/AKNS-spatial-make-hdf5-0.yaml 2017-06-15 8 \\
             && $HOME/.local/bin/mohid run --no-submit --tmp-run-dir $MONTE_CARLO/AKNS-spatial-0/ \\
               $MONTE_CARLO/mohid-yaml/AKNS-spatial-0.yaml $MONTE_CARLO/results/AKNS-spatial-0/ \\
             && bash $MONTE_CARLO/AKNS-spatial-0/MOHID.sh
