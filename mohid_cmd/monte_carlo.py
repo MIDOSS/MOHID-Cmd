@@ -322,7 +322,7 @@ def _render_glost_task_scripts(
             {
                 "run_number": i,
                 "start_yyyy_mm_dd": start_date.format("YYYY-MM-DD"),
-                "n_days": run.run_days,
+                "n_days": run.run_days + 1,
             }
         )
         (job_dir / "glost-tasks" / f"{job_id}-{i}.sh").write_text(tmpl.render(context))
