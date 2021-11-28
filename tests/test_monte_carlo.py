@@ -475,14 +475,14 @@ class TestRenderMohidRunYamls:
         assert run_desc["run_id"] == f"{job_id}-0"
         assert run_desc["paths"]["runs directory"] == f"{runs_dir}"
         expected_forcing = {
-            "winds.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/winds.hdf5",
-            "currents.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/currents.hdf5",
-            "water_levels.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/t.hdf5",
-            "temperature.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/t.hdf5",
-            "salinity.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/t.hdf5",
-            "ww3.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/waves.hdf5",
-            "e3t.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/e3t.hdf5",
-            "diffusivity.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-22jun17/t.hdf5",
+            "winds.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-23jun17/winds.hdf5",
+            "currents.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-23jun17/currents.hdf5",
+            "water_levels.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-23jun17/t.hdf5",
+            "temperature.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-23jun17/t.hdf5",
+            "salinity.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-23jun17/t.hdf5",
+            "ww3.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-23jun17/waves.hdf5",
+            "e3t.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-23jun17/e3t.hdf5",
+            "diffusivity.hdf5": f"{forcing_dir}/{job_id}-{0}/15jun17-23jun17/t.hdf5",
         }
         assert run_desc["forcing"] == expected_forcing
         expected_run_data_files = {

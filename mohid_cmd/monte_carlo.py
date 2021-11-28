@@ -243,7 +243,7 @@ def _render_mohid_run_yamls(
     }
     for i, run in runs.iterrows():
         start_date = arrow.get(run.spill_date_hour.date())
-        end_date = start_date.shift(days=+run.run_days)
+        end_date = start_date.shift(days=+run.run_days + 1)
         context.update(
             {
                 "run_number": i,
