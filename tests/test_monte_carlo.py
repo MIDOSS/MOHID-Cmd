@@ -516,8 +516,8 @@ class TestRenderModelDats:
                 """\
                 ! Note: Time period must be a multiple of DT
                 !
-                START                     : {{ start_yyyy_mm_dd }} 00 30 0
-                END                       : {{ end_yyyy_mm_dd }} 23 30 0
+                START                     : {{ start_yyyy_mm_dd_hh }} 30 0
+                END                       : {{ end_yyyy_mm_dd_hh }} 30 0
                 DT                        : 3600
 
                 VARIABLEDT                : 0
@@ -549,8 +549,8 @@ class TestRenderModelDats:
             """\
             ! Note: Time period must be a multiple of DT
             !
-            START                     : 2017 06 15 00 30 0
-            END                       : 2017 06 21 23 30 0
+            START                     : 2017 06 15 02 30 0
+            END                       : 2017 06 21 02 30 0
             DT                        : 3600
 
             VARIABLEDT                : 0
