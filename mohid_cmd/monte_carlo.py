@@ -268,7 +268,7 @@ def _render_model_dats(job_dir, runs, tmpl_env):
         # Run starts at spill date hour and ends run_days later to ensure that
         # end_date - start_date are a multiple of MOHID DT value in template
         start_date = arrow.get(run.spill_date_hour)
-        end_date = start_date.shift(days=+run.run_days - 1)
+        end_date = start_date.shift(days=+run.run_days)
         context = {
             "start_yyyy_mm_dd_hh": start_date.format("YYYY MM DD HH"),
             "end_yyyy_mm_dd_hh": end_date.format("YYYY MM DD HH"),
