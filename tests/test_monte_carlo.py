@@ -1214,6 +1214,7 @@ class TestGlostJobDir:
             #SBATCH --nodes={glost_run_desc["nodes"]}
             #SBATCH --ntasks-per-node=2
             #SBATCH --mem-per-cpu={glost_run_desc["mem per cpu"]}
+            #SBATCH --exclude=gra[801-803]
             #SBATCH --time=3:00:00
             #SBATCH --output={job_dir}/glost-job.stdout
             #SBATCH --error={job_dir}/glost-job.stderr

@@ -7,6 +7,7 @@
 #SBATCH --nodes={{ cookiecutter.nodes }}
 #SBATCH --ntasks-per-node={{ cookiecutter.ntasks_per_node }}
 #SBATCH --mem-per-cpu={{ cookiecutter.mem_per_cpu }}
+#SBATCH --exclude=gra[801-803]
 #SBATCH --time={{ cookiecutter.walltime }}
 #SBATCH --output={{ cookiecutter.job_dir }}/glost-job.stdout
 #SBATCH --error={{ cookiecutter.job_dir }}/glost-job.stderr
