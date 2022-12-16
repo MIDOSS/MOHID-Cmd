@@ -36,6 +36,12 @@ MIDOSS-MOHID Command Processor
     :target: https://github.com/MIDOSS/MOHID-Cmd/issues
     :alt: Issue Tracker
 
+**This repository has been archived because the model runs phase of the MIDOSS project has been completed.**
+Please contact `@SusanEAllen`_ or `@DougLatornell`_ if you see a need for this repository to be re-activated.
+
+.. _@SusanEAllen: https://github.com/SusanEAllen
+.. _@DougLatornell: https://github.com/douglatornell
+
 The MIDOSS-MOHID command processor, ``mohid``, is a command line tool for doing various operations associated with the `MIDOSS project`_ version of the `MOHID model`_.
 
 .. _MIDOSS project: https://midoss-docs.readthedocs.io/en/latest/
